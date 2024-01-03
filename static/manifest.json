@@ -1,0 +1,11 @@
+{
+  "short_name":"deContact",
+  "name": "sveltekit-pwa",
+  "start_url": "/",
+  "icons": [],
+  "background-color": "#3367d6",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3367D6",
+  "description": "A decentralized local first peer-to-peer address book"
+}
