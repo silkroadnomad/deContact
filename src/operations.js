@@ -1,4 +1,4 @@
-import {sha256, notify} from "utils/utils.js";
+import {notify} from "./utils/utils.js";
 
 import {
     myAddressBook,
@@ -9,7 +9,7 @@ import {
     qrCodeOpen,
     myDal, identity, subscriberList
 } from "./stores.js";
-import {sendMyAddress} from "network/net-operations.js";
+import {sendMyAddress} from "./network/net-operations.js";
 
 
 let _wakuNode;
