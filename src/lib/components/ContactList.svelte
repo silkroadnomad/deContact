@@ -1,7 +1,7 @@
 <script>
     import {DataTable} from "carbon-components-svelte";
-    import { myAddressBook, selectedRowIds } from "../../../../deContact/src/stores.js";
-    import { generateQRForAddress } from "../../../../deContact/src/operations.js"
+    import { myAddressBook, selectedRowIds } from "../../stores.js";
+    import { generateQRForAddress } from "../../operations.js"
 
 
 

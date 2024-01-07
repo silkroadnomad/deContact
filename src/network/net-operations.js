@@ -8,7 +8,7 @@ import {
     progressText,
     progressState,
     subscriberList
-} from "../../../deContact/src/stores.js";
+} from "../stores.js";
 
 import { AddressCardMessage} from "../schemas/protobufSchemas.js";
 import {confirm} from "../lib/components/modal.js"

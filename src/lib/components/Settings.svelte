@@ -1,6 +1,6 @@
 <script>
     import { Button, TextInput, Dropdown, Column, Grid, Row } from "carbon-components-svelte";
-    import {connectedPeers,identity} from "../../../../deContact/src/stores.js"
+    import {connectedPeers,identity} from "../../stores.js"
 
     $:window.localStorage.setItem('identity', $identity);
 </script>

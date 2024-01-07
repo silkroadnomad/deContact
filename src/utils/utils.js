@@ -1,4 +1,4 @@
-import { notificationMessage, showNotification } from "../../../deContact/src/stores.js";
+import { notificationMessage, showNotification } from "../stores.js";
 /**
  * {string} _notificationMessage
  */

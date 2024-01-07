@@ -1,6 +1,6 @@
 <script>
-     import { selectedTab, selectedAddr} from "../../../../deContact/src/stores.js";
-     import {addContact, deleteContact, updateContact} from "../../../../deContact/src/operations.js";
+     import { selectedTab, selectedAddr} from "../../stores.js";
+     import {addContact, deleteContact, updateContact} from "../../operations.js";
      import {Button, Checkbox, Column, Grid, Row, TextInput} from "carbon-components-svelte";
 </script>
 
