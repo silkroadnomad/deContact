@@ -3,7 +3,7 @@
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
-    import { selectedTab, selectedRowIds, qrCodeOpen, qrCodeData, identity, progressState, progressText } from "../../../deContact/src/stores.js";
+    import { selectedTab, selectedRowIds, qrCodeOpen, qrCodeData, identity, progressState, progressText } from "../stores.js";
     import { loadContact } from "../operations.js";
     import { sendAddress } from "../network/net-operations.js"
 
