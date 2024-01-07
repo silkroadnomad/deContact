@@ -3,7 +3,7 @@
     import "carbon-components-svelte/css/all.css";
     import { Theme, ToastNotification } from "carbon-components-svelte";
     import Modals from "$lib/components/QRCodeModal.svelte";
-    import { showNotification, notificationMessage, qrCodeOpen, qrCodeData, myDal, subscription, myAddressBook,subscriberList } from "../../../deContact/src/stores.js";
+    import { showNotification, notificationMessage, qrCodeOpen, qrCodeData, myDal, subscription, myAddressBook,subscriberList } from "../stores.js";
     import { startNetwork, CONTENT_TOPIC } from "../network/net-operations.js"
     const urlParams = new URLSearchParams(window.location.search);
 
