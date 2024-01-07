@@ -1,42 +1,29 @@
 <script>
-    import { onMount } from 'svelte'
-    import { pwaInfo } from 'virtual:pwa-info';
-    export const prerender = false;
-    onMount(async () => {
-        console.log("pwaInfo",pwaInfo)
-        if (pwaInfo) {
+    import { onDestroy, onMount } from "svelte";
+    import "carbon-components-svelte/css/all.css";
+    import { Theme, ToastNotification } from "carbon-components-svelte";
+    import Modals from "$lib/components/QRCodeModal.svelte";
+    import { showNotification, notificationMessage, qrCodeOpen, qrCodeData, myDal, subscription, myAddressBook,subscriberList } from "../../../deContact/src/stores.js";
+    import { startNetwork, CONTENT_TOPIC } from "../network/net-operations.js"
+    const urlParams = new URLSearchParams(window.location.search);
 
-            const { registerSW } = await import('virtual:pwa-register')
+    let theme = "g90";
 
-            registerSW({
-                immediate: true,
-                onRegistered(r) {
-                    // uncomment following code if you want check for updates
-                    // r && setInterval(() => {
-                    //    console.log('Checking for sw update')
-                    //    r.update()
-                    // }, 20000 /* 20s for testing purposes */)
-                    console.log(`SW Registered: ${r}`)
-                },
-                onRegisterError(error) {
-                    console.log('SW registration error', error)
-                }
-            })
-        }
-    })
+    async function handleDestroy() {
+        await $subscription.unsubscribe([CONTENT_TOPIC]);
+    }
 
-    $: webManifest = pwaInfo ? pwaInfo.webManifest.linkTag : ''
-    console.log("webManifest",webManifest)
+    $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
+    $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
+
+    onMount(startNetwork);
+    onDestroy(handleDestroy);
 </script>
 
-<svelte:head>
-    {@html webManifest}
-</svelte:head>
+<Theme bind:theme />
+    <Modals on:close={() => $qrCodeOpen = false} bind:qrCodeOpen={$qrCodeOpen} qrCodeData={$qrCodeData} dbMyDal={$myDal} />
 
-<main>
-    <slot />
-</main>
-
-{#await import('$lib/ReloadPrompt.svelte') then { default: ReloadPrompt}}
-    <ReloadPrompt />
-{/await}
+    {#if $showNotification}
+        <ToastNotification kind="success" title="Success" subtitle={$notificationMessage} />
+    {/if}
+<slot></slot>
