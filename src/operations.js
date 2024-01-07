@@ -1,4 +1,4 @@
-import {sha256, notify} from "../../decentralized-address-book/src/utils/utils.js";
+import {sha256, notify} from "utils/utils.js";
 
 import {
     myAddressBook,
@@ -9,7 +9,7 @@ import {
     qrCodeOpen,
     myDal, identity, subscriberList
 } from "./stores.js";
-import {sendMyAddress} from "../../decentralized-address-book/src/network/net-operations.js";
+import {sendMyAddress} from "network/net-operations.js";
 
 
 let _wakuNode;
