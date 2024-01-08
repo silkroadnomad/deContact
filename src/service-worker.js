@@ -9,12 +9,9 @@ const ASSETS = [
 ];
 
 self.addEventListener('install', (event) => {
-    console.log("service worker install")
-    // Create a new cache and add all files to it
     async function addFilesToCache() {
 
         const cache = await caches.open(CACHE);
-        console.log("addFilesToCache",ASSETS)
         await cache.addAll(ASSETS);
     }
 
