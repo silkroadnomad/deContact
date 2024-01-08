@@ -20,6 +20,8 @@
     onDestroy(handleDestroy);
 </script>
 
+<svelte:window on:beforeinstallprompt={()=>{console.log("beforeinstallprompt")}} />
+
 <Theme bind:theme />
     <Modals on:close={() => $qrCodeOpen = false} bind:qrCodeOpen={$qrCodeOpen} qrCodeData={$qrCodeData} dbMyDal={$myDal} />
 
