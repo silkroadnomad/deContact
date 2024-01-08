@@ -2,11 +2,14 @@
   "short_name":"deContact",
   "name": "deContact a peer-to-peer",
   "start_url": "/",
-  "icons": [   {
-    "src": "favicon.png",
+  "icons": [{
+    "src": "/android/android-launchericon-144-144.png",
+    "purpose": "any",
     "type": "image/png",
-    "sizes": "128x128"
-  }
+    "sizes": "144x144"
+  }],
+  "screenshots": [
+
   ],
   "background-color": "#3367d6",
   "display": "standalone",
