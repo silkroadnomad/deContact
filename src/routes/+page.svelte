@@ -13,6 +13,7 @@
         $qrCodeData = `ipfs://${$identity}`
         $qrCodeOpen = !$qrCodeOpen;
     };
+
 </script>
 
 <h2>Decentralized Address Book of {$identity}</h2>

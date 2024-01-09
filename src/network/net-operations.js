@@ -1,7 +1,7 @@
-import { createDecoder, createEncoder, createLightNode, Protocols, waitForRemotePeer} from "@waku/sdk";
+// import { createDecoder, createEncoder, createLightNode, Protocols, waitForRemotePeer} from "@waku/sdk";
 import {
+    libp2p,
     myAddressBook,
-    wakuNode,
     subscription,
     connectedPeers,
     identity,
@@ -9,66 +9,74 @@ import {
     progressState,
     subscriberList
 } from "../stores.js";
-
+import { fromString, toString } from 'uint8arrays';
 import { AddressCardMessage} from "../schemas/protobufSchemas.js";
-import {confirm} from "../lib/components/modal.js"
+import { confirm } from "../lib/components/modal.js"
+import { createLibp2p } from 'libp2p'
+import { config } from "../config.js";
 
 export const CONTENT_TOPIC = "/dContact/1/message/proto"; //TODO each user should have its own TOPIC
 const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_NEW_ADDRESS = 'RECEIVE_ADDRESS';
 
-const decoder = createDecoder(CONTENT_TOPIC);
-const encoder = createEncoder({ contentTopic: CONTENT_TOPIC, ephemeral: true });
+// const decoder = createDecoder(CONTENT_TOPIC);
+// const encoder = createEncoder({ contentTopic: CONTENT_TOPIC, ephemeral: true });
 
 export async function startNetwork() {
 
-    progressText.set("creating light waku node")
+    progressText.set("creating libp2p node in browser")
     progressState.set(1)
-    _wakuNode = await createLightNode({ defaultBootstrap: true })
+    _libp2p =  await createLibp2p(config)
+    libp2p.set(_libp2p)
+    console.log("_libp2p",_libp2p)
+    console.log("_libp2p",_libp2p.peerId.string)
+    //_wakuNode = await createLightNode({ defaultBootstrap: true })
 
-    wakuNode.set(_wakuNode)
-    progressText.set("starting waku node ...")
+    // wakuNode.set(_wakuNode)
+    progressText.set("starting libp2p node ...")
     progressState.set(2)
-    await _wakuNode.start();
+  //  await _wakuNode.start();
 
-    progressText.set("waku started - waiting for remote peers")
+    progressText.set("started - waiting for remote peers")
     progressState.set(3)
     // await waitForRemotePeer(_wakuNode, [Protocols.LightPush]);
-    await waitForRemotePeer(_wakuNode, [Protocols.Store]);
+   // await waitForRemotePeer(_wakuNode, [Protocols.Store]);
 
-    // Create the callback function
-//     const callback = (wakuMessage) => {
-//         // Render the message/payload in your application
-//         console.log(wakuMessage);
-//     };
-//
-// // Query the Store peer
-//     await node.store.queryWithOrderedCallback(
-//         [decoder],
-//         callback,
-//     );
-
-    progressText.set("waku peers connected - opening connections ...")
+    progressText.set("libp2p peers connected - subscribing to pubsub channel ")
     progressState.set(4)
-    subscription.set(await _wakuNode.filter.createSubscription());
-    await _subscription.subscribe([decoder], handleMessage);
+    // outputLogComp.appendOutput(`Subscribing to '${clean(subscribeTopic)}'`)
+    _libp2p.services.pubsub.subscribe(CONTENT_TOPIC)
+    // subscription.set(await _wakuNode.filter.createSubscription());
+    // await _subscription.subscribe([decoder], handleMessage);
 
-    progressText.set(`subscribed to ${CONTENT_TOPIC} `)
+    // progressText.set(`subscribed to ${CONTENT_TOPIC} `)
     progressState.set(5)
 
-    _wakuNode.libp2p.addEventListener('connection:open',  () => {
+    _libp2p.addEventListener('connection:open',  (c) => {
+        console.log("connection:open",c.detail.id)
         connectedPeers.update(n => n + 1);
-        if(_connectedPeers>1) progressState.set(6)
+        // _libp2p.services.pubsub.publish("test publish open")
+        if(_connectedPeers>=1) progressState.set(6)
     });
-    _wakuNode.libp2p.addEventListener('connection:close', () => {
+    _libp2p.addEventListener('connection:close', (c) => {
+        console.log("connection:close",c.detail.id)
         connectedPeers.update(n => n - 1);
+        // _libp2p.services.pubsub.publish("test publish close")
     });
+
+    _libp2p.services.pubsub.addEventListener('message', event => {
+        const topic = event.detail.topic
+        const message = toString(event.detail.data)
+        if(topic === 'dcontact._peer-discovery._p2p._pubsub') return //we don't do anything with other topics
+        console.log(`Message received on topic '${topic}': ${message}`)
+        handleMessage(message)
+    })
 }
 
-async function handleMessage (wakuMessage) {
-
-    if (!wakuMessage.proto.payload) return;
-    const messageObj = AddressCardMessage.decode(wakuMessage.payload);
+async function handleMessage (dContactMessage) {
+    console.log("message",dContactMessage   )
+    if (!dContactMessage) return;
+    const messageObj = JSON.parse(dContactMessage)
     let result
     if (messageObj.recipient === _identity){
         switch (messageObj.command) {
@@ -99,7 +107,6 @@ async function handleMessage (wakuMessage) {
     }
 }
 
-
 /**
  * In case somebody requests my contact data or I update my address I'll send it to requester / subscriber
  * @param recipient
@@ -108,35 +115,35 @@ async function handleMessage (wakuMessage) {
  */
 export async function sendMyAddress(recipient, data) {
 
-    const protoMessage = AddressCardMessage.create({
+    const myAddress = {
         timestamp: Date.now(),
         command: RECEIVE_NEW_ADDRESS,
         sender: _identity,
         recipient: recipient,
         data: JSON.stringify(data)
-    });
+    }
 
-    const serialisedMessage = AddressCardMessage.encode(protoMessage).finish();
-    await _wakuNode.lightPush.send(encoder, { payload: serialisedMessage });
-    console.log("sent my address to",protoMessage)
+    _libp2p.services.pubsub.publish(CONTENT_TOPIC,fromString(JSON.stringify(myAddress))) //TODO when publishing a message sign content and enrypt content
+    console.log("RECEIVE_NEW_ADDRESS", myAddress)
 }
 
 export const sendAddress = async (identity,scannedAddress) => {
-    console.log("request sendAddress",identity)
-    const protoMessage = AddressCardMessage.create({
+    console.log("request sendAddress", identity)
+
+    const addr = {
         timestamp: Date.now(),
         command: SEND_ADDRESS_REQUEST,
         sender: identity,
         recipient: scannedAddress,
-    });
-    const serialisedMessage = AddressCardMessage.encode(protoMessage).finish();
-    await _wakuNode.lightPush.send(encoder, { payload: serialisedMessage });
-    console.log("message sent")
+    }
+
+    _libp2p.services.pubsub.publish(CONTENT_TOPIC,fromString(JSON.stringify(addr))) //TODO when publishing a message sign content and enrypt content
+    console.log("SEND_ADDRESS_REQUEST",addr)
 }
 
 function updateAddressBook(messageObj) {
-    const msg = messageObj.toJSON()
-    const contactData = JSON.parse(messageObj.toJSON().data);
+    const msg = messageObj
+    const contactData = JSON.parse(messageObj.data);
     console.log("updating myAddressBook ",_myAddressBook)
     const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
     newAddrBook.push({
@@ -162,9 +169,9 @@ function updateAddressBook(messageObj) {
     myAddressBook.set(newAddrBook);
 }
 
-let _wakuNode;
-wakuNode.subscribe((val) => {
-    _wakuNode = val
+let _libp2p;
+libp2p.subscribe((val) => {
+    _libp2p = val
 });
 
 let _subscription

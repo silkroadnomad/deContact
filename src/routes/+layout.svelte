@@ -10,7 +10,7 @@
     let theme = "g90";
 
     async function handleDestroy() {
-        await $subscription.unsubscribe([CONTENT_TOPIC]);
+        if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
 
     $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));

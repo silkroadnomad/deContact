@@ -1,6 +1,6 @@
 {
 	"name": "decontact",
-	"version": "0.0.2",
+	"version": "0.1.0",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -36,7 +36,14 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@waku/sdk": "^0.0.21",
+		"@libp2p/autonat": "^1.0.7",
+		"@libp2p/circuit-relay-v2": "^1.0.10",
+		"@libp2p/identify": "^1.0.9",
+		"@libp2p/interface-transport": "^4.0.3",
+		"@libp2p/ping": "^1.0.8",
+		"@libp2p/pubsub-peer-discovery": "^10.0.2",
+		"@orbitdb/core": "github:orbitdb/orbitdb#helia",
+		"helia": "^3.0.0",
 		"qrcode-generator": "^1.4.4"
 	}
 }

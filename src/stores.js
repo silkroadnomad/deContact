@@ -1,6 +1,8 @@
 import { writable } from 'svelte/store'
 
+
 export const identity = writable(window.localStorage.getItem('identity') || 'unknown')
+export const libp2p = writable()
 export const wakuNode = writable()
 export const subscription = writable()
 export const connectedPeers = writable(0)
