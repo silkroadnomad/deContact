@@ -24,9 +24,6 @@ const server = await createLibp2p({
     },
     transports: [
         circuitRelayTransport(),
-        // webSockets({
-        //     filter: filters.all
-        // })
     ],
     connectionEncryption: [noise()],
     streamMuxers: [yamux()],
