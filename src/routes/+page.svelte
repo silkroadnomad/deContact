@@ -31,32 +31,32 @@
 </script>
 
 <div class="content">
-{#if $progressState!==6}
-    <ProgressBar helperText={"("+$progressState+"/5) "+$progressText} status={$progressState===5?"finished":"active"}/>
-{/if}
-<Tabs class="tabs" bind:selected={$selectedTab}>
-    <Tab label="Contacts" data-cy="contacts"/>
-    <Tab label="My Address" data-cy="address"/>
-    <Tab label="Settings"  data-cy="settings"/>
-    <svelte:fragment slot="content">
-        <TabContent>
-            <Grid fullWidth>
-                <Row>
-                    <Column><TextInput size="sm" bind:value={scannedAddress}/></Column>
-                    <Column><Button size="sm" on:click={() => sendAddress($identity,scannedAddress)}>Scan Contact</Button></Column>
-                    <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
-                </Row>
-            </Grid>
-            <ContactList/>
-        </TabContent>
-        <TabContent><ContactForm/></TabContent>
-        <TabContent><Settings/></TabContent>
-    </svelte:fragment>
-</Tabs>
+    {#if $progressState!==6}
+    <ProgressBar helperText={"("+$progressState+"/5) "+$progressText} status={$progressState===5?"finished":"active"} />
+    {/if}
+    <Tabs class="tabs" bind:selected={$selectedTab}>
+        <Tab label="Contacts" data-cy="contacts"/>
+        <Tab label="My Address" data-cy="address"/>
+        <Tab label="Settings"  data-cy="settings"/>
+        <svelte:fragment slot="content">
+            <TabContent>
+                <Grid fullWidth>
+                    <Row>
+                        <Column><TextInput size="sm" bind:value={scannedAddress}/></Column>
+                        <Column><Button size="sm" on:click={() => sendAddress($identity,scannedAddress)}>Scan Contact</Button></Column>
+                        <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
+                    </Row>
+                </Grid>
+                <ContactList/>
+            </TabContent>
+            <TabContent><ContactForm/></TabContent>
+            <TabContent><Settings/></TabContent>
+        </svelte:fragment>
+    </Tabs>
 </div>
 <style>
-    .content {
-        margin: 1rem;
+    :global(.content) {
+        margin: 3rem;
     }
     :global(.bx--btn, input) {
         margin-bottom: 1rem;
