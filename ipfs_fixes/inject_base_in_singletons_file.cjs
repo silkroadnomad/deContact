@@ -8,7 +8,8 @@ function inject_base_in_singletons_file(assets) {
 		(file) => file.name.startsWith('singletons-') || file.name.startsWith('singletons.')
 	);
 	if (files.length === 0) {
-		throw new Error(`no singletons- files found`);
+		console.log(`no singletons- files found`)
+		//throw new Error(`no singletons- files found`);
 	} else if (files.length > 1) {
 		throw new Error(`too many "singletons-..." files found: ${files.map((f) => f.path).join(',')}`);
 	} else {

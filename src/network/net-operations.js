@@ -1,61 +1,81 @@
-// import { createDecoder, createEncoder, createLightNode, Protocols, waitForRemotePeer} from "@waku/sdk";
 import {
     libp2p,
+    helia,
+    orbitdb,
     myAddressBook,
     subscription,
     connectedPeers,
     identity,
     progressText,
     progressState,
-    subscriberList
+    subscriberList, dbMessages
 } from "../stores.js";
-import { fromString, toString } from 'uint8arrays';
-import { AddressCardMessage} from "../schemas/protobufSchemas.js";
-import { confirm } from "../lib/components/modal.js"
+import { LevelBlockstore } from "blockstore-level"
+import { LevelDatastore } from "datastore-level";
 import { createLibp2p } from 'libp2p'
+import { createHelia } from "helia";
+import { createOrbitDB} from '@orbitdb/core';
+
 import { config } from "../config.js";
+import { fromString, toString } from 'uint8arrays';
+import { confirm } from "../lib/components/modal.js"
+
+
+let blockstore = new LevelBlockstore("./helia-blocks")
+let datastore = new LevelDatastore("./helia-data")
 
 export const CONTENT_TOPIC = "/dContact/1/message/proto"; //TODO each user should have its own TOPIC
 const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_NEW_ADDRESS = 'RECEIVE_ADDRESS';
 
-// const decoder = createDecoder(CONTENT_TOPIC);
-// const encoder = createEncoder({ contentTopic: CONTENT_TOPIC, ephemeral: true });
-
 export async function startNetwork() {
 
-    progressText.set("creating libp2p node in browser")
+    progressText.set("starting libp2p node")
     progressState.set(1)
     _libp2p =  await createLibp2p(config)
     libp2p.set(_libp2p)
     console.log("_libp2p",_libp2p)
     console.log("_libp2p",_libp2p.peerId.string)
-    //_wakuNode = await createLightNode({ defaultBootstrap: true })
 
-    // wakuNode.set(_wakuNode)
-    progressText.set("starting libp2p node ...")
+    progressText.set("starting Helia (IPFS) node")
+    _helia = await createHelia({
+        _libp2p,
+        blockstore,
+        datastore
+    });
+    helia.set(_helia)
     progressState.set(2)
-  //  await _wakuNode.start();
+    window.helia = _helia
 
-    progressText.set("started - waiting for remote peers")
+    progressText.set("creating OrbitDB")
+    _orbitdb = await createOrbitDB({ ipfs: _helia, directory: './deContact' })
+    orbitdb.set(_orbitdb)
+    window.orbitdb = _orbitdb
     progressState.set(3)
-    // await waitForRemotePeer(_wakuNode, [Protocols.LightPush]);
-   // await waitForRemotePeer(_wakuNode, [Protocols.Store]);
 
-    progressText.set("libp2p peers connected - subscribing to pubsub channel ")
-    progressState.set(4)
-    // outputLogComp.appendOutput(`Subscribing to '${clean(subscribeTopic)}'`)
+
+    progressText.set("subscribing to pubsub topic")
     _libp2p.services.pubsub.subscribe(CONTENT_TOPIC)
-    // subscription.set(await _wakuNode.filter.createSubscription());
-    // await _subscription.subscribe([decoder], handleMessage);
+    progressState.set(4)
 
-    // progressText.set(`subscribed to ${CONTENT_TOPIC} `)
+    progressText.set(`opening storage peer-to-peer storage db`)
+    _dbMessages = await _orbitdb.open("dbMessages")
+    dbMessages.set(_dbMessages)
+    _dbMessages.events.on('join', async (peerId, heads) => {
+        console.log("join",peerId)
+    })
+
+    _dbMessages.events.on('update', async (entry) => {
+        console.log("update",entry)
+        // Full replication is achieved by explicitly retrieving all records from db1.
+        console.log(await _dbMessages.all())
+        // db2Updated = true
+    })
     progressState.set(5)
 
     _libp2p.addEventListener('connection:open',  (c) => {
-        console.log("connection:open",c.detail.id)
+        console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
-        // _libp2p.services.pubsub.publish("test publish open")
         if(_connectedPeers>=1) progressState.set(6)
     });
     _libp2p.addEventListener('connection:close', (c) => {
@@ -172,6 +192,21 @@ function updateAddressBook(messageObj) {
 let _libp2p;
 libp2p.subscribe((val) => {
     _libp2p = val
+});
+
+let _helia;
+helia.subscribe((val) => {
+    _helia = val
+});
+
+let _orbitdb;
+orbitdb.subscribe((val) => {
+    _orbitdb = val
+});
+
+let _dbMessages;
+dbMessages.subscribe((val) => {
+    _dbMessages = val
 });
 
 let _subscription

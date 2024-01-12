@@ -3,7 +3,16 @@
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
-    import { selectedTab, selectedRowIds, qrCodeOpen, qrCodeData, identity, progressState, progressText } from "../stores.js";
+    import {
+        selectedTab,
+        selectedRowIds,
+        qrCodeOpen,
+        qrCodeData,
+        identity,
+        progressState,
+        progressText,
+        libp2p
+    } from "../stores.js";
     import { loadContact } from "../operations.js";
     import { sendAddress } from "../network/net-operations.js"
 
@@ -13,10 +22,15 @@
         $qrCodeData = `ipfs://${$identity}`
         $qrCodeOpen = !$qrCodeOpen;
     };
-
+    $: {
+        const decoder = new TextDecoder("utf-8");
+        const values = Array.from($libp2p?.peerRouting?.peerStore?.store.datastore.data.values() || []);
+        const stringValues = values.map(value => decoder.decode(value));
+        console.log(stringValues);
+    }
 </script>
 
-<h2>Decentralized Address Book of {$identity}</h2>
+<div class="content">
 {#if $progressState!==6}
     <ProgressBar helperText={"("+$progressState+"/5) "+$progressText} status={$progressState===5?"finished":"active"}/>
 {/if}
@@ -39,8 +53,9 @@
         <TabContent><Settings/></TabContent>
     </svelte:fragment>
 </Tabs>
+</div>
 <style>
-    h2 {
+    .content {
         margin: 1rem;
     }
     :global(.bx--btn, input) {

@@ -2,7 +2,6 @@ import {notify} from "./utils/utils.js";
 
 import {
     myAddressBook,
-    wakuNode,
     selectedAddr,
     selectedTab,
     qrCodeData,
@@ -11,11 +10,6 @@ import {
 } from "./stores.js";
 import {sendMyAddress} from "./network/net-operations.js";
 
-
-let _wakuNode;
-wakuNode.subscribe((value) => {
-    _wakuNode = value
-})
 let _identity
 identity.subscribe((value) => {
     _identity = value
