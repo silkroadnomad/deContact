@@ -24,7 +24,9 @@ export const dialMultiaddrItems =  [
 
 const multiaddrs = [ '/ip4/127.0.0.1/udp/9090/webrtc-direct/certhash/uEiAIbksoQ56yn3UPDn0k_abCkGBHCf79iUemkVXRn_Vy2g/p2p/12D3KooWKABDpSmjtXQRm1FmkwbRDMzLHYi83btQnxHMAYRpYH8k']
 const multiaddrs2 = [
-    '/ip4/159.69.119.82/udp/9090/webrtc-direct/certhash/uEiAIh0DoA5Qk2xTpc_j58KZMvww9CQzN6UNgsJ-DTuM6XQ/p2p/12D3KooWF5fGyE4VeXMhSGd9rCwckyxCVkA6xfoyFJG9DWJis62v'
+  //  '/ip4/192.168.0.103/udp/9090/webrtc-direct/certhash/uEiAIbksoQ56yn3UPDn0k_abCkGBHCf79iUemkVXRn_Vy2g/p2p/12D3KooWKABDpSmjtXQRm1FmkwbRDMzLHYi83btQnxHMAYRpYH8k', //Schewtschenko
+    //'/ip4/10.41.92.3/udp/9090/webrtc-direct/certhash/uEiAIbksoQ56yn3UPDn0k_abCkGBHCf79iUemkVXRn_Vy2g/p2p/12D3KooWKABDpSmjtXQRm1FmkwbRDMzLHYi83btQnxHMAYRpYH8k' //SOK
+     '/ip4/159.69.119.82/udp/9090/webrtc-direct/certhash/uEiAIh0DoA5Qk2xTpc_j58KZMvww9CQzN6UNgsJ-DTuM6XQ/p2p/12D3KooWF5fGyE4VeXMhSGd9rCwckyxCVkA6xfoyFJG9DWJis62v' //istanbul
     // '/ip4/127.0.0.1/udp/9095/quic-v1/p2p/12D3KooWPuveUzbMedUNP9C43LpNqpsrcHfTwAVrw8ghyksxW8xF' //go universal connectivity
   //  '/ip4/164.92.229.178/udp/9090/webrtc-direct/certhash/uEiCyG5zCRpky38iwqX6RCuNvaAumkTM0dexnyVXjMf6QLA/p2p/12D3KooWDsKuyhLWZwXXwFph1Tgd2CWs4RJFktsVKdQL94uHLsZv'
      // "/ip4/159.69.119.82/udp/4004/quic-v1/webtransport/certhash/uEiAP75UYHU9lxxeQ43_u3U7PrL3eeb0aOBfw2ty7CjuSUA/certhash/uEiBhciKTRyUiuDHnFkpOD_i3bMRCuGT8olXrdFvteNV-uA/p2p/12D3KooWAu6KS53pN69d6WG7QWttL14LnodUkBjZ1LG7F73k58LM",
