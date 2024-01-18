@@ -42,12 +42,6 @@
 </script>
 
 <svelte:window on:beforeinstallprompt={()=>{console.log("beforeinstallprompt")}} />
-
-<Modals on:close={() => $qrCodeOpen = false} bind:qrCodeOpen={$qrCodeOpen} qrCodeData={$qrCodeData} dbMyDal={$myDal} />
-
-{#if $showNotification}
-    <ToastNotification kind="success" title="Success" subtitle={$notificationMessage} />
-{/if}
 <Header
         class="header-title"
         persistentHamburgerMenu={true}
@@ -60,7 +54,7 @@
         <div class="flags">
         Peers: {$connectedPeers}</div>
     </HeaderNav>
-    <HeaderUtilities>
+<HeaderUtilities>
 
 <!--        <div class="flags">-->
 <!--            <De style="margin-right: 10px" on:click={()=>$locale="de"}/>-->
@@ -81,8 +75,15 @@
         </HeaderGlobalAction>
     </HeaderUtilities>
 </Header>
+<Modals on:close={() => $qrCodeOpen = false} bind:qrCodeOpen={$qrCodeOpen} qrCodeData={$qrCodeData} dbMyDal={$myDal} />
+{#if $showNotification}
+    <ToastNotification class="toast" kind="success" title="Success" subtitle={$notificationMessage} />
+{/if}
 <slot></slot>
 <style>
+    .toast {
+        margin: 3rem;
+    }
     .peers {
         margin: 10px;
         display: flex;

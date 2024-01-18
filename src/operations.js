@@ -49,6 +49,7 @@ let _subscriberList
 subscriberList.subscribe((val) => {
     _subscriberList = val
 });
+
 /**
  * Loading a contact from memory into the contactForm
  * @param id

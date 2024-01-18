@@ -32,7 +32,7 @@
 
 <div class="content">
     {#if $progressState!==6}
-    <ProgressBar helperText={"("+$progressState+"/5) "+$progressText} status={$progressState===5?"finished":"active"} />
+    <ProgressBar helperText={"("+$progressState+"/6) "+$progressText} status={$progressState===6?"finished":"active"} />
     {/if}
     <Tabs class="tabs" bind:selected={$selectedTab}>
         <Tab label="Contacts" data-cy="contacts"/>
