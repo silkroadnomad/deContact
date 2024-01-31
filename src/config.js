@@ -12,15 +12,12 @@ import { autoNAT } from '@libp2p/autonat'
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
-import { kadDHT, removePrivateAddressesMapper } from '@libp2p/kad-dht'
+import { kadDHT } from '@libp2p/kad-dht'
 import { FaultTolerance } from '@libp2p/interface-transport'
 
-export const dialMultiaddrItems =  [
-    // { id:"/ip4/159.69.119.82/udp/4004/quic-v1/webtransport/certhash/uEiAP75UYHU9lxxeQ43_u3U7PrL3eeb0aOBfw2ty7CjuSUA/certhash/uEiBhciKTRyUiuDHnFkpOD_i3bMRCuGT8olXrdFvteNV-uA/p2p/12D3KooWAu6KS53pN69d6WG7QWttL14LnodUkBjZ1LG7F73k58LM", text: "webtransport istanbul"},
-    { id:"/ip4/159.69.119.82/udp/4005/webrtc-direct/certhash/uEiD3LuzNOsNyskWmWI_wPr8-FlWBhbsEKsH9x6fcEGwT7w/p2p/12D3KooWAu6KS53pN69d6WG7QWttL14LnodUkBjZ1LG7F73k58LM", text: "webrtc-direct istanbul"},
-    // { id:"/ip4/78.46.210.80/udp/4005/quic-v1/webtransport/certhash/uEiAbaFR9QTo2Y6xu3VEK_r3mciXziAFA0jBWvKSBb4QaMA/certhash/uEiAk1c3NNp0-aAlwktq7FdzQDcTAqcHjjWiR99MqCkrgTw/p2p/12D3KooWA6NB8Vz5ro22X3ws3DQWndQKbdNgt6UNzgUSGjS4e96Z", text: "webtransport tiflis"},
-    { id:"/ip4/78.46.210.80/udp/4004/webrtc-direct/certhash/uEiA1KCyqxF7qbtyJpumrlZEB2BmvvLddpAoowlmltQogug/p2p/12D3KooWA6NB8Vz5ro22X3ws3DQWndQKbdNgt6UNzgUSGjS4e96Z", text: "webrtc-direct tiflis"}
-]
+const multiaddrs = [
+     '/ip4/159.69.119.82/udp/9090/webrtc-direct/certhash/uEiAIh0DoA5Qk2xTpc_j58KZMvww9CQzN6UNgsJ-DTuM6XQ/p2p/12D3KooWF5fGyE4VeXMhSGd9rCwckyxCVkA6xfoyFJG9DWJis62v'] //istanbul
+const pubSubPeerDiscoveryTopics = [`dcontact._peer-discovery._p2p._pubsub`]
 
 //const multiaddrs = public_env.SEED_NODES;
 

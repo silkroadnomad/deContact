@@ -1,7 +1,6 @@
 import { createLibp2p } from 'libp2p'
 import { createHelia } from "helia";
-import {createOrbitDB, Identities, KeyStore, useAccessController} from '@orbitdb/core';
-import { fromString, toString } from 'uint8arrays';
+import { createOrbitDB, useAccessController } from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
@@ -10,37 +9,92 @@ import {
     libp2p,
     helia,
     orbitdb,
+    masterSeed,
+    seedPhrase,
     identities,
     ourIdentity,
     myAddressBook,
     subscription,
     connectedPeers,
-    identity,
+    handle,
     progressText,
     progressState,
-    subscriberList, dbMessages,
+    subscriberList, dbMessages, selectedTab,
 } from "../stores.js";
+
 import AddressBookAccessController from "./AddressBookAccessController.js"
 import { confirm } from "../lib/components/modal.js"
-import {notify, sha256} from "../utils/utils.js";
+import { generateSeed, ENTER_EXISTING, GENERATE_NEW } from "../lib/components/seedModal.js"
+import {convertTo32BitSeed, generateMasterSeed, notify, sha256} from "../utils/utils.js";
+import createIdentityProvider from "./identityProvider.js";
+import {generateMnemonic} from "bip39";
+
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
 
-export const CONTENT_TOPIC = "/dContact/1/message/proto";
+export const CONTENT_TOPIC = "/dContact/2/message/proto";
+
+const FIND_HANDLE = 'FIND_HANDLE';
 const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_ADDRESS = 'RECEIVE_ADDRESS';
 
+export const getIdentity = async (_type,_seed,_helia) => {
+    console.log("masterSeed or identity provider changed - creating new identity",_seed)
+    const identitySeed = convertTo32BitSeed(_seed)
+    const idProvider = await createIdentityProvider(_type, identitySeed, _helia)
+    _ourIdentity = idProvider.identity
+    _identities = idProvider.identities
+    ourIdentity.set(_ourIdentity)
+    window.identity = _ourIdentity
+
+    _orbitdb = await createOrbitDB({
+        ipfs: _helia,
+        identity: _ourIdentity,
+        identities: _identities,
+        directory: './deContact' })
+    orbitdb.set(_orbitdb)
+    window.orbitdb = _orbitdb
+}
 export async function startNetwork() {
 
+    if(!localStorage.getItem("testConfirmation")){
+        const result = await confirm({ data: {
+                text: "Note: This is still experimental software. " +
+                    "This peer-to-peer web app is not (yet) intended for use in production environments " +
+                    "or for use where real money or real contact data is at stake, at this point. " +
+                    "Please contact developers for questions." } })
+        if(result===true) localStorage.setItem("testConfirmation",result)
+    }
+
+    if(!localStorage.getItem("seedPhrase")){
+        const result = await generateSeed({ data: {
+                text: "We couldn't find a masterSeed phrase inside your browser storage. " +
+                    "Do you want to generate a new masterSeed phrase? Or you have an existing one"} })
+        console.log("result",result)
+        switch (result) {
+            case ENTER_EXISTING:
+                notify("enter existing masterSeed phrase in settings please!")
+                selectedTab.set(2)
+                break;
+            case GENERATE_NEW:
+                _seedPhrase = generateMnemonic();
+                seedPhrase.set(_seedPhrase)
+                selectedTab.set(2)
+                notify(`generated a new seed phrase ${_seedPhrase}`)
+                break;
+        }
+        masterSeed.set(_masterSeed)
+    }
+    _masterSeed = generateMasterSeed(_seedPhrase,"password")
+    masterSeed.set(_masterSeed)
     progressText.set("starting libp2p node")
     progressState.set(1)
     _libp2p =  await createLibp2p(config)
     libp2p.set(_libp2p)
-    console.log("_libp2p",_libp2p)
-    console.log("_libp2p",_libp2p.peerId.string)
 
     progressText.set("starting Helia (IPFS) node")
+    progressState.set(2)
     _helia = await createHelia({
         libp2p: _libp2p,
         blockstore,
@@ -48,13 +102,12 @@ export async function startNetwork() {
         blockBrokers: [bitswap()]
     });
     helia.set(_helia)
-    progressState.set(2)
     window.helia = _helia
 
-    progressText.set("creating OrbitDB")
-    _orbitdb = await createOrbitDB({ ipfs: _helia, directory: './deContact' })
-    orbitdb.set(_orbitdb)
-    window.orbitdb = _orbitdb
+    progressText.set("creating Identity and starting OrbitDB")
+    const identitySeed = convertTo32BitSeed(_masterSeed)
+    console.log("idenitySeed",identitySeed)
+    await getIdentity('ed25519',identitySeed,_helia)
     progressState.set(3)
 
     progressText.set("subscribing to pub sub topic")
@@ -68,28 +121,21 @@ export async function startNetwork() {
             progressState.set(6)
         }
     });
+
     _libp2p.addEventListener('connection:close', (c) => {
         console.log("connection:close",c.detail.id)
         connectedPeers.update(n => n - 1);
     });
-
     progressText.set(`opening peer-to-peer storage protocol`)
-    const keysPath = './dContactKeys'
-    const keystore = await KeyStore({ path: keysPath })
-    _identities = await Identities({ keystore })
-    identities.set(_identities)
-    _ourIdentity = await _identities.createIdentity({ id: _handle })
-    ourIdentity.set(_ourIdentity)
+
     useAccessController(AddressBookAccessController)
-    _dbMessages = await _orbitdb.open("dbMessages",
-        //"/orbitdb/zdpuAzWfv59XPddgxdmGxznmL24oiZ78RpJfAuA1fqFqodGLP",{//"dbMessages", {
-        {
-            type: 'documents',
+    _dbMessages = await _orbitdb.open("dbMessages", {
+        type: 'documents',
         sync: true,
-        identities: identities,
-        identity: ourIdentity,
+        identities: _identities,
+        identity: _ourIdentity,
         AccessController: AddressBookAccessController( )
-    }) //'dbMessages'
+    })
     console.log("_dbMessages",_dbMessages)
     dbMessages.set(_dbMessages)
     window.dbMessages = _dbMessages
@@ -111,34 +157,30 @@ export async function startNetwork() {
         console.log(await _dbMessages.all())
     })
     progressState.set(5)
-
-    _libp2p.services.pubsub.addEventListener('message', event => {
-        const topic = event.detail.topic
-        const message = toString(event.detail.data)
-        if(topic === 'dcontact._peer-discovery._p2p._pubsub') return //we don't do anything with other topics
-        console.log(`Message received on topic '${topic}': ${message}`)
-        handleMessage(message)
-    })
 }
 
-async function handleMessage (dContactMessage) {
-    console.log("message",dContactMessage   )
-    if (!dContactMessage) return;
-    let messageObj
-
-    try { //pubsub receives a string
-        messageObj = JSON.parse(dContactMessage)
-    } catch (e) { //orbitdb has already a valid object
-        messageObj = dContactMessage
-    }
-
+async function handleMessage (messageObj) {
+    if (!messageObj) return;
     let result
-    if (messageObj.recipient === _handle){
+    if (messageObj.recipient === _orbitdb?.identity?.id){
+
+        const sig = messageObj.sig;
+        delete messageObj.sig;
+        if(!await _identities.verify(sig,messageObj.publicKey,JSON.stringify(dContactMessage))){
+            console.log("signature not verified!",messageObj);
+            return
+        }
+
         switch (messageObj.command) {
-            case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address //TODO verify signature with public key
+            case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
+
+            break;
+            case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
+                console.log("verifying signature with pubkey",{dContactMessage,pubKey:messageObj.publicKey})
+
                 result = await confirm({data:messageObj})
                 if(result){
-                    const contact =  _myAddressBook.find((entry) => entry.owner === _handle) //TODO check if requester (Alice) was sending her own data
+                    const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id) //TODO check if requester (Alice) was sending her own data
                     sendMyAddress(messageObj.sender,contact);
                     if(_subscriberList.indexOf(messageObj.sender)===-1)
                         _subscriberList.push(messageObj.sender)
@@ -148,7 +190,7 @@ async function handleMessage (dContactMessage) {
                     //TODO send "rejected sending address"
                 }
             break;
-            case RECEIVE_ADDRESS: //we received an address and add it to our address book //TODO show address sender in modal & verify signature with his pubic key
+            case RECEIVE_ADDRESS: //we received an address and add it to our address book //TODO show address sender in modal
                 result = await confirm({data:messageObj})
                 if(result) {
                     updateAddressBook(messageObj);
@@ -162,46 +204,44 @@ async function handleMessage (dContactMessage) {
     }
 }
 
-/**
- * In case somebody requests my contact data or I update my address I'll send it to requester / subscriber
- * @param recipient
- * @param data
- * @returns {Promise<void>}
- */
-export async function sendMyAddress(recipient, data) {
-
-    const myAddress = {
+async function createMessage(command, recipient, data = null) {
+    const message = {
         timestamp: Date.now(),
-        command: RECEIVE_ADDRESS,
-        sender: _handle,
-        recipient: recipient,
-        data: JSON.stringify(data)
+        command,
+        sender: _orbitdb?.identity?.id,
+        recipient,
+        data: data ? JSON.stringify(data) : null,
+    };
+    message._id = await sha256(JSON.stringify(message));
+    message.publicKey = _ourIdentity.publicKey;
+    const messageString = JSON.stringify(message);
+    message.sig = await _ourIdentity.sign(_ourIdentity, messageString);
+    const verified = await _ourIdentity.verify(message.sig, message.publicKey, messageString);
+    if (!verified) {
+        throw new Error('Signature verification failed');
     }
-    myAddress._id =  await sha256(JSON.stringify(myAddress));
-
-    //_libp2p.services.pubsub.publish(CONTENT_TOPIC,fromString(JSON.stringify(myAddress))) //TODO when publishing a message sign content and enrypt content
-    const hash = await _dbMessages.put(myAddress) //TODO put this in a broadcast function
-    console.log("hash in dbMessages", hash)
-    console.log("RECEIVE_NEW_ADDRESS", myAddress)
-    notify(`sent RECEIVE_NEW_ADDRESS`)
+    return message;
 }
 
-export const sendAddress = async (identity,scannedAddress) => {
-    console.log("request sendAddress", identity)
-
-    const addr = {
-        timestamp: Date.now(),
-        command: SEND_ADDRESS_REQUEST,
-        sender: identity,
-        recipient: scannedAddress,
+export const sendAddress = async (identity, scannedAddress) => {
+    try {
+        console.log("request sendAddress from", _orbitdb?.identity?.id);
+        const addr = await createMessage(SEND_ADDRESS_REQUEST, scannedAddress);
+        const hash = await _dbMessages.put(addr);
+        notify(`sent SEND_ADDRESS_REQUEST ${hash}`);
+    } catch (error) {
+        console.error('Error in sendAddress:', error);
     }
-    addr._id =  await sha256(JSON.stringify(addr));
+}
 
-    //_libp2p.services.pubsub.publish(CONTENT_TOPIC,fromString(JSON.stringify(addr))) //TODO when publishing a message sign content and enrypt content
-    const hash = await _dbMessages.put(addr) //TODO put this in a broadcast functin
-    console.log("hash in dbMessages", hash)
-    console.log("SEND_ADDRESS_REQUEST",addr)
-    notify(`sent SEND_ADDRESS_REQUEST`)
+export async function sendMyAddress(recipient, data) {
+    try {
+        const myAddress = await createMessage(RECEIVE_ADDRESS, recipient, data);
+        const hash = await _dbMessages.put(myAddress);
+        notify(`sent RECEIVE_NEW_ADDRESS ${hash}`);
+    } catch (error) {
+        console.error('Error in sendMyAddress:', error);
+    }
 }
 
 function updateAddressBook(messageObj) {
@@ -210,7 +250,7 @@ function updateAddressBook(messageObj) {
     console.log("updating myAddressBook ",_myAddressBook)
     const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
     newAddrBook.push({
-        _id: contactData._id, //TODO
+        _id: contactData._id,
         firstName: contactData.firstName,
         middleName: contactData.middleName,
         lastName: contactData.lastName,
@@ -226,8 +266,7 @@ function updateAddressBook(messageObj) {
         postalCode: contactData.postalCode,
         countryRegion: contactData.countryRegion,
         timestamp: msg.timestamp,
-        owner: msg.sender,
-        ownerPubKey: 'somepubkey' //TODO store pubkey of owner with contact
+        owner: msg.sender
     });
     myAddressBook.set(newAddrBook);
     notify(`address updated`)
@@ -253,6 +292,16 @@ dbMessages.subscribe((val) => {
     _dbMessages = val
 });
 
+let _masterSeed;
+masterSeed.subscribe((val) => {
+    _masterSeed = val
+});
+
+let _seedPhrase;
+seedPhrase.subscribe((val) => {
+    _seedPhrase = val
+});
+
 let _ourIdentity;
 ourIdentity.subscribe((val) => {
     _ourIdentity = val
@@ -269,7 +318,7 @@ subscription.subscribe((val) => {
 });
 
 let _handle
-identity.subscribe((val) => {
+handle.subscribe((val) => {
     _handle = val
 });
 let _connectedPeers
@@ -284,4 +333,9 @@ myAddressBook.subscribe((val) => {
 let _subscriberList
 subscriberList.subscribe((val) => {
     _subscriberList = val
+});
+
+let _selectedTab
+selectedTab.subscribe((val) => {
+    _selectedTab = val
 });

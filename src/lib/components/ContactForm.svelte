@@ -1,7 +1,7 @@
 <script>
-     import { selectedTab, selectedAddr} from "../../stores.js";
+     import { selectedAddr } from "../../stores.js";
      import {addContact, deleteContact, updateContact} from "../../operations.js";
-     import {Button, Checkbox, Column, Grid, Row, TextInput} from "carbon-components-svelte";
+     import {Button, Column, Grid, Row, TextInput} from "carbon-components-svelte";
 </script>
 
 <section>
