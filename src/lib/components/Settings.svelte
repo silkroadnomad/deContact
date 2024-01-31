@@ -1,15 +1,15 @@
 <script>
-    import { TextInput, Column, Grid, Row } from "carbon-components-svelte";
+    import { TextInput, Column, Grid, Row,PasswordInput } from "carbon-components-svelte";
     import {
         libp2p,
         connectedPeers,
-        hdkey,
+        masterSeed,
         handle,
         orbitdb, seedPhrase,
     } from "../../stores.js"
 
     $:window.localStorage.setItem('handle', $handle);
-    $:window.localStorage.setItem('seed', $hdkey);
+    $:window.localStorage.setItem('seed', $masterSeed);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
 
     $:console.log("orbitdb",$orbitdb?.identity?.id)
@@ -33,11 +33,11 @@
 <!--        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" bind:value={$connectedPeers} /></Column>-->
     </Row>
     <Row>
-        <Column sm={3}><TextInput labelText="Seed" size="sm" bind:value={$hdkey} /></Column>
+        <Column sm={3}><TextInput labelText="Seed" size="sm" bind:value={$masterSeed} /></Column>
         <!--        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" bind:value={$connectedPeers} /></Column>-->
     </Row>
     <Row>
-        <Column sm={3}><TextInput labelText="Seed" size="sm" bind:value={$seedPhrase} /></Column>
+        <Column sm={3}><PasswordInput labelText="Seed" size="sm" bind:value={$seedPhrase} /></Column>
         <!--        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" bind:value={$connectedPeers} /></Column>-->
     </Row>
 </Grid>

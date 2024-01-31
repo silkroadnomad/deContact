@@ -1,5 +1,8 @@
 import { notificationMessage, showNotification } from "../stores.js";
-import { bip39 } from "bip39"
+import { mnemonicToSeedSync } from "bip39";
+import HDKey from "hdkey";
+import { createHash } from 'crypto';
+
 /**
  * {string} _notificationMessage
  */
@@ -30,13 +33,25 @@ export async function sha256(input) {
     return hashHex;
 }
 
-export const createHdKeyFromMnemonic = (mnemonicSeedphrase, password) => {
-    // const bip39 = require("bip39")
-    // const HDKey = require("hdkey")
-    const masterSeed = bip39
-        .mnemonicToSeedSync(mnemonicSeedphrase, password ? password : "mnemonic")
-        .toString("hex")
-    return HDKey.fromMasterSeed(Buffer.from(masterSeed, "hex"), global.DEFAULT_NETWORK.bip32)
+/**
+ * ConvertTo32BitSeed: Takes our masterSeed with 64 bit and converts it deterministically to 32 bit seed
+ * @param origSeed
+ * @returns {Buffer}
+ */
+export function convertTo32BitSeed (origSeed) {
+    const hash = createHash('sha256');
+    hash.update(origSeed);
+    return hash.digest();
+}
+/**
+ * Generates a master seed from a mnemonic and a password
+ * @type {{return: string}}
+ */
+export const generateMasterSeed = (mnemonicSeedphrase, password) => {
+    return mnemonicToSeedSync(mnemonicSeedphrase, password ? password : "mnemonic").toString("hex")
+}
+export const createHdKeyFromMasterKey = (masterseed,network) => {
+    return HDKey.fromMasterSeed(Buffer.from(masterseed, "hex"), network)
 }
 
 export function notify(message) {

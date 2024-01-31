@@ -5,7 +5,7 @@ import OrbitDBIdentityProviderDID from "@orbitdb/identity-provider-did";
 import {Identities, useIdentityProvider} from "@orbitdb/core";
 import {notify} from "../utils/utils.js";
 
-export async function createIdentityProvider(type, seed, ipfs) {
+export async function createIdentityProvider(type, seedArray, ipfs) {
     let identity
     let identityProvider;
     const identities = await Identities({ ipfs })
@@ -15,8 +15,8 @@ export async function createIdentityProvider(type, seed, ipfs) {
             OrbitDBIdentityProviderDID.setDIDResolver(keyDidResolver)
             useIdentityProvider(OrbitDBIdentityProviderDID)
 
-            try { //TODO if hdkey array is encrypted open decryption dialog
-                const seedArray = new Uint8Array(seed.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
+            try { //TODO if masterSeed array is encrypted open decryption dialog
+             //   const seedArray = new Uint8Array(seed.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
                 identityProvider = new Ed25519Provider(seedArray)
             } catch(e){
                 console.log(e)

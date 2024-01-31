@@ -9,7 +9,7 @@ import {
     libp2p,
     helia,
     orbitdb,
-    hdkey,
+    masterSeed,
     seedPhrase,
     identities,
     ourIdentity,
@@ -25,9 +25,10 @@ import {
 import AddressBookAccessController from "./AddressBookAccessController.js"
 import { confirm } from "../lib/components/modal.js"
 import { generateSeed, ENTER_EXISTING, GENERATE_NEW } from "../lib/components/seedModal.js"
-import { notify, sha256 } from "../utils/utils.js";
+import {convertTo32BitSeed, generateMasterSeed, notify, sha256} from "../utils/utils.js";
 import createIdentityProvider from "./identityProvider.js";
-import { generateMnemonic, createHdKeyFromMnemonic, createNewWallet, network } from "doichainjs-lib"
+import {generateMnemonic} from "bip39";
+
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
@@ -39,8 +40,9 @@ const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_ADDRESS = 'RECEIVE_ADDRESS';
 
 export const getIdentity = async (_type,_seed,_helia) => {
-    console.log("hdkey or identity provider changed - creating new identity")
-    const idProvider = await createIdentityProvider(_type, _seed, _helia)
+    console.log("masterSeed or identity provider changed - creating new identity",_seed)
+    const identitySeed = convertTo32BitSeed(_seed)
+    const idProvider = await createIdentityProvider(_type, identitySeed, _helia)
     _ourIdentity = idProvider.identity
     _identities = idProvider.identities
     ourIdentity.set(_ourIdentity)
@@ -67,29 +69,25 @@ export async function startNetwork() {
 
     if(!localStorage.getItem("seedPhrase")){
         const result = await generateSeed({ data: {
-                text: "We couldn't find a hdkey phrase inside your browser storage. " +
-                    "Do you want to generate a new hdkey phrase? Or you have an existing one"} })
+                text: "We couldn't find a masterSeed phrase inside your browser storage. " +
+                    "Do you want to generate a new masterSeed phrase? Or you have an existing one"} })
         console.log("result",result)
         switch (result) {
             case ENTER_EXISTING:
-                notify("enter existing hdkey phrase in settings please!")
+                notify("enter existing masterSeed phrase in settings please!")
                 selectedTab.set(2)
                 break;
             case GENERATE_NEW:
                 _seedPhrase = generateMnemonic();
                 seedPhrase.set(_seedPhrase)
-
-                _hdkey = createHdKeyFromMnemonic(_seedPhrase, "mnemonic")
-                console.log("_hdkey",_hdkey)
-                hdkey.set(_hdkey)
-
                 selectedTab.set(2)
                 notify(`generated a new seed phrase ${_seedPhrase}`)
                 break;
         }
-        //if(result===true) localStorage.setItem("testConfirmation",result)
+        masterSeed.set(_masterSeed)
     }
-
+    _masterSeed = generateMasterSeed(_seedPhrase,"password")
+    masterSeed.set(_masterSeed)
     progressText.set("starting libp2p node")
     progressState.set(1)
     _libp2p =  await createLibp2p(config)
@@ -107,7 +105,9 @@ export async function startNetwork() {
     window.helia = _helia
 
     progressText.set("creating Identity and starting OrbitDB")
-    await getIdentity('ed25519',_seed,_helia)
+    const identitySeed = convertTo32BitSeed(_masterSeed)
+    console.log("idenitySeed",identitySeed)
+    await getIdentity('ed25519',identitySeed,_helia)
     progressState.set(3)
 
     progressText.set("subscribing to pub sub topic")
@@ -292,9 +292,9 @@ dbMessages.subscribe((val) => {
     _dbMessages = val
 });
 
-let _hdkey;
-hdkey.subscribe((val) => {
-    _hdkey = val
+let _masterSeed;
+masterSeed.subscribe((val) => {
+    _masterSeed = val
 });
 
 let _seedPhrase;

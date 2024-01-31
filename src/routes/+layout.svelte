@@ -18,7 +18,7 @@
         qrCodeData,
         subscription,
         myAddressBook,
-        subscriberList, handle, hdkey, helia
+        subscriberList, handle, masterSeed, helia
     } from "../stores.js";
 
     import { startNetwork, CONTENT_TOPIC, getIdentity } from "../network/net-operations.js"
@@ -36,8 +36,8 @@
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
     $: {
-        if($helia && $hdkey)
-            getIdentity('ed25519',$hdkey,$helia)
+        if($helia && $masterSeed)
+            getIdentity('ed25519',$masterSeed,$helia)
     }
 
     onMount(startNetwork);

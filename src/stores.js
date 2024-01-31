@@ -10,7 +10,7 @@ export const progressText = writable("initializing...")
 export const progressState = writable(0)
 
 //0d3c4655d0fa1f9bcaa6c824eaae27fbb494e3a763d1bdd8b764d66e73ce8c4a
-export const hdkey = writable()
+export const masterSeed = writable()
 export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
 export const identities = writable()
 export const ourIdentity = writable()
