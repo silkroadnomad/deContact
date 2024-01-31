@@ -1,4 +1,5 @@
 import { notificationMessage, showNotification } from "../stores.js";
+import { bip39 } from "bip39"
 /**
  * {string} _notificationMessage
  */
@@ -27,6 +28,15 @@ export async function sha256(input) {
     const hashArray = Array.from(new Uint8Array(hashBuffer));
     const hashHex = hashArray.map(byte => byte.toString(16).padStart(2, '0')).join('');
     return hashHex;
+}
+
+export const createHdKeyFromMnemonic = (mnemonicSeedphrase, password) => {
+    // const bip39 = require("bip39")
+    // const HDKey = require("hdkey")
+    const masterSeed = bip39
+        .mnemonicToSeedSync(mnemonicSeedphrase, password ? password : "mnemonic")
+        .toString("hex")
+    return HDKey.fromMasterSeed(Buffer.from(masterSeed, "hex"), global.DEFAULT_NETWORK.bip32)
 }
 
 export function notify(message) {

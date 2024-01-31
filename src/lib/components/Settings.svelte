@@ -3,13 +3,13 @@
     import {
         libp2p,
         connectedPeers,
-        seed,
+        hdkey,
         handle,
         orbitdb, seedPhrase,
     } from "../../stores.js"
 
     $:window.localStorage.setItem('handle', $handle);
-    $:window.localStorage.setItem('seed', $seed);
+    $:window.localStorage.setItem('seed', $hdkey);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
 
     $:console.log("orbitdb",$orbitdb?.identity?.id)
@@ -33,7 +33,7 @@
 <!--        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" bind:value={$connectedPeers} /></Column>-->
     </Row>
     <Row>
-        <Column sm={3}><TextInput labelText="Seed" size="sm" bind:value={$seed} /></Column>
+        <Column sm={3}><TextInput labelText="Seed" size="sm" bind:value={$hdkey} /></Column>
         <!--        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" bind:value={$connectedPeers} /></Column>-->
     </Row>
     <Row>

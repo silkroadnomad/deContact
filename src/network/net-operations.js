@@ -9,7 +9,7 @@ import {
     libp2p,
     helia,
     orbitdb,
-    seed,
+    hdkey,
     seedPhrase,
     identities,
     ourIdentity,
@@ -27,7 +27,7 @@ import { confirm } from "../lib/components/modal.js"
 import { generateSeed, ENTER_EXISTING, GENERATE_NEW } from "../lib/components/seedModal.js"
 import { notify, sha256 } from "../utils/utils.js";
 import createIdentityProvider from "./identityProvider.js";
-import * as bip39 from "bip39";
+import { generateMnemonic, createHdKeyFromMnemonic, createNewWallet, network } from "doichainjs-lib"
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
@@ -39,7 +39,7 @@ const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_ADDRESS = 'RECEIVE_ADDRESS';
 
 export const getIdentity = async (_type,_seed,_helia) => {
-    console.log("seed or identity provider changed - creating new identity")
+    console.log("hdkey or identity provider changed - creating new identity")
     const idProvider = await createIdentityProvider(_type, _seed, _helia)
     _ourIdentity = idProvider.identity
     _identities = idProvider.identities
@@ -67,16 +67,22 @@ export async function startNetwork() {
 
     if(!localStorage.getItem("seedPhrase")){
         const result = await generateSeed({ data: {
-                text: "We couldn't find a seed phrase inside your browser storage. " +
-                    "Do you want to generate a new seed phrase? Or you have an existing one"} })
+                text: "We couldn't find a hdkey phrase inside your browser storage. " +
+                    "Do you want to generate a new hdkey phrase? Or you have an existing one"} })
         console.log("result",result)
         switch (result) {
             case ENTER_EXISTING:
-                notify("enter existing seed phrase in settings please!")
+                notify("enter existing hdkey phrase in settings please!")
                 selectedTab.set(2)
                 break;
             case GENERATE_NEW:
-                seedPhrase.set(bip39.generateMnemonic())
+                _seedPhrase = generateMnemonic();
+                seedPhrase.set(_seedPhrase)
+
+                _hdkey = createHdKeyFromMnemonic(_seedPhrase, "mnemonic")
+                console.log("_hdkey",_hdkey)
+                hdkey.set(_hdkey)
+
                 selectedTab.set(2)
                 notify(`generated a new seed phrase ${_seedPhrase}`)
                 break;
@@ -286,9 +292,9 @@ dbMessages.subscribe((val) => {
     _dbMessages = val
 });
 
-let _seed;
-seed.subscribe((val) => {
-    _seed = val
+let _hdkey;
+hdkey.subscribe((val) => {
+    _hdkey = val
 });
 
 let _seedPhrase;
