@@ -25,21 +25,26 @@ export const dialMultiaddrItems =  [
 //const multiaddrs = public_env.SEED_NODES;
 
 
-const multiaddrs = [
-	import.meta.env.MODE != 'development'
+const multiaddrs =
+	import.meta.env.MODE == 'development'
 		? import.meta.env.VITE_SEED_NODES_DEV
-		: import.meta.env.VITE_SEED_NODES
-];
+		: import.meta.env.VITE_SEED_NODES;
 
+
+console.log('__111', import.meta.env.VITE_SEED_NODES_DEV);
 console.log('____', import.meta.env);
 
 
+
 const pubSubPeerDiscoveryTopics = [
-    `dcontact._peer-discovery._p2p._pubsub`, // It's recommended but not required to extend the global space
-    // '_peer-discovery._p2p._pubsub' // Include if you want to participate in the global space
-]
+	import.meta.env.MODE == 'development'
+		? `dcontact._peer-discovery._p2p._pubsub`
+		: `dev-dcontact._peer-discovery._p2p._pubsub` // It's recommended but not required to extend the global space
+	// '_peer-discovery._p2p._pubsub' // Include if you want to participate in the global space
+];
 
 const bootstrapConfig = {list: multiaddrs};
+console.log('____3', bootstrapConfig);
 export const config = {
     addresses: {
         // swarm: [address],

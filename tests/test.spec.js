@@ -39,8 +39,8 @@ async function OpenNewBrowser(user) {
 	const context = await browser.newContext();
 	const page = await context.newPage();
 
-	//await page.goto('http://localhost:5173/');
-	await page.goto('http://www.decontact.xyz/');
+	await page.goto('http://localhost:5173/');
+	//await page.goto('http://www.decontact.xyz/');
 
 
 	
