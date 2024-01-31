@@ -50,7 +50,6 @@
 		"bip39": "^3.1.0",
 		"blockstore-level": "^1.1.7",
 		"datastore-level": "^10.1.6",
-		"doichainjs-lib": "^2.3.3",
 		"hdkey": "^2.1.0",
 		"helia": "^3.0.0",
 		"key-did-provider-ed25519": "^4.0.2",
