@@ -14,21 +14,25 @@ import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
 import { kadDHT } from '@libp2p/kad-dht'
 import { FaultTolerance } from '@libp2p/interface-transport'
-
+/*
 const multiaddrs = [
      '/ip4/159.69.119.82/udp/9090/webrtc-direct/certhash/uEiAIh0DoA5Qk2xTpc_j58KZMvww9CQzN6UNgsJ-DTuM6XQ/p2p/12D3KooWF5fGyE4VeXMhSGd9rCwckyxCVkA6xfoyFJG9DWJis62v'] //istanbul
 const pubSubPeerDiscoveryTopics = [`dcontact._peer-discovery._p2p._pubsub`]
+
+*/
+
 
 //const multiaddrs = public_env.SEED_NODES;
 
 
 const multiaddrs =
 	import.meta.env.MODE == 'development'
-		? import.meta.env.VITE_SEED_NODES_DEV
-		: import.meta.env.VITE_SEED_NODES;
+		? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',') 
+		: import.meta.env.VITE_SEED_NODES.replace('\n','').split(',') 
 
 
 console.log('__111', import.meta.env.VITE_SEED_NODES_DEV);
+console.log('____222', multiaddrs);
 console.log('____', import.meta.env);
 
 
@@ -41,7 +45,7 @@ const pubSubPeerDiscoveryTopics = [
 ];
 
 const bootstrapConfig = {list: multiaddrs};
-console.log('____3', bootstrapConfig);
+
 export const config = {
     addresses: {
         // swarm: [address],

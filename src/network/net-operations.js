@@ -163,45 +163,48 @@ async function handleMessage (messageObj) {
     if (!messageObj) return;
     let result
     if (messageObj.recipient === _orbitdb?.identity?.id){
-
+			
         const sig = messageObj.sig;
         delete messageObj.sig;
-        if(!await _identities.verify(sig,messageObj.publicKey,JSON.stringify(dContactMessage))){
-            console.log("signature not verified!",messageObj);
-            return
-        }
+        
+        if (!(await _identities.verify(sig, messageObj.publicKey, JSON.stringify(messageObj)))) {
+					console.log('signature not verified!', messageObj);
+					return;
+				}
 
-        switch (messageObj.command) {
-            case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
+			switch (messageObj.command) {
+				case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
+					break;
+				case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
+					console.log('verifying signature with pubkey', {
+						messageObj,
+						pubKey: messageObj.publicKey
+					});
 
-            break;
-            case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
-                console.log("verifying signature with pubkey",{dContactMessage,pubKey:messageObj.publicKey})
-
-                result = await confirm({data:messageObj})
-                if(result){
-                    const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id) //TODO check if requester (Alice) was sending her own data
-                    sendMyAddress(messageObj.sender,contact);
-                    if(_subscriberList.indexOf(messageObj.sender)===-1)
-                        _subscriberList.push(messageObj.sender)
-                    console.log("_subscriberList",_subscriberList)
-                    subscriberList.set(_subscriberList) //keep subscribers
-                }else{
-                    //TODO send "rejected sending address"
-                }
-            break;
-            case RECEIVE_ADDRESS: //we received an address and add it to our address book //TODO show address sender in modal
-                result = await confirm({data:messageObj})
-                if(result) {
-                    updateAddressBook(messageObj);
-                }
-                else {  //TODO respond with something?
-                     }
-            break;
-            default:
-                console.error(`Unknown command: ${messageObj.command}`);
-        }
-    }
+					result = await confirm({ data: messageObj });
+					if (result) {
+						const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id); //TODO check if requester (Alice) was sending her own data
+						sendMyAddress(messageObj.sender, contact);
+						if (_subscriberList.indexOf(messageObj.sender) === -1)
+							_subscriberList.push(messageObj.sender);
+						console.log('_subscriberList', _subscriberList);
+						subscriberList.set(_subscriberList); //keep subscribers
+					} else {
+						//TODO send "rejected sending address"
+					}
+					break;
+				case RECEIVE_ADDRESS: //we received an address and add it to our address book //TODO show address sender in modal
+					result = await confirm({ data: messageObj });
+					if (result) {
+						updateAddressBook(messageObj);
+					} else {
+						//TODO respond with something?
+					}
+					break;
+				default:
+					console.error(`Unknown command: ${messageObj.command}`);
+			}
+		}
 }
 
 async function createMessage(command, recipient, data = null) {

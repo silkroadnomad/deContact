@@ -8,6 +8,7 @@ const users = [
 		lastname: 'Maier',
 		street: 'Schulgasse 5',
 		zipcode: '84444',
+		did: '',
 		city: 'Berlin',
 		country: 'Germany'
 	},
@@ -17,6 +18,7 @@ const users = [
 		lastname: 'Dylan',
 		street: 'Schulgasse 55',
 		zipcode: '565544',
+		did: '',
 		city: 'Berlin',
 		country: 'Germany'
 	},
@@ -26,6 +28,7 @@ const users = [
 		lastname: 'Fox',
 		street: 'Schulgasse 150',
 		zipcode: '1111111',
+		did: '',
 		city: 'Rom',
 		country: 'Italy'
 	}
@@ -43,10 +46,20 @@ async function OpenNewBrowser(user) {
 	//await page.goto('http://www.decontact.xyz/');
 
 
+	await page.getByRole('button', { name: 'Continue' }).click();
+	await page.getByRole('button', { name: 'Generate New' }).click();
+	await page.getByLabel('My Handle').click();
+	await page.getByLabel('My Handle').fill(user.identity);
+	await page.getByLabel('DID').click();
+	user.did = await page.getByLabel('DID').inputValue();
+
+
+
+	await page.getByRole('tab', { name: 'My Address' }).click();
 	
-	https: await page.getByRole('tab', { name: 'Settings' }).click();
-	await page.getByLabel('My Identity').click();
-	await page.getByLabel('My Identity').fill(user.identity);
+	//await page.getByRole('tab', { name: 'Settings' }).click();
+	//await page.getByLabel('My Identity').click();
+	//await page.getByLabel('My Identity').fill(user.identity);
 	await page.getByRole('tab', { name: 'My Address' }).click();
 	await page.getByPlaceholder('Enter firstname...').click();
 	await page.getByPlaceholder('Enter firstname...').fill(user.firstname);
@@ -77,12 +90,12 @@ test.describe('exchange of addresse', () => {
 		const page2 = await OpenNewBrowser(users[1]);
 
 		await page2.getByRole('textbox').click({ timeout: 50000 });
-		await page2.getByRole('textbox').fill(users[0].identity);
+		await page2.getByRole('textbox').fill(users[0].did);
 		await page2.getByRole('button', { name: 'Scan Contact' }).click();
 		await page.getByRole('button', { name: 'Continue' }).click();
 		await page2.getByRole('button', { name: 'Continue' }).click();
 		await page.getByRole('textbox').click({ timeout: 50000 });
-		await page.getByRole('textbox').fill(users[1].identity);
+		await page.getByRole('textbox').fill(users[1].did);
 		await page.getByRole('button', { name: 'Scan Contact' }).click();
 		await page2.getByRole('button', { name: 'Continue' }).click();
 		await page.getByRole('button', { name: 'Continue' }).click();
