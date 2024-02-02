@@ -61,7 +61,7 @@ export async function startNetwork() {
     if(!localStorage.getItem("testConfirmation")){
         const result = await confirm({ data: {
                 text: "Note: This is still experimental software. " +
-                    "This peer-to-peer web app is not (yet) intended for use in production environments " +
+                    "This peer-to-peer progressive web app is not (yet) intended for use in production environments " +
                     "or for use where real money or real contact data are at stake!" +
                     "Please contact developers for questions." } })
         if(result===true) localStorage.setItem("testConfirmation",result)

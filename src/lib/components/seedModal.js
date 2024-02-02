@@ -3,7 +3,6 @@
  * @module lib/components/common/confirmationModal/modal
  */
 import Modal from './SeedPhraseModal.svelte';
-
 export const ENTER_EXISTING = "EnterSeedPhrase"
 export const GENERATE_NEW = "GenerateNew"
 

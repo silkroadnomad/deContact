@@ -20,7 +20,7 @@
         subscriberList, masterSeed, helia, synced, recordSynced
     } from "../stores.js";
 
-    import { startNetwork, getIdentity } from "../network/net-operations.js"
+    import { startNetwork, getIdentity } from "../network/p2p-operations.js"
     import { connectedPeers } from "../stores.js";
 
     const urlParams = new URLSearchParams(window.location.search);
