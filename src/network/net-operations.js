@@ -162,18 +162,6 @@ export async function startNetwork() {
 async function handleMessage (messageObj) {
     if (!messageObj) return;
     let result
-    // const sig = messageObj.sig;
-    // delete messageObj.sig;
-
-    // console.log("messageObj.length",JSON.stringify(messageObj).length)
-    // console.log("sig",sig)
-    // console.log("publicKey",messageObj.publicKey)
-    // const sigVerified = await _identities.verify(sig, messageObj.publicKey, JSON.stringify(messageObj))
-    // if(!sigVerified){
-    //     console.log("signature not verified!",messageObj);
-    //     return
-    // }
-
     if (messageObj.recipient === _orbitdb?.identity?.id){
 
         switch (messageObj.command) {
@@ -181,7 +169,6 @@ async function handleMessage (messageObj) {
 
             break;
             case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
-                console.log("verifying signature with pubkey",{messageObj,pubKey:messageObj.publicKey})
                 result = await confirm({data:messageObj})
                 if(result){
                     const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id) //TODO check if requester (Alice) was sending her own data
