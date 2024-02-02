@@ -17,6 +17,9 @@ export const ourIdentity = writable()
 
 export const myAddressBook = writable(JSON.parse(window.localStorage.getItem('myAddressBook') || "[]"))
 export const myDal = writable()
+export const synced = writable(false)
+export const recordSynced = writable(0)
+
 
 export const showNotification =  writable()
 export const notificationMessage = writable()

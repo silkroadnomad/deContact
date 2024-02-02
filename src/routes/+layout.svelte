@@ -16,12 +16,11 @@
         myDal,
         qrCodeOpen,
         qrCodeData,
-        subscription,
         myAddressBook,
-        subscriberList, handle, masterSeed, helia
+        subscriberList, handle, masterSeed, helia, synced, recordSynced
     } from "../stores.js";
 
-    import { startNetwork, CONTENT_TOPIC, getIdentity } from "../network/net-operations.js"
+    import { startNetwork, getIdentity } from "../network/net-operations.js"
     import { connectedPeers } from "../stores.js";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +28,7 @@
     let theme = "g90";
 
     async function handleDestroy() {
-        if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
+        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
 
     $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
@@ -58,9 +57,10 @@
         href="./#/">
 
         <HeaderNav>
-            <div class="flags">Identity: {$handle}</div>
-            <div class="flags">
-            Peers: {$connectedPeers}</div>
+<!--            <div class="flags">Identity: {$handle}</div>-->
+            <div class="flags">Peers: {$connectedPeers}</div>
+            <div class="flags">In Sync: {$synced}</div>
+            <div class="flags">Synced: {$recordSynced.length}</div>
         </HeaderNav>
 
         <HeaderUtilities>

@@ -19,21 +19,21 @@ import {
     handle,
     progressText,
     progressState,
-    subscriberList, dbMessages, selectedTab,
+    subscriberList, dbMessages, selectedTab, recordSynced, synced,
 } from "../stores.js";
 
 import AddressBookAccessController from "./AddressBookAccessController.js"
 import { confirm } from "../lib/components/modal.js"
 import { generateSeed, ENTER_EXISTING, GENERATE_NEW } from "../lib/components/seedModal.js"
-import {convertTo32BitSeed, generateMasterSeed, notify, sha256} from "../utils/utils.js";
+import { convertTo32BitSeed, generateMasterSeed, notify, sha256 } from "../utils/utils.js";
 import createIdentityProvider from "./identityProvider.js";
-import {generateMnemonic} from "bip39";
+import { generateMnemonic } from "bip39";
 
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
 
-export const CONTENT_TOPIC = "/dContact/2/message/proto";
+// export const CONTENT_TOPIC = "/dContact/3/message/proto";
 
 const FIND_HANDLE = 'FIND_HANDLE';
 const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
@@ -111,13 +111,14 @@ export async function startNetwork() {
     progressState.set(3)
 
     progressText.set("subscribing to pub sub topic")
-    _libp2p.services.pubsub.subscribe(CONTENT_TOPIC)
+    // _libp2p.services.pubsub.subscribe(CONTENT_TOPIC)
     progressState.set(4)
     _libp2p.addEventListener('connection:open',  async (c) => {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
         if(_connectedPeers>1) {
-            console.log(await _dbMessages.all())
+            const records = await _dbMessages.all()
+            recordSynced.set(records)
             progressState.set(6)
         }
     });
@@ -142,7 +143,9 @@ export async function startNetwork() {
 
     _dbMessages.events.on('join', async (peerId, heads) => {
         console.log("join",peerId)
-        console.log(await _dbMessages.all())
+        synced.set(true)
+        const records = await _dbMessages.all()
+        recordSynced.set(records)
     })
 
     _dbMessages.events.on('update', async (entry) => {
@@ -154,7 +157,8 @@ export async function startNetwork() {
             handleMessage(message)
         }
         // Full replication is achieved by explicitly retrieving all records from db1.
-        console.log(await _dbMessages.all())
+        const records = await _dbMessages.all()
+        recordSynced.set(records)
     })
     progressState.set(5)
 }
@@ -163,48 +167,34 @@ async function handleMessage (messageObj) {
     if (!messageObj) return;
     let result
     if (messageObj.recipient === _orbitdb?.identity?.id){
-			
-        const sig = messageObj.sig;
-        delete messageObj.sig;
-        
-        if (!(await _identities.verify(sig, messageObj.publicKey, JSON.stringify(messageObj)))) {
-					console.log('signature not verified!', messageObj);
-					return;
-				}
 
-			switch (messageObj.command) {
-				case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
-					break;
-				case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
-					console.log('verifying signature with pubkey', {
-						messageObj,
-						pubKey: messageObj.publicKey
-					});
 
-					result = await confirm({ data: messageObj });
-					if (result) {
-						const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id); //TODO check if requester (Alice) was sending her own data
-						sendMyAddress(messageObj.sender, contact);
-						if (_subscriberList.indexOf(messageObj.sender) === -1)
-							_subscriberList.push(messageObj.sender);
-						console.log('_subscriberList', _subscriberList);
-						subscriberList.set(_subscriberList); //keep subscribers
-					} else {
-						//TODO send "rejected sending address"
-					}
-					break;
-				case RECEIVE_ADDRESS: //we received an address and add it to our address book //TODO show address sender in modal
-					result = await confirm({ data: messageObj });
-					if (result) {
-						updateAddressBook(messageObj);
-					} else {
-						//TODO respond with something?
-					}
-					break;
-				default:
-					console.error(`Unknown command: ${messageObj.command}`);
-			}
-		}
+        switch (messageObj.command) {
+            case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
+
+            break;
+            case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
+                result = await confirm({data:messageObj})
+                if(result){
+                    const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id) //TODO check if requester (Alice) was sending her own data
+                    sendMyAddress(messageObj.sender,contact);
+                    if(_subscriberList.indexOf(messageObj.sender)===-1)
+                        _subscriberList.push(messageObj.sender)
+                    console.log("_subscriberList",_subscriberList)
+                    subscriberList.set(_subscriberList) //keep subscribers
+                }
+            break;
+            case RECEIVE_ADDRESS: //we received an address and add it to our address book //TODO show address sender in modal
+                result = await confirm({data:messageObj})
+                if(result) {
+                    updateAddressBook(messageObj);
+                }
+            break;
+            default:
+                console.error(`Unknown command: ${messageObj.command}`);
+        }
+    }
+
 }
 
 async function createMessage(command, recipient, data = null) {
@@ -217,12 +207,15 @@ async function createMessage(command, recipient, data = null) {
     };
     message._id = await sha256(JSON.stringify(message));
     message.publicKey = _ourIdentity.publicKey;
-    const messageString = JSON.stringify(message);
-    message.sig = await _ourIdentity.sign(_ourIdentity, messageString);
-    const verified = await _ourIdentity.verify(message.sig, message.publicKey, messageString);
-    if (!verified) {
-        throw new Error('Signature verification failed');
-    }
+    // const messageString = JSON.stringify(message);
+    // message.sig = await _ourIdentity.sign(_ourIdentity, messageString);
+    // console.log("messageString.length",messageString.length)
+    // console.log("sig",message.sig)
+    // console.log("publicKey",message.publicKey)
+    // const verified = await _ourIdentity.verify(message.sig, message.publicKey, messageString);
+    // if (!verified) {
+    //     throw new Error('Signature verification failed');
+    // }
     return message;
 }
 
