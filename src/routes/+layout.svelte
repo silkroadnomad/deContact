@@ -21,7 +21,7 @@
         subscriberList, handle, masterSeed, helia
     } from "../stores.js";
 
-    import { startNetwork, CONTENT_TOPIC, getIdentity } from "../network/net-operations.js"
+    import { startNetwork, getIdentity } from "../network/net-operations.js"
     import { connectedPeers } from "../stores.js";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -29,7 +29,7 @@
     let theme = "g90";
 
     async function handleDestroy() {
-        if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
+        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
 
     $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
