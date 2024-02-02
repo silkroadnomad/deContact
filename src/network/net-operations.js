@@ -19,7 +19,7 @@ import {
     handle,
     progressText,
     progressState,
-    subscriberList, dbMessages, selectedTab,
+    subscriberList, dbMessages, selectedTab, recordSynced, synced,
 } from "../stores.js";
 
 import AddressBookAccessController from "./AddressBookAccessController.js"
@@ -117,7 +117,8 @@ export async function startNetwork() {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
         if(_connectedPeers>1) {
-            console.log(await _dbMessages.all())
+            const records = await _dbMessages.all()
+            recordSynced.set(records)
             progressState.set(6)
         }
     });
@@ -142,7 +143,9 @@ export async function startNetwork() {
 
     _dbMessages.events.on('join', async (peerId, heads) => {
         console.log("join",peerId)
-        console.log(await _dbMessages.all())
+        synced.set(true)
+        const records = await _dbMessages.all()
+        recordSynced.set(records)
     })
 
     _dbMessages.events.on('update', async (entry) => {
@@ -154,7 +157,8 @@ export async function startNetwork() {
             handleMessage(message)
         }
         // Full replication is achieved by explicitly retrieving all records from db1.
-        console.log(await _dbMessages.all())
+        const records = await _dbMessages.all()
+        recordSynced.set(records)
     })
     progressState.set(5)
 }

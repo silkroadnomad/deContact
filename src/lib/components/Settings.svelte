@@ -23,7 +23,7 @@
 -->
 <Grid>
     <Row>
-        <Column sm={3}><TextInput labelText="My Handle"  size="sm" bind:value={$handle} /></Column>
+<!--        <Column sm={3}><TextInput labelText="My Handle"  size="sm" bind:value={$handle} /></Column>-->
         <Column sm={3}><TextInput labelText="DID"  size="sm" value={$orbitdb?.identity?.id} /></Column>
         <Column sm={3}><TextInput labelText="PeerId (LibP2P)"  size="sm" value={$libp2p?.peerId?.string} /></Column>
 

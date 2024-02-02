@@ -16,9 +16,8 @@
         myDal,
         qrCodeOpen,
         qrCodeData,
-        subscription,
         myAddressBook,
-        subscriberList, handle, masterSeed, helia
+        subscriberList, handle, masterSeed, helia, synced, recordSynced
     } from "../stores.js";
 
     import { startNetwork, getIdentity } from "../network/net-operations.js"
@@ -58,9 +57,10 @@
         href="./#/">
 
         <HeaderNav>
-            <div class="flags">Identity: {$handle}</div>
-            <div class="flags">
-            Peers: {$connectedPeers}</div>
+<!--            <div class="flags">Identity: {$handle}</div>-->
+            <div class="flags">Peers: {$connectedPeers}</div>
+            <div class="flags">In Sync: {$synced}</div>
+            <div class="flags">Synced: {$recordSynced.length}</div>
         </HeaderNav>
 
         <HeaderUtilities>
