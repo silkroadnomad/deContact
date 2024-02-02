@@ -13,40 +13,44 @@ import {FaultTolerance} from "@libp2p/interface-transport";
 import {kadDHT} from "@libp2p/kad-dht";
 
 const topics = [
-    `dcontact._peer-discovery._p2p._pubsub`
-]
+	'dcontact._peer - discovery._p2p._pubsub' // It's recommended but not required to extend the global space
+	// '_peer-discovery._p2p._pubsub' // Include if you want to participate in the global space
+];
+
+// const reservationStore = new ReservationStore({ maxReservations: 100 })
 
 const server = await createLibp2p({
-    addresses: {
-        listen: ['/ip4/127.0.0.1/tcp/12313/ws']
-    },
-    transports: [
-        circuitRelayTransport(),
-    ],
-    connectionEncryption: [noise()],
-    streamMuxers: [yamux()],
-    transportManager: {
-        faultTolerance: FaultTolerance.NO_FATAL
-    },
-    peerDiscovery: [
-        // bootstrap(bootstrapConfig),
-        pubsubPeerDiscovery({
-            interval: 10000,
-            topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
-            listenOnly: false
-        })
-    ],
-    services: {
-        identify: identify(),
-        autoNAT: autoNAT(),
-        dcutr: dcutr(),
-        pubsub: gossipsub({ allowPublishToZeroPeers: true, canRelayMessage: true}),
-        dht: kadDHT({
-            kBucketSize: 20,
-            clientMode: false           // Whether to run the WAN DHT in client or server mode (default: client mode)
-        }),
-        circuitRelay: circuitRelayServer({ reservations: { applyDefaultLimit:false, maxReservations:Infinity }})
-    }
-})
+	addresses: {
+		listen: ['/ip4/127.0.0.1/tcp/12313/ws']
+	},
+	transports: [
+		circuitRelayTransport(),
+		webSockets({
+			filter: filters.all
+		})
+	],
+	connectionEncryption: [noise()],
+	streamMuxers: [yamux()],
+	peerDiscovery: [
+		// bootstrap(bootstrapConfig),
+		pubsubPeerDiscovery({
+			interval: 10000,
+			topics: topics, // defaults to ['_peer-discovery._p2p._pubsub']
+			listenOnly: false
+		})
+	],
+	services: {
+		identify: identify(),
+		autoNAT: autoNAT(),
+		dcutr: dcutr(),
+		pubsub: gossipsub({ allowPublishToZeroPeers: true, canRelayMessage: true }),
+		circuitRelay: circuitRelayServer({
+			reservations: { applyDefaultLimit: false, maxReservations: Infinity }
+		})
+	}
+});
 
-console.log('Relay listening on multiaddr(s): ', server.getMultiaddrs().map((ma) => ma.toString()))
+console.log(
+	'Relay listening on multiaddr(s): ',
+	server.getMultiaddrs().map((ma) => ma.toString())
+);
