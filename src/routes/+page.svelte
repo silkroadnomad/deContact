@@ -1,17 +1,31 @@
 <script>
-    import {Tabs, Tab, TabContent, Button, TextInput, Column, Grid, Row, ProgressBar} from "carbon-components-svelte";
+    import {
+        Tabs,
+        Tab,
+        TabContent,
+        Button,
+        TextInput,
+        Column,
+        Grid,
+        Row,
+        ProgressBar,
+        ToastNotification
+    } from "carbon-components-svelte";
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
+
     import {
-        selectedTab,
-        selectedRowIds,
         qrCodeOpen,
         qrCodeData,
-        identity,
+        handle,
         progressState,
         progressText,
-        libp2p
+        showNotification,
+        libp2p,
+        notificationMessage,
+        selectedTab,
+        selectedRowIds
     } from "../stores.js";
     import { loadContact } from "../operations.js";
     import { sendAddress } from "../network/net-operations.js"
@@ -19,9 +33,10 @@
     $: loadContact($selectedRowIds[0]);
     let scannedAddress;
     const toggleQrCode = () => {
-        $qrCodeData = `ipfs://${$identity}`
+        $qrCodeData = `ipfs://${$handle}`
         $qrCodeOpen = !$qrCodeOpen;
     };
+
     $: {
         const decoder = new TextDecoder("utf-8");
         const values = Array.from($libp2p?.peerRouting?.peerStore?.store.datastore.data.values() || []);
@@ -43,7 +58,7 @@
                 <Grid fullWidth>
                     <Row>
                         <Column><TextInput size="sm" bind:value={scannedAddress}/></Column>
-                        <Column><Button size="sm" on:click={() => sendAddress($identity,scannedAddress)}>Scan Contact</Button></Column>
+                        <Column><Button size="sm" on:click={() => sendAddress($handle,scannedAddress)}>Scan Contact</Button></Column>
                         <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
                     </Row>
                 </Grid>
@@ -54,6 +69,12 @@
         </svelte:fragment>
     </Tabs>
 </div>
+{#if $showNotification}
+    <ToastNotification class="toast"
+                       kind={$notificationMessage?.indexOf("error")!==-1?'error':'success'}
+                       title={$notificationMessage?.indexOf("Error")!==-1?'error':'success'}
+                       subtitle={$notificationMessage} />
+{/if}
 <style>
     :global(.content) {
         margin: 3rem;

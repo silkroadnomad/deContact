@@ -9,8 +9,6 @@ import { pubsubPeerDiscovery } from "@libp2p/pubsub-peer-discovery";
 import { autoNAT } from '@libp2p/autonat'
 import {dcutr} from "@libp2p/dcutr";
 import {gossipsub} from "@chainsafe/libp2p-gossipsub";
-import {webRTC, webRTCDirect} from "@libp2p/webrtc";
-import {webTransport} from "@libp2p/webtransport";
 import {FaultTolerance} from "@libp2p/interface-transport";
 import {kadDHT} from "@libp2p/kad-dht";
 

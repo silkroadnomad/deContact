@@ -1,4 +1,4 @@
-import {notify} from "./utils/utils.js";
+import { notify } from "./utils/utils.js";
 
 import {
     myAddressBook,
@@ -6,13 +6,20 @@ import {
     selectedTab,
     qrCodeData,
     qrCodeOpen,
-    myDal, identity, subscriberList
+    orbitdb,
+    myDal,
+    handle,
+    subscriberList
 } from "./stores.js";
 import {sendMyAddress} from "./network/net-operations.js";
 
-let _identity
-identity.subscribe((value) => {
-    _identity = value
+let _handle
+handle.subscribe((value) => {
+    _handle = value
+})
+let _orbitdb
+orbitdb.subscribe((value) => {
+    _orbitdb = value
 })
 
 let _selectedTab;
@@ -67,9 +74,8 @@ export async function loadContact(id) {
 }
 
 export async function addContact() {
-
     _selectedAddr.id = new Date().getTime()+"-"+(Math.random()*100000000)
-    _selectedAddr.owner = _identity
+    _selectedAddr.owner = _orbitdb?.identity?.id
     _myAddressBook.push(_selectedAddr)
     myAddressBook.set(_myAddressBook) //trigger reactivity
     selectedAddr.set({})
@@ -80,12 +86,12 @@ export async function addContact() {
 export async function updateContact() {
     console.log("updating contact",_selectedAddr)
     const newAddrBook = _myAddressBook.filter( el => el.id !== _selectedAddr.id )
-    _selectedAddr.owner = _identity
+    _selectedAddr.owner = _orbitdb?.identity?.id
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
     notify(`Contact added successfully - informing subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
     console.log("_subscriberList",_subscriberList)
-    if(_selectedAddr.owner === _identity){ //only send update requests if my own address was changed
+    if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
         for (const s in  _subscriberList) {
             sendMyAddress(_subscriberList[s],_selectedAddr)
         }

@@ -22,7 +22,7 @@ const AddressBookAccessController = ({  } = {}) => async ({ orbitdb, identities,
     // }
 
     const canAppend = async (entry) => {
-        // const writerIdentity = await identities.getIdentity(entry.identity)
+        // const writerIdentity = await identities.getIdentity(entry.handle)
         // if (!writerIdentity) {
         //     return false
         // }
