@@ -18,8 +18,8 @@ import { FaultTolerance } from '@libp2p/interface-transport'
 
 const multiaddrs =
     import.meta.env.MODE == 'development'
-        ? import.meta.env.DECONTACT_SEED_NODES_DEV.replace('\n','').split(',')
-        : import.meta.env.DECONTACT_SEED_NODES.replace('\n','').split(',')
+        ? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',')
+        : import.meta.env.VITE_SEED_NODES.replace('\n','').split(',')
 
 
 const pubSubPeerDiscoveryTopics = [
