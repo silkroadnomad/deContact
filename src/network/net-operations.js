@@ -168,6 +168,7 @@ async function handleMessage (messageObj) {
     let result
     if (messageObj.recipient === _orbitdb?.identity?.id){
 
+
         switch (messageObj.command) {
             case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
 
@@ -193,6 +194,7 @@ async function handleMessage (messageObj) {
                 console.error(`Unknown command: ${messageObj.command}`);
         }
     }
+
 }
 
 async function createMessage(command, recipient, data = null) {
