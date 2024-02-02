@@ -1,7 +1,7 @@
 <script>
     import { onDestroy, onMount } from "svelte";
     import "carbon-components-svelte/css/all.css";
-
+    import { bootstrapConfig } from "../config.js";
     import {
         Header,
         HeaderGlobalAction,
@@ -17,7 +17,7 @@
         qrCodeOpen,
         qrCodeData,
         myAddressBook,
-        subscriberList, handle, masterSeed, helia, synced, recordSynced
+        subscriberList, masterSeed, helia, synced, recordSynced
     } from "../stores.js";
 
     import { startNetwork, getIdentity } from "../network/net-operations.js"
@@ -31,6 +31,7 @@
         // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
 
+    console.log("bootstrapConfig",bootstrapConfig)
     $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
@@ -60,7 +61,7 @@
 <!--            <div class="flags">Identity: {$handle}</div>-->
             <div class="flags">Peers: {$connectedPeers}</div>
             <div class="flags">In Sync: {$synced}</div>
-            <div class="flags">Synced: {$recordSynced.length}</div>
+            <div class="flags">Synced: {$recordSynced.length | 0}</div>
         </HeaderNav>
 
         <HeaderUtilities>

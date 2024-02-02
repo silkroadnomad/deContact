@@ -17,20 +17,17 @@ import { FaultTolerance } from '@libp2p/interface-transport'
 
 
 const multiaddrs =
-	import.meta.env.MODE == 'development'
-		? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',') 
-		: import.meta.env.VITE_SEED_NODES.replace('\n','').split(',') 
-
+    import.meta.env.MODE == 'development'
+        ? import.meta.env.DECONTACT_SEED_NODES_DEV.replace('\n','').split(',')
+        : import.meta.env.DECONTACT_SEED_NODES.replace('\n','').split(',')
 
 
 const pubSubPeerDiscoveryTopics = [
-	import.meta.env.MODE == 'development'
+	import.meta.env.MODE !== 'development'
 		? `dcontact._peer-discovery._p2p._pubsub`
-		: `dev-dcontact._peer-discovery._p2p._pubsub` // It's recommended but not required to extend the global space
-	// '_peer-discovery._p2p._pubsub' // Include if you want to participate in the global space
-];
+		: `dev-dcontact._peer-discovery._p2p._pubsub`]
 
-const bootstrapConfig = {list: multiaddrs};
+export const bootstrapConfig = {list: multiaddrs};
 
 export const config = {
     addresses: {
@@ -55,7 +52,7 @@ export const config = {
         }),
         webRTCDirect(),
         webTransport(),
-        circuitRelayTransport({discoverRelays: 2}),
+        circuitRelayTransport({ discoverRelays: 2 }),
         // kadDHT({}),
     ],
     connectionEncryption: [noise()],
