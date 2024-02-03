@@ -27,6 +27,7 @@
         masterSeed,
         helia,
         synced,
+        subscription,
         recordSynced
     } from "../stores.js";
 
@@ -38,7 +39,7 @@
     let theme = "g90";
 
     async function handleDestroy() {
-        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
+        if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
 
     console.log("bootstrapConfig",bootstrapConfig)

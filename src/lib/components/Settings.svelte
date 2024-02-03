@@ -19,16 +19,24 @@
 -->
 <Grid>
     <Row>
-        <Column sm={3}><TextInput labelText="DID"  size="sm" readonly value={$orbitdb?.identity?.id} /></Column>
-        <Column sm={3}><TextInput labelText="PeerId (LibP2P)" readonly size="sm" value={$libp2p?.peerId?.string} /></Column>
+        <Column sm={3}><TextInput labelText="DID"  helperText="Generated from your seed phrase" size="sm" readonly  value={$orbitdb?.identity?.id} /></Column>
     </Row>
     <Row>
-        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" value={$connectedPeers} /></Column>
+        <Column sm={3}><TextInput labelText="PeerId (LibP2P)" helperText="Every device has a unique peer id independent from your seed phrase" readonly size="sm" value={$libp2p?.peerId?.string} /></Column>
     </Row>
-    <Row>
-        <Column sm={3}><TextInput labelText="Master Seed" size="sm" readonly value={$masterSeed} /></Column>
+    <Row class="custom-row">
+        <Column sm={3}><TextInput labelText="Connected Peers" helperText="This is the amount of peers which are connected in our peer-to-peer network" readonly size="sm" value={$connectedPeers} /></Column>
     </Row>
-    <Row>
-        <Column sm={3}><PasswordInput labelText="Seed Phrase" size="sm" bind:value={$seedPhrase} /></Column>
+    <Row class="custom-row">
+        <Column sm={3}><PasswordInput labelText="Seed Phrase" helperText="If you change the seed phrase a new DID is generated" size="sm" bind:value={$seedPhrase} /></Column>
     </Row>
 </Grid>
+<style>
+    :global(.bx--label) {
+        color: white;
+    }
+
+    :global(.bx--row) {
+        margin-bottom: 40px; /* Adjust the bottom margin to increase space between rows */
+    }
+</style>
