@@ -1,8 +1,6 @@
 {
 	"name": "decontact",
-
 	"version": "0.1.7",
-
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -37,7 +35,6 @@
 		"vitest": "^1.0.0"
 	},
 	"type": "module",
-  
 	"dependencies": {
 		"@libp2p/autonat": "^1.0.7",
 		"@libp2p/circuit-relay-v2": "^1.0.10",
@@ -51,6 +48,7 @@
 		"@orbitdb/identity-provider-ethereum": "^1.0.1",
 		"bip39": "^3.1.0",
 		"blockstore-level": "^1.1.7",
+		"carbon-icons-svelte": "^12.4.2",
 		"datastore-level": "^10.1.6",
 		"hdkey": "^2.1.0",
 		"helia": "^3.0.0",

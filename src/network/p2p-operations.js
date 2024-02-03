@@ -71,7 +71,7 @@ export async function startNetwork() {
         const result = await generateSeed({ data: {
                 text: "We couldn't find a master seed phrase inside your browser storage. " +
                     "Do you want to generate a new master seed phrase? Or maybe you have an existing one?"} })
-        console.log("result",result)
+
         switch (result) {
             case ENTER_EXISTING:
                 notify("enter existing masterSeed phrase in settings please!")

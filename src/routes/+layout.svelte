@@ -1,6 +1,12 @@
 <script>
     import { onDestroy, onMount } from "svelte";
     import "carbon-components-svelte/css/all.css";
+    import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
+    import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
+
+
+    import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
+    import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
     import { bootstrapConfig } from "../config.js";
     import {
         Header,
@@ -17,7 +23,11 @@
         qrCodeOpen,
         qrCodeData,
         myAddressBook,
-        subscriberList, masterSeed, helia, synced, recordSynced
+        subscriberList,
+        masterSeed,
+        helia,
+        synced,
+        recordSynced
     } from "../stores.js";
 
     import { startNetwork, getIdentity } from "../network/p2p-operations.js"
@@ -58,10 +68,22 @@
         href="./#/">
 
         <HeaderNav>
-<!--            <div class="flags">Identity: {$handle}</div>-->
-            <div class="flags">Peers: {$connectedPeers}</div>
-            <div class="flags">In Sync: {$synced}</div>
-            <div class="flags">Synced: {$recordSynced.length | 0}</div>
+            <div class="flags">
+                 {#if ($connectedPeers.length===0) }
+                     <ConnectionSignalOff />&nbsp;{$connectedPeers}
+                 {:else if $connectedPeers.length===1}
+                     <ConnectionSignal class="statusYellow" />&nbsp;{$connectedPeers}
+                 {:else}
+                     <ConnectionSignal class="statusGreen" />&nbsp;{$connectedPeers}
+                 {/if}
+            </div>
+            <div class="flags">
+                {#if $synced}
+                    <WatsonHealthAiStatusComplete  class="statusGreen"/>&nbsp;{$recordSynced.length | 0}
+                {:else}
+                    <WatsonHealthAiStatus class="statusRead" />&nbsp;{$recordSynced.length | 0}
+                {/if}
+            </div>
         </HeaderNav>
 
         <HeaderUtilities>
@@ -93,11 +115,20 @@
         z-index: 1;
         margin: 5rem;
     }
-    .peers {
-        margin: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    :global(.statusRead) {
+        color: red;
+        width: 16px;
+        height: 16px;
+    }
+    :global(.statusYellow) {
+        color: yellow;
+        width: 16px;
+        height: 16px;
+    }
+    :global(.statusGreen) {
+        color: green;
+        width: 16px;
+        height: 16px;
     }
     .flags {
         margin: 10px;

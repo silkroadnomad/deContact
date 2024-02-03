@@ -10,7 +10,6 @@
     $:window.localStorage.setItem('handle', $handle);
     $:window.localStorage.setItem('seed', $masterSeed);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
-    $:console.log("orbitdb",$orbitdb?.identity?.id)
 </script>
 
 <!--
@@ -20,14 +19,14 @@
 -->
 <Grid>
     <Row>
-        <Column sm={3}><TextInput labelText="DID"  size="sm" value={$orbitdb?.identity?.id} /></Column>
-        <Column sm={3}><TextInput labelText="PeerId (LibP2P)"  size="sm" value={$libp2p?.peerId?.string} /></Column>
+        <Column sm={3}><TextInput labelText="DID"  size="sm" readonly value={$orbitdb?.identity?.id} /></Column>
+        <Column sm={3}><TextInput labelText="PeerId (LibP2P)" readonly size="sm" value={$libp2p?.peerId?.string} /></Column>
     </Row>
     <Row>
-        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" bind:value={$connectedPeers} /></Column>
+        <Column sm={3}><TextInput labelText="Connected Peers" readonly size="sm" value={$connectedPeers} /></Column>
     </Row>
     <Row>
-        <Column sm={3}><TextInput labelText="Master Seed" size="sm" bind:value={$masterSeed} /></Column>
+        <Column sm={3}><TextInput labelText="Master Seed" size="sm" readonly value={$masterSeed} /></Column>
     </Row>
     <Row>
         <Column sm={3}><PasswordInput labelText="Seed Phrase" size="sm" bind:value={$seedPhrase} /></Column>
