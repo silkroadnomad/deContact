@@ -69,19 +69,19 @@
 
         <HeaderNav>
             <div class="flags">
-                 {#if ($connectedPeers.length===0) }
-                     <ConnectionSignalOff />&nbsp;{$connectedPeers}
-                 {:else if $connectedPeers.length===1}
-                     <ConnectionSignal class="statusYellow" />&nbsp;{$connectedPeers}
+                 {#if ($connectedPeers===0) }
+                     <ConnectionSignalOff title="No network or connecting..." class="statusRed" />&nbsp;{$connectedPeers}
+                 {:else if $connectedPeers===1}
+                     <ConnectionSignal title="Seed Node connected" class="statusYellow" />&nbsp;{$connectedPeers}
                  {:else}
-                     <ConnectionSignal class="statusGreen" />&nbsp;{$connectedPeers}
+                     <ConnectionSignal title="Swarm connected" class="statusGreen" />&nbsp;{$connectedPeers}
                  {/if}
             </div>
             <div class="flags">
-                {#if $synced}
-                    <WatsonHealthAiStatusComplete  class="statusGreen"/>&nbsp;{$recordSynced.length | 0}
+                {#if $synced===true}
+                    <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordSynced.length | 0}
                 {:else}
-                    <WatsonHealthAiStatus class="statusRead" />&nbsp;{$recordSynced.length | 0}
+                    <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordSynced.length | 0}
                 {/if}
             </div>
         </HeaderNav>
@@ -115,7 +115,7 @@
         z-index: 1;
         margin: 5rem;
     }
-    :global(.statusRead) {
+    :global(.statusRed) {
         color: red;
         width: 16px;
         height: 16px;
