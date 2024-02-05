@@ -122,8 +122,26 @@ test.describe('simple exchange of adress between Alice and Bob', () => {
 
 		await page2.getByRole('row', { name: users[0].identity }).locator('label').click();
 
-		await page.getByRole('tab', { name: 'Settings' }).click({ timeout: 50000 });
-		await page.getByLabel('My Identity').click({ timeout: 50000 });
+		//await page.getByRole('tab', { name: 'Settings' }).click({ timeout: 50000 });	
+		//await page.getByLabel('DID').click({ timeout: 50000 });
+
+		//await expect(page2.getByRole('row', { name: users[0].identity })).toContainText(users[2].street);
+
+ 		//console.log ("____", await page2.getByText(users[0].street, { exact: true }))
+
+
+		
+		//const locator = page.locator('table > td');
+		//await expect(locator).toHaveClass(users[2].street);
+
+
+		//await page2.getByPlaceholder('Enter street...').click();
+		
+
+		//await expect(page2.getByPlaceholder('Enter street...')).toHaveText(users[2].street);
+
+		//await page.getByRole('tab', { name: 'Settings' }).click({ timeout: 50000 });
+		//await page.getByLabel('DID').click({ timeout: 50000 });
 
 		await page.close();
 		await page2.close();
