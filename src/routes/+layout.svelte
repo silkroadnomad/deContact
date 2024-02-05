@@ -24,14 +24,13 @@
         qrCodeData,
         myAddressBook,
         subscriberList,
-        masterSeed,
+        seedPhrase,
         helia,
         synced,
-        subscription,
-        recordSynced
+        recordsSynced
     } from "../stores.js";
 
-    import { startNetwork, getIdentity } from "../network/p2p-operations.js"
+    import { startNetwork, getIdentityAndCreateOrbitDB } from "../network/p2p-operations.js"
     import { connectedPeers } from "../stores.js";
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -39,7 +38,7 @@
     let theme = "g90";
 
     async function handleDestroy() {
-        if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
+        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
 
     console.log("bootstrapConfig",bootstrapConfig)
@@ -47,8 +46,8 @@
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
     $: {
-        if($helia && $masterSeed)
-            getIdentity('ed25519',$masterSeed,$helia)
+        if($helia && $seedPhrase)
+            getIdentityAndCreateOrbitDB('ed25519',$seedPhrase,$helia)
     }
 
     onMount(startNetwork);
@@ -80,9 +79,9 @@
             </div>
             <div class="flags">
                 {#if $synced===true}
-                    <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordSynced.length | 0}
+                    <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
                 {:else}
-                    <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordSynced.length | 0}
+                    <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}
                 {/if}
             </div>
         </HeaderNav>

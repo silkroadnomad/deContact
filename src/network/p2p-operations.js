@@ -1,6 +1,6 @@
 import { createLibp2p } from 'libp2p'
 import { createHelia } from "helia";
-import { createOrbitDB, useAccessController } from '@orbitdb/core';
+import {createOrbitDB, OrbitDBAccessController, useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
@@ -14,12 +14,13 @@ import {
     identities,
     ourIdentity,
     myAddressBook,
+    dbMyAddressBook,
     subscription,
     connectedPeers,
     handle,
     progressText,
     progressState,
-    subscriberList, dbMessages, selectedTab, recordSynced, synced,
+    subscriberList, dbMessages, selectedTab, recordsSynced, synced, syncedDevices, addressRecordsSynced,
 } from "../stores.js";
 
 import AddressBookAccessController from "./AddressBookAccessController.js"
@@ -39,8 +40,7 @@ const FIND_HANDLE = 'FIND_HANDLE';
 const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_ADDRESS = 'RECEIVE_ADDRESS';
 
-export const getIdentity = async (_type,_seed,_helia) => {
-    console.log("masterSeed or identity provider changed - creating new identity",_seed)
+export const getIdentityAndCreateOrbitDB = async (_type, _seed, _helia) => {
     const identitySeed = convertTo32BitSeed(_seed)
     const idProvider = await createIdentityProvider(_type, identitySeed, _helia)
     _ourIdentity = idProvider.identity
@@ -61,9 +61,9 @@ export async function startNetwork() {
     if(!localStorage.getItem("testConfirmation")){
         const result = await confirm({ data: {
                 text: "Note: This is still experimental software. " +
-                    "This peer-to-peer progressive web app is not (yet) intended for use in production environments " +
-                    "or for use where real money or real contact data are at stake!" +
-                    "Please contact developers for questions." } })
+                    "This peer-to-peer only progressive web app (PWA) is not (yet) intended for use in production environments " +
+                    "or for use where real money or real contact data are at stake! \n" +
+                    "Please contact developers for questions. " } })
         if(result===true) localStorage.setItem("testConfirmation",result)
     }
 
@@ -106,8 +106,8 @@ export async function startNetwork() {
 
     progressText.set("creating Identity and starting OrbitDB")
     const identitySeed = convertTo32BitSeed(_masterSeed)
-    console.log("idenitySeed",identitySeed)
-    await getIdentity('ed25519',identitySeed,_helia)
+    console.log("identitySeed",identitySeed)
+    await getIdentityAndCreateOrbitDB('ed25519',identitySeed,_helia)
     progressState.set(3)
 
     progressText.set("subscribing to pub sub topic")
@@ -118,7 +118,7 @@ export async function startNetwork() {
         connectedPeers.update(n => n + 1);
         if(_connectedPeers>1) {
             const records = await _dbMessages.all()
-            recordSynced.set(records)
+            recordsSynced.set(records)
             progressState.set(6)
         }
     });
@@ -135,30 +135,57 @@ export async function startNetwork() {
         sync: true,
         identities: _identities,
         identity: _ourIdentity,
-        AccessController: AddressBookAccessController( )
+        AccessController: AddressBookAccessController(_orbitdb, _identities, _subscriberList) //this should be almost same as OrbitDBAccessController but should use id's if me and all ids I am following (as soon as Alice receives Bobs contact data, his data will be added to the log) (this happens in the moment alice allows it by buton click)
     })
     console.log("_dbMessages",_dbMessages)
+    const records = await _dbMessages.all()
+    recordsSynced.set(records)
+
     dbMessages.set(_dbMessages)
     window.dbMessages = _dbMessages
+    useAccessController(OrbitDBAccessController)
+    const myDBName = await sha256(_orbitdb.identity.id)
+    _dbMyAddressBook = await _orbitdb.open(myDBName, {
+        type: 'documents',
+        sync: true,
+        identities: _identities,
+        identity: _ourIdentity,
+        //OrbitDBAccessController()({ orbitdb: orbitdb1, identities: identities1, address: 'testdb/add' })
+        AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
+    })
+    const addressRecords = await _dbMyAddressBook.all()
+    addressRecordsSynced.set(addressRecords)
+
+    console.log("_dbMyAddressBook",_dbMyAddressBook)
+    dbMyAddressBook.set(_dbMyAddressBook)
+    window.dbMyAddresses = _dbMyAddressBook
+
+    _dbMyAddressBook.events.on('join', async (peerId, heads) => {
+        console.log("join myaddressbook",peerId)
+        syncedDevices.set(true)
+        const records = await _dbMyAddressBook.all()
+        addressRecordsSynced.set(records)
+        console.log("records in _dbMyAddressBook ",records)
+    })
 
     _dbMessages.events.on('join', async (peerId, heads) => {
-        console.log("join",peerId)
+        console.log("join storage protocol",peerId)
         synced.set(true)
         const records = await _dbMessages.all()
-        recordSynced.set(records)
+        recordsSynced.set(records)
     })
 
     _dbMessages.events.on('update', async (entry) => {
         console.log("update",entry)
         const OP = entry.payload.op
-        if(OP==="PUT"){
+        if(OP==="PUT"){ //we only handle PUT messages (no DEL) //TODO this should go into AccessController
             const message = entry.payload.value
             console.log("processing message of storage protocol via orbitdb",message)
             handleMessage(message)
         }
         // Full replication is achieved by explicitly retrieving all records from db1.
         const records = await _dbMessages.all()
-        recordSynced.set(records)
+        recordsSynced.set(records)
     })
     progressState.set(5)
 }
@@ -167,16 +194,11 @@ async function handleMessage (messageObj) {
     if (!messageObj) return;
     let result
     if (messageObj.recipient === _orbitdb?.identity?.id){
-
-
         switch (messageObj.command) {
-            case FIND_HANDLE: //TODO data contains a letter e.g. A  everybody with beginning A in handle should send DID, publickey and handle (signed)
-
-            break;
             case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
                 result = await confirm({data:messageObj})
                 if(result){
-                    const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id) //TODO check if requester (Alice) was sending her own data
+                    const contact = _myAddressBook.find((entry) => entry.owner === _orbitdb?.identity?.id)
                     sendMyAddress(messageObj.sender,contact);
                     if(_subscriberList.indexOf(messageObj.sender)===-1)
                         _subscriberList.push(messageObj.sender)
@@ -206,16 +228,7 @@ async function createMessage(command, recipient, data = null) {
         data: data ? JSON.stringify(data) : null,
     };
     message._id = await sha256(JSON.stringify(message));
-    message.publicKey = _ourIdentity.publicKey;
-    // const messageString = JSON.stringify(message);
-    // message.sig = await _ourIdentity.sign(_ourIdentity, messageString);
-    // console.log("messageString.length",messageString.length)
-    // console.log("sig",message.sig)
-    // console.log("publicKey",message.publicKey)
-    // const verified = await _ourIdentity.verify(message.sig, message.publicKey, messageString);
-    // if (!verified) {
-    //     throw new Error('Signature verification failed');
-    // }
+    // message.publicKey = _ourIdentity.publicKey;
     return message;
 }
 
@@ -246,7 +259,7 @@ function updateAddressBook(messageObj) {
     console.log("updating myAddressBook ",_myAddressBook)
     const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
     newAddrBook.push({
-        _id: contactData._id,
+        id: contactData.id,
         firstName: contactData.firstName,
         middleName: contactData.middleName,
         lastName: contactData.lastName,
@@ -286,6 +299,11 @@ orbitdb.subscribe((val) => {
 let _dbMessages;
 dbMessages.subscribe((val) => {
     _dbMessages = val
+});
+
+let _dbMyAddressBook;
+dbMyAddressBook.subscribe((val) => {
+    _dbMyAddressBook = val
 });
 
 let _masterSeed;

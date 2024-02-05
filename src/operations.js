@@ -1,4 +1,4 @@
-import { notify } from "./utils/utils.js";
+import {notify, sha256} from "./utils/utils.js";
 
 import {
     myAddressBook,
@@ -74,8 +74,8 @@ export async function loadContact(id) {
 }
 
 export async function addContact() {
-    _selectedAddr.id = new Date().getTime()+"-"+(Math.random()*100000000)
     _selectedAddr.owner = _orbitdb?.identity?.id
+    _selectedAddr.id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
     _myAddressBook.push(_selectedAddr)
     myAddressBook.set(_myAddressBook) //trigger reactivity
     selectedAddr.set({})

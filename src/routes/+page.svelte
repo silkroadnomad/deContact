@@ -22,7 +22,6 @@
         progressState,
         progressText,
         showNotification,
-        libp2p,
         notificationMessage,
         selectedTab,
         selectedRowIds
@@ -30,19 +29,12 @@
     import { loadContact } from "../operations.js";
     import { sendAddress } from "../network/p2p-operations.js"
 
-    $: loadContact($selectedRowIds[0]);
+    $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
     const toggleQrCode = () => {
         $qrCodeData = `ipfs://${$handle}`
         $qrCodeOpen = !$qrCodeOpen;
     };
-
-    $: {
-        const decoder = new TextDecoder("utf-8");
-        const values = Array.from($libp2p?.peerRouting?.peerStore?.store.datastore.data.values() || []);
-        const stringValues = values.map(value => decoder.decode(value));
-        console.log(stringValues);
-    }
 </script>
 
 <div class="content">
