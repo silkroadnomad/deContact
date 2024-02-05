@@ -48,8 +48,8 @@ async function OpenNewBrowser(user) {
 
 	await page.getByRole('button', { name: 'Continue' }).click();
 	await page.getByRole('button', { name: 'Generate New' }).click();
-	await page.getByLabel('My Handle').click();
-	await page.getByLabel('My Handle').fill(user.identity);
+	//await page.getByLabel('My Handle').click();
+	//await page.getByLabel('My Handle').fill(user.identity);
 	await page.getByLabel('DID').click();
 	user.did = await page.getByLabel('DID').inputValue();
 
