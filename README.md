@@ -43,13 +43,6 @@ npx playwright test test.spec.js
 To run the Playwright test, use the command npx playwright test test.spec.js. This command will execute the test.spec.js test with Playwright. Make sure you have Playwright installed in your project 
 
 npx playwright test test.spec.js --debug  --trace on
-
-- playwright: The Node.js package being run. Playwright allows for testing web applications across different browsers.
-- test: A command provided by Playwright to run tests.
-- test.spec.js: The file containing the tests to be run.
-- --debug: A flag that enables debug mode. In this mode, additional information is outputted that can be helpful for debugging.
-- --trace: A flag that enables tracing. When this flag is set, Playwright records a trace of the tests that can be used for debugging later. The value on turns tracing on.
-
 npx playwright codegen
 
 The command npx playwright codegen is a helpful tool provided by Playwright to facilitate writing test scripts. It launches a browser and records the user's interactions to generate a Playwright test script.

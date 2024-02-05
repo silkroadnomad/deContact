@@ -11,7 +11,7 @@ import {
     handle,
     subscriberList
 } from "./stores.js";
-import {sendMyAddress} from "./network/net-operations.js";
+import {sendMyAddress} from "./network/p2p-operations.js";
 
 let _handle
 handle.subscribe((value) => {

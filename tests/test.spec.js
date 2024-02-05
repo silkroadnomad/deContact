@@ -82,7 +82,7 @@ test.beforeAll(async () => {
 });
 
 
-test.describe('exchange of addresse', () => {
+test.describe('simple exchange of adress between Alice and Bob', () => {
 	test('test', async () => {
 		test.setTimeout(60000);
 

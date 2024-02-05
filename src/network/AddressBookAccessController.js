@@ -1,5 +1,3 @@
-// import pathJoin from './path-join.js'
-
 const type = 'custom'
 
 const AddressBookAccessController = ({  } = {}) => async ({ orbitdb, identities, address, name }) => {

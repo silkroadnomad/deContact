@@ -61,17 +61,17 @@ export async function startNetwork() {
     if(!localStorage.getItem("testConfirmation")){
         const result = await confirm({ data: {
                 text: "Note: This is still experimental software. " +
-                    "This peer-to-peer web app is not (yet) intended for use in production environments " +
-                    "or for use where real money or real contact data is at stake, at this point. " +
+                    "This peer-to-peer progressive web app is not (yet) intended for use in production environments " +
+                    "or for use where real money or real contact data are at stake!" +
                     "Please contact developers for questions." } })
         if(result===true) localStorage.setItem("testConfirmation",result)
     }
 
     if(!localStorage.getItem("seedPhrase")){
         const result = await generateSeed({ data: {
-                text: "We couldn't find a masterSeed phrase inside your browser storage. " +
-                    "Do you want to generate a new masterSeed phrase? Or you have an existing one"} })
-        console.log("result",result)
+                text: "We couldn't find a master seed phrase inside your browser storage. " +
+                    "Do you want to generate a new master seed phrase? Or maybe you have an existing one?"} })
+
         switch (result) {
             case ENTER_EXISTING:
                 notify("enter existing masterSeed phrase in settings please!")

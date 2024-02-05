@@ -28,7 +28,7 @@
         selectedRowIds
     } from "../stores.js";
     import { loadContact } from "../operations.js";
-    import { sendAddress } from "../network/net-operations.js"
+    import { sendAddress } from "../network/p2p-operations.js"
 
     $: loadContact($selectedRowIds[0]);
     let scannedAddress;
