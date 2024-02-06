@@ -42,7 +42,7 @@
     }
 
     console.log("bootstrapConfig",bootstrapConfig)
-    $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
+    // $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
     $: {

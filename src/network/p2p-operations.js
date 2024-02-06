@@ -56,6 +56,35 @@ export const getIdentityAndCreateOrbitDB = async (_type, _seed, _helia) => {
     orbitdb.set(_orbitdb)
     window.orbitdb = _orbitdb
 }
+
+async function fetchTransformAndSetAddressRecords() {
+    try {
+        const addressRecords = await _dbMyAddressBook.all();
+        const transformedRecords = addressRecords.map(record => ({
+            ...record.value,
+            id: record.value._id
+        }));
+        myAddressBook.set(transformedRecords);
+        console.log("records in dbMyAddressBook ",addressRecords)
+    } catch (e) {
+        console.log("something isn't yet correctly setup inside dbMessages")
+    }
+}
+
+async function fetchTransformAndSetMessageRecords() {
+    try {
+        const msgRecords = await _dbMessages.all();
+        const transformedRecords = msgRecords.map(record => ({
+            ...record.value,
+            id: record.value._id
+        }));
+        recordsSynced.set(transformedRecords)
+        console.log("recordsSynced",transformedRecords)
+    } catch (e) {
+        console.log("something isn't yet correctly setup inside dbMessages")
+    }
+}
+
 export async function startNetwork() {
 
     if(!localStorage.getItem("testConfirmation")){
@@ -113,13 +142,14 @@ export async function startNetwork() {
     progressText.set("subscribing to pub sub topic")
     // _libp2p.services.pubsub.subscribe(CONTENT_TOPIC)
     progressState.set(4)
+
     _libp2p.addEventListener('connection:open',  async (c) => {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
+
         if(_connectedPeers>1) {
-            const records = await _dbMessages.all()
-            recordsSynced.set(records)
-            progressState.set(6)
+                await fetchTransformAndSetAddressRecords();
+                progressState.set(6)
         }
     });
 
@@ -137,42 +167,45 @@ export async function startNetwork() {
         identity: _ourIdentity,
         AccessController: AddressBookAccessController(_orbitdb, _identities, _subscriberList) //this should be almost same as OrbitDBAccessController but should use id's if me and all ids I am following (as soon as Alice receives Bobs contact data, his data will be added to the log) (this happens in the moment alice allows it by buton click)
     })
-    console.log("_dbMessages",_dbMessages)
-    const records = await _dbMessages.all()
-    recordsSynced.set(records)
-
     dbMessages.set(_dbMessages)
     window.dbMessages = _dbMessages
+
+    await fetchTransformAndSetMessageRecords()
+
     useAccessController(OrbitDBAccessController)
     const myDBName = await sha256(_orbitdb.identity.id)
-    _dbMyAddressBook = await _orbitdb.open(myDBName, {
+    _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
         type: 'documents',
         sync: true,
         identities: _identities,
         identity: _ourIdentity,
-        //OrbitDBAccessController()({ orbitdb: orbitdb1, identities: identities1, address: 'testdb/add' })
         AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
     })
+    window.dbMyAddressBook = _dbMyAddressBook
     const addressRecords = await _dbMyAddressBook.all()
-    addressRecordsSynced.set(addressRecords)
+    myAddressBook.set(addressRecords.map(record => ({
+        ...record.value,
+        id: record.value._id
+    })))
 
     console.log("_dbMyAddressBook",_dbMyAddressBook)
     dbMyAddressBook.set(_dbMyAddressBook)
     window.dbMyAddresses = _dbMyAddressBook
 
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
-        console.log("join myaddressbook",peerId)
+        console.log("one of my devices joined and synced myaddressbook",peerId)
         syncedDevices.set(true)
-        const records = await _dbMyAddressBook.all()
-        addressRecordsSynced.set(records)
-        console.log("records in _dbMyAddressBook ",records)
+        fetchTransformAndSetAddressRecords()
+    })
+
+    _dbMyAddressBook.events.on('update', async (entry) => {
+        fetchTransformAndSetAddressRecords()
     })
 
     _dbMessages.events.on('join', async (peerId, heads) => {
         console.log("join storage protocol",peerId)
         synced.set(true)
-        const records = await _dbMessages.all()
-        recordsSynced.set(records)
+        await fetchTransformAndSetMessageRecords()
     })
 
     _dbMessages.events.on('update', async (entry) => {
@@ -189,10 +222,11 @@ export async function startNetwork() {
     })
     progressState.set(5)
 }
-
 async function handleMessage (messageObj) {
     if (!messageObj) return;
-    let result
+    if (messageObj.recipient === messageObj.sender) return;
+
+    let result;
     if (messageObj.recipient === _orbitdb?.identity?.id){
         switch (messageObj.command) {
             case SEND_ADDRESS_REQUEST: //we received a SEND_ADDRESS_REQUEST and sending our address
@@ -216,7 +250,6 @@ async function handleMessage (messageObj) {
                 console.error(`Unknown command: ${messageObj.command}`);
         }
     }
-
 }
 
 async function createMessage(command, recipient, data = null) {
@@ -277,8 +310,8 @@ function updateAddressBook(messageObj) {
         timestamp: msg.timestamp,
         owner: msg.sender
     });
-    myAddressBook.set(newAddrBook);
-    notify(`address updated`)
+    const hash = _dbMyAddressBook.put(newAddrBook)
+    notify(`address updated to local ipfs${hash}`)
 }
 
 let _libp2p;

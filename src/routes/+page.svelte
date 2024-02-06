@@ -16,6 +16,7 @@
     import Settings from "$lib/components/Settings.svelte";
 
     import {
+        orbitdb,
         qrCodeOpen,
         qrCodeData,
         handle,
@@ -32,7 +33,7 @@
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
     const toggleQrCode = () => {
-        $qrCodeData = `ipfs://${$handle}`
+        $qrCodeData = $orbitdb.identity.id
         $qrCodeOpen = !$qrCodeOpen;
     };
 </script>
