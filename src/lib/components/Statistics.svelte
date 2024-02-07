@@ -15,21 +15,21 @@
 -->
 <Grid>
     <Row>
-        <Column sm={3}>
+        <Column sm={2}>Seed Node connected / Swarm connected  </Column>
+        <Column sm={1}>
             {#if ($connectedPeers===0) }
                 <ConnectionSignalOff title="No network or connecting..." class="statusRed" />&nbsp;{$connectedPeers}
             {:else if $connectedPeers===1}
-                <ConnectionSignal title="Seed Node connected" class="statusYellow" />&nbsp;{$connectedPeers}
+                <ConnectionSignal title="Seed Nodes connected" class="statusYellow" />&nbsp;{$connectedPeers}
             {:else}
                 <ConnectionSignal title="Swarm connected" class="statusGreen" />&nbsp;{$connectedPeers}
             {/if}
-
-
-            </Column>
+        </Column>
     </Row>
 
-    <Row class="custom-row">
-        <Column sm={3}>
+    <Row>
+        <Column sm={2}>Global Storage Protocol Synced Messages: </Column>
+        <Column sm={1}>
             {#if $synced===true}
             <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
         {:else}
