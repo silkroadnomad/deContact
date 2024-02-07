@@ -1,5 +1,5 @@
 <script>
-     import { selectedAddr } from "../../stores.js";
+     import { selectedAddr,ourIdentity } from "../../stores.js";
      import {addContact, deleteContact, updateContact} from "../../operations.js";
      import {Button, Column, Grid, Row, TextInput} from "carbon-components-svelte";
 </script>
@@ -27,9 +27,12 @@
         <Row>
             <Column>
                 {#if $selectedAddr.id}
-                    <Button data-cy="updateContact" size="sm" on:click={() => updateContact()}>Update</Button>
+                    {#if $selectedAddr.owner === $ourIdentity.id}
+                        <Button data-cy="updateContact" size="sm" on:click={() => updateContact()}>Update</Button>
+                        <Button data-cy="newContact" size="sm" on:click={() => $selectedAddr = {}}>New</Button>
+                    {/if}
                     <Button data-cy="deleteContact" size="sm" on:click={() => deleteContact()}>Delete</Button>
-                    <Button data-cy="newContact" size="sm" on:click={() => $selectedAddr = {}}>New</Button>
+
                 {:else}
                     <Button data-cy="addContact" size="sm" on:click={() => addContact()}>Add</Button>
                 {/if}

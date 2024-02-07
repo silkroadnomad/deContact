@@ -16,10 +16,31 @@ export const identities = writable()
 export const ourIdentity = writable()
 
 export const myAddressBook = writable(JSON.parse(window.localStorage.getItem('myAddressBook') || "[]"))
-export const myDal = writable()
-export const synced = writable(false)
-export const recordSynced = writable(0)
+/** an orbitdb which will replace the myAddressBook store based on localstorage //TODO */
+export const dbMyAddressBook = writable([])
 
+export const myDal = writable()
+
+/** storage protocol in synced with another device TODO count the sync events instead of showing just true/false) */
+export const synced = writable(false)
+
+/**
+ * if contacts of the devices got synced with another devices
+ * @type {Writable<boolean>}
+ */
+export const syncedDevices = writable(false)
+
+/**
+ * how many records (messages) got syned via the storage protocol.
+ * @type {Writable<number>}
+ */
+export const recordsSynced = writable(0)
+
+/**
+ * Holds the amount of address records, synced from another of my devices (devices with same seed)
+ * @type {Writable<number>}
+ */
+export const addressRecordsSynced = writable(0)
 
 export const showNotification =  writable()
 export const notificationMessage = writable()

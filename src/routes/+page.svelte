@@ -14,15 +14,16 @@
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
+    import Statistics from "$lib/components/Statistics.svelte";
 
     import {
+        orbitdb,
         qrCodeOpen,
         qrCodeData,
         handle,
         progressState,
         progressText,
         showNotification,
-        libp2p,
         notificationMessage,
         selectedTab,
         selectedRowIds
@@ -30,19 +31,12 @@
     import { loadContact } from "../operations.js";
     import { sendAddress } from "../network/p2p-operations.js"
 
-    $: loadContact($selectedRowIds[0]);
+    $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
     const toggleQrCode = () => {
-        $qrCodeData = `ipfs://${$handle}`
+        $qrCodeData = $orbitdb.identity.id
         $qrCodeOpen = !$qrCodeOpen;
     };
-
-    $: {
-        const decoder = new TextDecoder("utf-8");
-        const values = Array.from($libp2p?.peerRouting?.peerStore?.store.datastore.data.values() || []);
-        const stringValues = values.map(value => decoder.decode(value));
-        console.log(stringValues);
-    }
 </script>
 
 <div class="content">
@@ -52,6 +46,7 @@
     <Tabs class="tabs" bind:selected={$selectedTab}>
         <Tab label="Contacts" data-cy="contacts"/>
         <Tab label="My Address" data-cy="address"/>
+        <Tab label="Statistics"  data-cy="statistics"/>
         <Tab label="Settings"  data-cy="settings"/>
         <svelte:fragment slot="content">
             <TabContent>
@@ -65,6 +60,7 @@
                 <ContactList/>
             </TabContent>
             <TabContent><ContactForm/></TabContent>
+            <TabContent><Statistics/></TabContent>
             <TabContent><Settings/></TabContent>
         </svelte:fragment>
     </Tabs>

@@ -1,4 +1,4 @@
-import { notify } from "./utils/utils.js";
+import {notify, sha256} from "./utils/utils.js";
 
 import {
     myAddressBook,
@@ -8,6 +8,7 @@ import {
     qrCodeOpen,
     orbitdb,
     myDal,
+    dbMyAddressBook,
     handle,
     subscriberList
 } from "./stores.js";
@@ -42,6 +43,11 @@ myDal.subscribe((value) => {
     _myDal = value
 })
 
+let _dbMyAddressBook;
+dbMyAddressBook.subscribe((value) => {
+    _dbMyAddressBook = value
+})
+
 let _qrCodeData;
 qrCodeData.subscribe((value) => {
     _qrCodeData = value
@@ -74,19 +80,22 @@ export async function loadContact(id) {
 }
 
 export async function addContact() {
-    _selectedAddr.id = new Date().getTime()+"-"+(Math.random()*100000000)
     _selectedAddr.owner = _orbitdb?.identity?.id
-    _myAddressBook.push(_selectedAddr)
-    myAddressBook.set(_myAddressBook) //trigger reactivity
+    _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
+    // _myAddressBook.push(_selectedAddr)
+    const hash = _dbMyAddressBook.put(_selectedAddr)
+    // myAddressBook.set(_myAddressBook) //trigger reactivity
     selectedAddr.set({})
     selectedTab.set(0)
-    notify(`Contact added successfully!`);
+    notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
 }
 
 export async function updateContact() {
     console.log("updating contact",_selectedAddr)
-    const newAddrBook = _myAddressBook.filter( el => el.id !== _selectedAddr.id )
+    const newAddrBook = _myAddressBook.filter( el => el._id !== _selectedAddr._id )
     _selectedAddr.owner = _orbitdb?.identity?.id
+    await _dbMyAddressBook.put(_selectedAddr)
+    console.log("updated contact in orbitdb")
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
     notify(`Contact added successfully - informing subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
