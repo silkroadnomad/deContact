@@ -3,8 +3,6 @@
     import "carbon-components-svelte/css/all.css";
     import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
-
-
     import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
     import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
     import { bootstrapConfig } from "../config.js";

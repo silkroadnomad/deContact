@@ -14,6 +14,7 @@
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
+    import Statistics from "$lib/components/Statistics.svelte";
 
     import {
         orbitdb,
@@ -45,6 +46,7 @@
     <Tabs class="tabs" bind:selected={$selectedTab}>
         <Tab label="Contacts" data-cy="contacts"/>
         <Tab label="My Address" data-cy="address"/>
+        <Tab label="Statistics"  data-cy="statistics"/>
         <Tab label="Settings"  data-cy="settings"/>
         <svelte:fragment slot="content">
             <TabContent>
@@ -58,6 +60,7 @@
                 <ContactList/>
             </TabContent>
             <TabContent><ContactForm/></TabContent>
+            <TabContent><Statistics/></TabContent>
             <TabContent><Settings/></TabContent>
         </svelte:fragment>
     </Tabs>
