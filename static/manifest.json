@@ -3,7 +3,7 @@
   "name": "deContact a peer-to-peer",
   "start_url": "/",
   "icons": [{
-    "src": "/android/android-launchericon-144-144.png",
+    "src": "launchericon-144-144.png",
     "purpose": "any",
     "type": "image/png",
     "sizes": "144x144"
