@@ -106,6 +106,9 @@ export async function startNetwork() {
     });
     progressText.set(`opening peer-to-peer storage protocol`)
 
+    /**
+     * My Address Book (with own contact data and contact data of others
+     */
     useAccessController(OrbitDBAccessController)
     const myDBName = await sha256(_orbitdb.identity.id)
     _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
@@ -127,7 +130,9 @@ export async function startNetwork() {
         getAddressRecords()
     })
 
-
+    /*
+     * Storage Protocoll
+     */
     useAccessController(AddressBookAccessController)
     _dbMessages = await _orbitdb.open("dbMessages", {
         type: 'documents',
@@ -228,29 +233,7 @@ export async function sendMyAddress(recipient, data) {
 }
 
 async function updateAddressBook(messageObj) {
-    // const msg = messageObj
     const contactData = JSON.parse(messageObj.data);
-    // console.log("updating myAddressBook ",_myAddressBook)
-    // const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
-    // newAddrBook.push({
-    //     _id: contactData._id,
-    //     firstName: contactData.firstName,
-    //     middleName: contactData.middleName,
-    //     lastName: contactData.lastName,
-    //     organization: contactData.organization,
-    //     workPhone: contactData.workPhone,
-    //     birthday: contactData.birthday,
-    //     title: contactData.title,
-    //     url: contactData.url,
-    //     note: contactData.note,
-    //     street: contactData.street,
-    //     city: contactData.city,
-    //     stateProvince: contactData.stateProvince,
-    //     postalCode: contactData.postalCode,
-    //     countryRegion: contactData.countryRegion,
-    //     timestamp: msg.timestamp,
-    //     owner: msg.sender
-    // });
     const hash = _dbMyAddressBook.put(contactData)
     await getAddressRecords()
     notify(`address updated to local ipfs${hash}`)
