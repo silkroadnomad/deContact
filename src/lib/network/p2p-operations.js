@@ -235,7 +235,7 @@ function updateAddressBook(messageObj) {
     console.log("updating myAddressBook ",_myAddressBook)
     const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
     newAddrBook.push({
-        id: contactData.id,
+        _id: contactData._id,
         firstName: contactData.firstName,
         middleName: contactData.middleName,
         lastName: contactData.lastName,
