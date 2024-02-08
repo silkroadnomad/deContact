@@ -36,27 +36,54 @@ const users = [
 
 async function OpenNewBrowser(user) {
 	const browser = await chromium.launch({
-		headless: false
+		headless: true
 	});
 
 	const context = await browser.newContext();
 	const page = await context.newPage();
+	const page_url = process.env.PAGE_URL;
 
-	await page.goto('http://localhost:5173/');
+	await page.goto(page_url);
+
+	await page.evaluate(() => window.localStorage.clear());
+	await page.evaluate(() => window.sessionStorage.clear());
+	/*
+	const dbs = await page.evaluate(() => {
+		return  window.indexedDB.databases()
+	});
+	console.log("___",dbs)
+	dbs.forEach(async (db) => {
+		console.log("__aaa_",db.name)
+		//await page.evaluate( () =>  window.indexedDB.deleteDatabase(db.name) );
+	});
+
+	await page.evaluate(
+		() => {
+			const dbs = await window.indexedDB.databases();
+			dbs.forEach(db => {
+				console.log("___",db.name)
+				window.indexedDB.deleteDatabase(db.name)
+			});
+		}
+	);
+*/
+
+
+	//await page.goto(page_url);
 	//await page.goto('http://www.decontact.xyz/');
-
+	//await page.goto('https://davidreband.github.io/deContact/');
 
 	await page.getByRole('button', { name: 'Continue' }).click();
 	await page.getByRole('button', { name: 'Generate New' }).click();
-	await page.getByLabel('My Handle').click();
-	await page.getByLabel('My Handle').fill(user.identity);
-	await page.getByLabel('DID').click();
-	user.did = await page.getByLabel('DID').inputValue();
-
+	//await page.getByLabel('My Handle').click();
+	//await page.getByLabel('My Handle').fill(user.identity);
+	await page.getByRole('tab', { name: 'Settings' }).click();
+	await page.getByLabel('DID', { exact: true }).click();
+	user.did = await page.getByLabel('DID', { exact: true }).inputValue();
 
 
 	await page.getByRole('tab', { name: 'My Address' }).click();
-	
+
 	//await page.getByRole('tab', { name: 'Settings' }).click();
 	//await page.getByLabel('My Identity').click();
 	//await page.getByLabel('My Identity').fill(user.identity);
@@ -78,7 +105,7 @@ async function OpenNewBrowser(user) {
 }
 
 test.beforeAll(async () => {
-	
+
 });
 
 
@@ -122,8 +149,19 @@ test.describe('simple exchange of adress between Alice and Bob', () => {
 
 		await page2.getByRole('row', { name: users[0].identity }).locator('label').click();
 
+		//await page.getByRole('tab', { name: 'Settings' }).click({ timeout: 50000 });
+		//await page.getByLabel('DID').click({ timeout: 50000 });
+
+		// await expect(page2.getByRole('row', { name: users[0].identity })).toContainText(users[2].street);
+
+		//console.log ("____", await page2.getByText(users[0].street, { exact: true }))
+
+
+
+		//await expect(page2.getByPlaceholder('Enter street...')).toHaveText(users[2].street);
+
 		await page.getByRole('tab', { name: 'Settings' }).click({ timeout: 50000 });
-		await page.getByLabel('My Identity').click({ timeout: 50000 });
+		// await page.getByLabel('DID').click({ timeout: 50000 });
 
 		await page.close();
 		await page2.close();
@@ -131,6 +169,6 @@ test.describe('simple exchange of adress between Alice and Bob', () => {
 });
 
 test.afterAll(async () => {
-  //await page.close();
+	//await page.close();
 	//await page2.close();
 });
