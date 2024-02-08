@@ -117,6 +117,16 @@ export async function startNetwork() {
     })
     window.dbMyAddressBook = _dbMyAddressBook
     await getAddressRecords()
+    _dbMyAddressBook.events.on('join', async (peerId, heads) => {
+        console.log("one of my devices joined and synced myaddressbook",peerId)
+        syncedDevices.set(true)
+        getAddressRecords()
+    })
+
+    _dbMyAddressBook.events.on('update', async (entry) => {
+        getAddressRecords()
+    })
+
 
     useAccessController(AddressBookAccessController)
     _dbMessages = await _orbitdb.open("dbMessages", {
@@ -130,23 +140,9 @@ export async function startNetwork() {
     window.dbMessages = _dbMessages
     await getMessageRecords()
 
-
-
-
     console.log("_dbMyAddressBook",_dbMyAddressBook)
     dbMyAddressBook.set(_dbMyAddressBook)
     window.dbMyAddresses = _dbMyAddressBook
-
-    _dbMyAddressBook.events.on('join', async (peerId, heads) => {
-        console.log("one of my devices joined and synced myaddressbook",peerId)
-        syncedDevices.set(true)
-        getAddressRecords()
-    })
-
-    _dbMyAddressBook.events.on('update', async (entry) => {
-        getAddressRecords()
-    })
-
     _dbMessages.events.on('join', async (peerId, heads) => {
         console.log("join storage protocol",peerId)
         synced.set(true)
