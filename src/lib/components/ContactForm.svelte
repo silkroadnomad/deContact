@@ -1,5 +1,5 @@
 <script>
-     import { selectedAddr,ourIdentity } from "../../stores.js";
+     import { selectedAddr, orbitdb } from "../../stores.js";
      import {addContact, deleteContact, updateContact} from "../../operations.js";
      import {Button, Column, Grid, Row, TextInput} from "carbon-components-svelte";
 </script>
@@ -27,7 +27,7 @@
         <Row>
             <Column>
                 {#if $selectedAddr.id}
-                    {#if $selectedAddr.owner === $ourIdentity.id}
+                    {#if $selectedAddr.owner === $orbitdb.identity.id}
                         <Button data-cy="updateContact" size="sm" on:click={() => updateContact()}>Update</Button>
                         <Button data-cy="newContact" size="sm" on:click={() => $selectedAddr = {}}>New</Button>
                     {/if}

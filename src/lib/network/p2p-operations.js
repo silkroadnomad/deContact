@@ -11,8 +11,6 @@ import {
     orbitdb,
     masterSeed,
     seedPhrase,
-    identities,
-    ourIdentity,
     myAddressBook,
     dbMyAddressBook,
     subscription,
@@ -112,9 +110,9 @@ export async function startNetwork() {
     _dbMessages = await _orbitdb.open("dbMessages", {
         type: 'documents',
         sync: true,
-        identities: _identities,
-        identity: _ourIdentity,
-        AccessController: AddressBookAccessController(_orbitdb, _identities, _subscriberList) //this should be almost same as OrbitDBAccessController but should use id's if me and all ids I am following (as soon as Alice receives Bobs contact data, his data will be added to the log) (this happens in the moment alice allows it by buton click)
+        identities: _orbitdb.identities,
+        identity: _orbitdb.identity,
+        AccessController: AddressBookAccessController(_orbitdb, _orbitdb.identities, _subscriberList) //this should be almost same as OrbitDBAccessController but should use id's if me and all ids I am following (as soon as Alice receives Bobs contact data, his data will be added to the log) (this happens in the moment alice allows it by buton click)
     })
     dbMessages.set(_dbMessages)
     window.dbMessages = _dbMessages
@@ -125,8 +123,8 @@ export async function startNetwork() {
     _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
         type: 'documents',
         sync: true,
-        identities: _identities,
-        identity: _ourIdentity,
+        identities: _orbitdb.identities,
+        identity: _orbitdb.identity,
         AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
     })
     window.dbMyAddressBook = _dbMyAddressBook
@@ -292,16 +290,6 @@ masterSeed.subscribe((val) => {
 let _seedPhrase;
 seedPhrase.subscribe((val) => {
     _seedPhrase = val
-});
-
-let _ourIdentity;
-ourIdentity.subscribe((val) => {
-    _ourIdentity = val
-});
-
-let _identities;
-identities.subscribe((val) => {
-    _identities = val
 });
 
 let _subscription

@@ -12,8 +12,8 @@ export const progressState = writable(0)
 //0d3c4655d0fa1f9bcaa6c824eaae27fbb494e3a763d1bdd8b764d66e73ce8c4a
 export const masterSeed = writable()
 export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
-export const identities = writable()
-export const ourIdentity = writable()
+// export const identities = writable()
+// export const ourIdentity = writable()
 
 export const myAddressBook = writable(JSON.parse(window.localStorage.getItem('myAddressBook') || "[]"))
 /** an orbitdb which will replace the myAddressBook store based on localstorage //TODO */
@@ -40,7 +40,7 @@ export const recordsSynced = writable(0)
  * Holds the amount of address records, synced from another of my devices (devices with same seed)
  * @type {Writable<number>}
  */
-export const addressRecordsSynced = writable(0)
+// export const addressRecordsSynced = writable(0)
 
 export const showNotification =  writable()
 export const notificationMessage = writable()
