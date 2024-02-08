@@ -5,7 +5,6 @@
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
     import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
     import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
-    import { bootstrapConfig } from "../config.js";
     import {
         Header,
         HeaderGlobalAction,
@@ -13,42 +12,52 @@
         HeaderUtilities,
         Theme,
     } from "carbon-components-svelte";
-
     import Modals from "$lib/components/QRCodeModal.svelte";
-
     import {
         myDal,
         qrCodeOpen,
         qrCodeData,
-        myAddressBook,
         subscriberList,
         seedPhrase,
         helia,
         synced,
-        recordsSynced
+        recordsSynced,
+        orbitdb // Assuming you have an orbitdb store
     } from "../stores.js";
 
-    import { startNetwork, getIdentityAndCreateOrbitDB } from "../network/p2p-operations.js"
-    import { connectedPeers } from "../stores.js";
+    import { startNetwork } from "../lib/network/p2p-operations.js"
+    import { getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js"
 
-    const urlParams = new URLSearchParams(window.location.search);
+    import { connectedPeers } from "../stores.js";
+    import {confirmExperimentalUse} from "./confirmExperimentalUse.js";
+    import {handleSeedphrase} from "./handleSeedphrase.js";
+
+    const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
 
     let theme = "g90";
 
     async function handleDestroy() {
-        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
+        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]); //TODO remove this again if there is no native pub sub inside our app
     }
 
-    console.log("bootstrapConfig",bootstrapConfig)
-    // $: window.localStorage.setItem('myAddressBook', JSON.stringify($myAddressBook));
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
-    $: {
-        if($helia && $seedPhrase)
-            getIdentityAndCreateOrbitDB('ed25519',$seedPhrase,$helia)
+    $: if ($helia && $seedPhrase) {
+        getIdentityAndCreateOrbitDB('ed25519', $seedPhrase, $helia)
+            .then(dbInstance => {
+                orbitdb.set(dbInstance);
+            })
+            .catch(error => {
+                console.error('Failed to create OrbitDB instance:', error);
+            });
     }
 
-    onMount(startNetwork);
+    onMount(async ()=>{
+        await confirmExperimentalUse();
+        await handleSeedphrase();
+        await startNetwork();
+    })
+
     onDestroy(handleDestroy);
 
     let isSideNavOpen
@@ -85,13 +94,7 @@
         </HeaderNav>
 
         <HeaderUtilities>
-
-<!--        <div class="flags">-->
-<!--            <De style="margin-right: 10px" on:click={()=>$locale="de"}/>-->
-<!--            <Gb style="margin-right: 10px"  on:click={()=>$locale="en"}/>-->
-<!--        </div>-->
             <HeaderGlobalAction aria-label="dark-mode">
-
                 <Theme
                         bind:theme
                         render="toggle"
@@ -106,7 +109,6 @@
     </HeaderUtilities>
 </Header>
 <Modals on:close={() => $qrCodeOpen = false} bind:qrCodeOpen={$qrCodeOpen} qrCodeData={$qrCodeData} dbMyDal={$myDal} />
-
 <slot></slot>
 <style>
     :global(.bx--toast-notification) {

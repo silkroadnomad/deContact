@@ -12,7 +12,7 @@ import {
     handle,
     subscriberList
 } from "./stores.js";
-import {sendMyAddress} from "./network/p2p-operations.js";
+import {sendMyAddress} from "./lib/network/p2p-operations.js";
 
 let _handle
 handle.subscribe((value) => {

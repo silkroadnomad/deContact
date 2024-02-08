@@ -29,7 +29,7 @@
         selectedRowIds
     } from "../stores.js";
     import { loadContact } from "../operations.js";
-    import { sendAddress } from "../network/p2p-operations.js"
+    import { sendAddress } from "../lib/network/p2p-operations.js"
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
