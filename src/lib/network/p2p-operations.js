@@ -106,6 +106,18 @@ export async function startNetwork() {
     });
     progressText.set(`opening peer-to-peer storage protocol`)
 
+    useAccessController(OrbitDBAccessController)
+    const myDBName = await sha256(_orbitdb.identity.id)
+    _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
+        type: 'documents',
+        sync: true,
+        identities: _orbitdb.identities,
+        identity: _orbitdb.identity,
+        AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
+    })
+    window.dbMyAddressBook = _dbMyAddressBook
+    await getAddressRecords()
+
     useAccessController(AddressBookAccessController)
     _dbMessages = await _orbitdb.open("dbMessages", {
         type: 'documents',
@@ -118,17 +130,7 @@ export async function startNetwork() {
     window.dbMessages = _dbMessages
     await getMessageRecords()
 
-    useAccessController(OrbitDBAccessController)
-    const myDBName = await sha256(_orbitdb.identity.id)
-    _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
-        type: 'documents',
-        sync: true,
-        identities: _orbitdb.identities,
-        identity: _orbitdb.identity,
-        AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
-    })
-    window.dbMyAddressBook = _dbMyAddressBook
-    await getAddressRecords()
+
 
 
     console.log("_dbMyAddressBook",_dbMyAddressBook)
@@ -208,7 +210,7 @@ async function createMessage(command, recipient, data = null) {
     return message;
 }
 
-export const sendAddress = async (identity, scannedAddress) => {
+export const sendAddress = async (scannedAddress) => {
     try {
         console.log("request sendAddress from", _orbitdb?.identity?.id);
         const addr = await createMessage(SEND_ADDRESS_REQUEST, scannedAddress);
@@ -229,31 +231,32 @@ export async function sendMyAddress(recipient, data) {
     }
 }
 
-function updateAddressBook(messageObj) {
-    const msg = messageObj
+async function updateAddressBook(messageObj) {
+    // const msg = messageObj
     const contactData = JSON.parse(messageObj.data);
-    console.log("updating myAddressBook ",_myAddressBook)
-    const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
-    newAddrBook.push({
-        _id: contactData._id,
-        firstName: contactData.firstName,
-        middleName: contactData.middleName,
-        lastName: contactData.lastName,
-        organization: contactData.organization,
-        workPhone: contactData.workPhone,
-        birthday: contactData.birthday,
-        title: contactData.title,
-        url: contactData.url,
-        note: contactData.note,
-        street: contactData.street,
-        city: contactData.city,
-        stateProvince: contactData.stateProvince,
-        postalCode: contactData.postalCode,
-        countryRegion: contactData.countryRegion,
-        timestamp: msg.timestamp,
-        owner: msg.sender
-    });
-    const hash = _dbMyAddressBook.put(newAddrBook)
+    // console.log("updating myAddressBook ",_myAddressBook)
+    // const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
+    // newAddrBook.push({
+    //     _id: contactData._id,
+    //     firstName: contactData.firstName,
+    //     middleName: contactData.middleName,
+    //     lastName: contactData.lastName,
+    //     organization: contactData.organization,
+    //     workPhone: contactData.workPhone,
+    //     birthday: contactData.birthday,
+    //     title: contactData.title,
+    //     url: contactData.url,
+    //     note: contactData.note,
+    //     street: contactData.street,
+    //     city: contactData.city,
+    //     stateProvince: contactData.stateProvince,
+    //     postalCode: contactData.postalCode,
+    //     countryRegion: contactData.countryRegion,
+    //     timestamp: msg.timestamp,
+    //     owner: msg.sender
+    // });
+    const hash = _dbMyAddressBook.put(contactData)
+    await getAddressRecords()
     notify(`address updated to local ipfs${hash}`)
 }
 
