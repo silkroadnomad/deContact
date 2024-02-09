@@ -51,6 +51,7 @@
 		"blockstore-level": "^1.1.7",
 		"carbon-icons-svelte": "^12.4.2",
 		"datastore-level": "^10.1.6",
+		"dotenv": "^16.4.1",
 		"hdkey": "^2.1.0",
 		"helia": "^3.0.0",
 		"key-did-provider-ed25519": "^4.0.2",
