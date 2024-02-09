@@ -1,3 +1,5 @@
+![example workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
+
 # create-svelte
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
