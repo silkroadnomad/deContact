@@ -57,8 +57,8 @@
     }
 </script>
 <svelte:window on:copysuccess={copySuccess} on:copyerror={copyError}/>
-<Modal bind:open={qrCodeOpen}
-       modalHeading="Scan (DAL) - Decentralized Address Link"
+<Modal bind:open={ qrCodeOpen }
+       modalHeading="Scan (DID) - Decentralized Identity"
        primaryButtonText="OK"
        secondaryButtonText=""
        on:click:button--primary={ () => dispatch('close') }
@@ -73,5 +73,4 @@
     {/each}
 
     {#if qrCodeData && qrCodeOpen}{@html generateQRCode(qrCodeData)}{/if}
-
 </Modal>

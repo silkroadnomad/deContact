@@ -1,18 +1,16 @@
 import { createLibp2p } from 'libp2p'
 import { createHelia } from "helia";
-import {createOrbitDB, OrbitDBAccessController, useAccessController} from '@orbitdb/core';
+import { OrbitDBAccessController, useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
-import { config } from "../config.js";
+import { config } from "../../config.js";
 import {
     libp2p,
     helia,
     orbitdb,
     masterSeed,
     seedPhrase,
-    identities,
-    ourIdentity,
     myAddressBook,
     dbMyAddressBook,
     subscription,
@@ -20,44 +18,23 @@ import {
     handle,
     progressText,
     progressState,
-    subscriberList, dbMessages, selectedTab, recordsSynced, synced, syncedDevices, addressRecordsSynced,
-} from "../stores.js";
+    subscriberList, dbMessages, selectedTab, recordsSynced, synced, syncedDevices,
+} from "../../stores.js";
 
 import AddressBookAccessController from "./AddressBookAccessController.js"
-import { confirm } from "../lib/components/modal.js"
-import { generateSeed, ENTER_EXISTING, GENERATE_NEW } from "../lib/components/seedModal.js"
-import { convertTo32BitSeed, generateMasterSeed, notify, sha256 } from "../utils/utils.js";
-import createIdentityProvider from "./identityProvider.js";
-import { generateMnemonic } from "bip39";
-
+import { confirm } from "../components/modal.js"
+import { convertTo32BitSeed, notify, sha256 } from "../../utils/utils.js";
+import {getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js";
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
 
 // export const CONTENT_TOPIC = "/dContact/3/message/proto";
 
-const FIND_HANDLE = 'FIND_HANDLE';
 const SEND_ADDRESS_REQUEST = 'SEND_ADDRESS_REQUEST';
 const RECEIVE_ADDRESS = 'RECEIVE_ADDRESS';
 
-export const getIdentityAndCreateOrbitDB = async (_type, _seed, _helia) => {
-    const identitySeed = convertTo32BitSeed(_seed)
-    const idProvider = await createIdentityProvider(_type, identitySeed, _helia)
-    _ourIdentity = idProvider.identity
-    _identities = idProvider.identities
-    ourIdentity.set(_ourIdentity)
-    window.identity = _ourIdentity
-
-    _orbitdb = await createOrbitDB({
-        ipfs: _helia,
-        identity: _ourIdentity,
-        identities: _identities,
-        directory: './deContact' })
-    orbitdb.set(_orbitdb)
-    window.orbitdb = _orbitdb
-}
-
-async function fetchTransformAndSetAddressRecords() {
+async function getAddressRecords() {
     try {
         const addressRecords = await _dbMyAddressBook.all();
         const transformedRecords = addressRecords.map(record => ({
@@ -71,7 +48,7 @@ async function fetchTransformAndSetAddressRecords() {
     }
 }
 
-async function fetchTransformAndSetMessageRecords() {
+async function getMessageRecords() {
     try {
         const msgRecords = await _dbMessages.all();
         const transformedRecords = msgRecords.map(record => ({
@@ -87,36 +64,6 @@ async function fetchTransformAndSetMessageRecords() {
 
 export async function startNetwork() {
 
-    if(!localStorage.getItem("testConfirmation")){
-        const result = await confirm({ data: {
-                text: "Note: This is still experimental software. " +
-                    "This peer-to-peer only progressive web app (PWA) is not (yet) intended for use in production environments " +
-                    "or for use where real money or real contact data are at stake! \n" +
-                    "Please contact developers for questions. " } })
-        if(result===true) localStorage.setItem("testConfirmation",result)
-    }
-
-    if(!localStorage.getItem("seedPhrase")){
-        const result = await generateSeed({ data: {
-                text: "We couldn't find a master seed phrase inside your browser storage. " +
-                    "Do you want to generate a new master seed phrase? Or maybe you have an existing one?"} })
-
-        switch (result) {
-            case ENTER_EXISTING:
-                notify("enter existing masterSeed phrase in settings please!")
-                selectedTab.set(2)
-                break;
-            case GENERATE_NEW:
-                _seedPhrase = generateMnemonic();
-                seedPhrase.set(_seedPhrase)
-                selectedTab.set(2)
-                notify(`generated a new seed phrase ${_seedPhrase}`)
-                break;
-        }
-        masterSeed.set(_masterSeed)
-    }
-    _masterSeed = generateMasterSeed(_seedPhrase,"password")
-    masterSeed.set(_masterSeed)
     progressText.set("starting libp2p node")
     progressState.set(1)
     _libp2p =  await createLibp2p(config)
@@ -135,8 +82,8 @@ export async function startNetwork() {
 
     progressText.set("creating Identity and starting OrbitDB")
     const identitySeed = convertTo32BitSeed(_masterSeed)
-    console.log("identitySeed",identitySeed)
-    await getIdentityAndCreateOrbitDB('ed25519',identitySeed,_helia)
+    _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',identitySeed,_helia)
+    orbitdb.set(_orbitdb)
     progressState.set(3)
 
     progressText.set("subscribing to pub sub topic")
@@ -148,7 +95,7 @@ export async function startNetwork() {
         connectedPeers.update(n => n + 1);
 
         if(_connectedPeers>1) {
-                await fetchTransformAndSetAddressRecords();
+                await getAddressRecords();
                 progressState.set(6)
         }
     });
@@ -159,53 +106,52 @@ export async function startNetwork() {
     });
     progressText.set(`opening peer-to-peer storage protocol`)
 
-    useAccessController(AddressBookAccessController)
-    _dbMessages = await _orbitdb.open("dbMessages", {
-        type: 'documents',
-        sync: true,
-        identities: _identities,
-        identity: _ourIdentity,
-        AccessController: AddressBookAccessController(_orbitdb, _identities, _subscriberList) //this should be almost same as OrbitDBAccessController but should use id's if me and all ids I am following (as soon as Alice receives Bobs contact data, his data will be added to the log) (this happens in the moment alice allows it by buton click)
-    })
-    dbMessages.set(_dbMessages)
-    window.dbMessages = _dbMessages
-
-    await fetchTransformAndSetMessageRecords()
-
+    /**
+     * My Address Book (with own contact data and contact data of others
+     */
     useAccessController(OrbitDBAccessController)
     const myDBName = await sha256(_orbitdb.identity.id)
     _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
         type: 'documents',
         sync: true,
-        identities: _identities,
-        identity: _ourIdentity,
+        identities: _orbitdb.identities,
+        identity: _orbitdb.identity,
         AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
     })
     window.dbMyAddressBook = _dbMyAddressBook
-    const addressRecords = await _dbMyAddressBook.all()
-    myAddressBook.set(addressRecords.map(record => ({
-        ...record.value,
-        id: record.value._id
-    })))
+    await getAddressRecords()
+    _dbMyAddressBook.events.on('join', async (peerId, heads) => {
+        console.log("one of my devices joined and synced myaddressbook",peerId)
+        syncedDevices.set(true)
+        getAddressRecords()
+    })
+
+    _dbMyAddressBook.events.on('update', async (entry) => {
+        getAddressRecords()
+    })
+
+    /*
+     * Storage Protocoll
+     */
+    useAccessController(AddressBookAccessController)
+    _dbMessages = await _orbitdb.open("dbMessages", {
+        type: 'documents',
+        sync: true,
+        identities: _orbitdb.identities,
+        identity: _orbitdb.identity,
+        AccessController: AddressBookAccessController(_orbitdb, _orbitdb.identities, _subscriberList) //this should be almost same as OrbitDBAccessController but should use id's if me and all ids I am following (as soon as Alice receives Bobs contact data, his data will be added to the log) (this happens in the moment alice allows it by buton click)
+    })
+    dbMessages.set(_dbMessages)
+    window.dbMessages = _dbMessages
+    await getMessageRecords()
 
     console.log("_dbMyAddressBook",_dbMyAddressBook)
     dbMyAddressBook.set(_dbMyAddressBook)
     window.dbMyAddresses = _dbMyAddressBook
-
-    _dbMyAddressBook.events.on('join', async (peerId, heads) => {
-        console.log("one of my devices joined and synced myaddressbook",peerId)
-        syncedDevices.set(true)
-        fetchTransformAndSetAddressRecords()
-    })
-
-    _dbMyAddressBook.events.on('update', async (entry) => {
-        fetchTransformAndSetAddressRecords()
-    })
-
     _dbMessages.events.on('join', async (peerId, heads) => {
         console.log("join storage protocol",peerId)
         synced.set(true)
-        await fetchTransformAndSetMessageRecords()
+        await getMessageRecords()
     })
 
     _dbMessages.events.on('update', async (entry) => {
@@ -265,7 +211,7 @@ async function createMessage(command, recipient, data = null) {
     return message;
 }
 
-export const sendAddress = async (identity, scannedAddress) => {
+export const sendAddress = async (scannedAddress) => {
     try {
         console.log("request sendAddress from", _orbitdb?.identity?.id);
         const addr = await createMessage(SEND_ADDRESS_REQUEST, scannedAddress);
@@ -286,31 +232,10 @@ export async function sendMyAddress(recipient, data) {
     }
 }
 
-function updateAddressBook(messageObj) {
-    const msg = messageObj
+async function updateAddressBook(messageObj) {
     const contactData = JSON.parse(messageObj.data);
-    console.log("updating myAddressBook ",_myAddressBook)
-    const newAddrBook = _myAddressBook.filter( el => el.id !== contactData.id )
-    newAddrBook.push({
-        id: contactData.id,
-        firstName: contactData.firstName,
-        middleName: contactData.middleName,
-        lastName: contactData.lastName,
-        organization: contactData.organization,
-        workPhone: contactData.workPhone,
-        birthday: contactData.birthday,
-        title: contactData.title,
-        url: contactData.url,
-        note: contactData.note,
-        street: contactData.street,
-        city: contactData.city,
-        stateProvince: contactData.stateProvince,
-        postalCode: contactData.postalCode,
-        countryRegion: contactData.countryRegion,
-        timestamp: msg.timestamp,
-        owner: msg.sender
-    });
-    const hash = _dbMyAddressBook.put(newAddrBook)
+    const hash = _dbMyAddressBook.put(contactData)
+    await getAddressRecords()
     notify(`address updated to local ipfs${hash}`)
 }
 
@@ -347,16 +272,6 @@ masterSeed.subscribe((val) => {
 let _seedPhrase;
 seedPhrase.subscribe((val) => {
     _seedPhrase = val
-});
-
-let _ourIdentity;
-ourIdentity.subscribe((val) => {
-    _ourIdentity = val
-});
-
-let _identities;
-identities.subscribe((val) => {
-    _identities = val
 });
 
 let _subscription

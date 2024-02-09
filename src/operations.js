@@ -12,7 +12,7 @@ import {
     handle,
     subscriberList
 } from "./stores.js";
-import {sendMyAddress} from "./network/p2p-operations.js";
+import {sendMyAddress} from "./lib/network/p2p-operations.js";
 
 let _handle
 handle.subscribe((value) => {
@@ -82,9 +82,7 @@ export async function loadContact(id) {
 export async function addContact() {
     _selectedAddr.owner = _orbitdb?.identity?.id
     _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
-    // _myAddressBook.push(_selectedAddr)
     const hash = _dbMyAddressBook.put(_selectedAddr)
-    // myAddressBook.set(_myAddressBook) //trigger reactivity
     selectedAddr.set({})
     selectedTab.set(0)
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);

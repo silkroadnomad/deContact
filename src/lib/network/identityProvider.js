@@ -3,7 +3,7 @@ import EthereumIdentityProvider from '@orbitdb/identity-provider-ethereum';
 import * as KeyDIDResolver from "key-did-resolver";
 import OrbitDBIdentityProviderDID from "@orbitdb/identity-provider-did";
 import {Identities, useIdentityProvider} from "@orbitdb/core";
-import {notify} from "../utils/utils.js";
+import {notify} from "../../utils/utils.js";
 
 export async function createIdentityProvider(type, seedArray, ipfs) {
     let identity

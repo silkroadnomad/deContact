@@ -1,4 +1,4 @@
-import {ourIdentity} from "../stores.js";
+import {ourIdentity} from "../../stores.js";
 
 const type = 'custom'
 
