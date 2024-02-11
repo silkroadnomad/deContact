@@ -22,7 +22,7 @@
         helia,
         synced,
         recordsSynced,
-        orbitdb // Assuming you have an orbitdb store
+        orbitdb, masterSeed // Assuming you have an orbitdb store
     } from "../stores.js";
 
     import { startNetwork } from "../lib/network/p2p-operations.js"
@@ -42,8 +42,8 @@
 
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
-    $: if ($helia && $seedPhrase) {
-        getIdentityAndCreateOrbitDB('ed25519', $seedPhrase, $helia)
+    $: if ($helia!==undefined && $masterSeed!==undefined) {
+        getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
             .then(dbInstance => {
                 orbitdb.set(dbInstance);
             })

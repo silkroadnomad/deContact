@@ -52,7 +52,7 @@ export const qrCodeData = writable()
 export const selectedRowIds = writable([])
 export const selectedTab = writable(0)
 const contact = {
-    id:"",
+    _id:"",
     firstName: "",
     lastName: "",
     street: "",
@@ -61,7 +61,9 @@ const contact = {
     stateProvince: "",
     countryRegion:"",
     own: false,
-    ipns: ""
+    ipns: "",
+    owner:"",
+    sharedAddress:""
 }
 export const selectedAddr = writable( contact)
 // export const selectedAddress = writable( )
