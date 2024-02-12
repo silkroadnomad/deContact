@@ -39,8 +39,8 @@ jobs:
     - uses: actions/deploy-pages@v4
     - name: Install Playwright Browsers
       run: npx playwright install --with-deps  
-    - name: Start 
-      run: |
-        npx playwright test BasicAddressExchange.spec.js
-        npx playwright test MyDevicesAutoSync.spec.js 
+    - name: Start test BasicAddressExchange.spec.js
+      run: npx playwright test BasicAddressExchange.spec.js
+    - name: Start test MyDevicesAutoSync.spec.js 
+      run: npx playwright test MyDevicesAutoSync.spec.js 
   

@@ -40,9 +40,9 @@ You can preview the production build with `npm run preview`.
 
 ## Tests
 
-npx playwright test test.spec.js
+npm run test:e2e
 
-To run the Playwright test, use the command npx playwright test test.spec.js. This command will execute the test.spec.js test with Playwright. Make sure you have Playwright installed in your project 
+To run the Playwright test, use the command npm run test:e2e. This command will execute the BasicAddressExchange.spec.js test with Playwright. Make sure you have Playwright installed in your project 
 
 npx playwright test BasicAddressExchange.spec.js --debug --trace on 
 
@@ -61,3 +61,4 @@ Here are the steps to use it:
 5. Copy the generated code into your test file.
 
 > To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
+
