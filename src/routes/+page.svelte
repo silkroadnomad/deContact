@@ -20,7 +20,6 @@
         orbitdb,
         qrCodeOpen,
         qrCodeData,
-        handle,
         progressState,
         progressText,
         showNotification,
@@ -29,7 +28,7 @@
         selectedRowIds
     } from "../stores.js";
     import { loadContact } from "../operations.js";
-    import { sendAddress } from "../lib/network/p2p-operations.js"
+    import { requestAddress } from "../lib/network/p2p-operations.js"
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
@@ -53,7 +52,7 @@
                 <Grid fullWidth>
                     <Row>
                         <Column><TextInput size="sm" bind:value={scannedAddress}/></Column>
-                        <Column><Button size="sm" on:click={() => sendAddress(scannedAddress)}>Scan Contact</Button></Column>
+                        <Column><Button size="sm" on:click={() => requestAddress(scannedAddress)}>Scan Contact</Button></Column>
                         <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
                     </Row>
                 </Grid>

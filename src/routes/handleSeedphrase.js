@@ -40,9 +40,8 @@ export const handleSeedphrase = async () => {
                 notify(`generated a new seed phrase ${_seedPhrase}`)
                 break;
         }
-        masterSeed.set(_masterSeed)
-
     }
     _masterSeed = generateMasterSeed(_seedPhrase,"password")
+    console.log("generated masterseed",_masterSeed)
     masterSeed.set(_masterSeed)
 }

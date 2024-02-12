@@ -48,6 +48,10 @@ npx playwright test BasicAddressExchange.spec.js --debug --trace on
 
 npx playwright test MyDevicesAutoSync.spec.js --debug  --trace on 
 
+npx playwright test BasicAddressExchange.spec.js --debug --trace on 
+
+npx playwright test MyDevicesAutoSync.spec.js --debug  --trace on 
+
 npx playwright codegen
 
 The command npx playwright codegen is a helpful tool provided by Playwright to facilitate writing test scripts. It launches a browser and records the user's interactions to generate a Playwright test script.
