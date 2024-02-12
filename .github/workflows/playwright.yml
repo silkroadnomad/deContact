@@ -40,4 +40,5 @@ jobs:
       run: npx playwright install --with-deps  
     - name: Start 
       run:  npx playwright test BasicAddressExchange.spec.js 
+      run:  npx playwright test MyDevicesAutoSync.spec.js 
   
