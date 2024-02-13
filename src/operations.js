@@ -55,12 +55,12 @@ export async function updateContact() {
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
     notify(`Contact added successfully - informing subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
-    console.log("_subscriberList",_subscriberList)
-    if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
-        for (const s in  _subscriberList) {
-            writeMyAddressIntoRequesterDB(_subscriberList[s],_selectedAddr)
-        }
-    }
+    // console.log("_subscriberList",_subscriberList)
+    // if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
+    //     for (const s in  _subscriberList) {
+    //         writeMyAddressIntoRequesterDB(_subscriberList[s],_selectedAddr)
+    //     }
+    // }
     selectedAddr.set({})
     selectedTab.set(0)
 }

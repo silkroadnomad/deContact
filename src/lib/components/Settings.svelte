@@ -6,8 +6,8 @@
         masterSeed,
         handle,
         orbitdb, seedPhrase,
+        dbMyAddressBook, selectedAddr, selectedTab
     } from "../../stores.js"
-    import {confirm} from "$lib/components/modal.js";
     $:window.localStorage.setItem('handle', $handle);
     $:window.localStorage.setItem('seed', $masterSeed);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
@@ -50,6 +50,17 @@
                                   readonly
                                   size="sm"
                                   value={$connectedPeers} /></Column>
+    </Row>
+    <Row class="custom-row">
+        <Column sm={3}><Button data-cy="DropAddressDB" size="sm" on:click={async () => {
+            console.log("dropping address db!")
+
+            await $dbMyAddressBook.drop()
+            const addressRecords = await $dbMyAddressBook.all();
+            console.log("addressRecords",addressRecords)
+            selectedAddr.set({})
+            selectedTab.set(0)
+        }}>Drop AddressDB</Button></Column>
     </Row>
 
 </Grid>

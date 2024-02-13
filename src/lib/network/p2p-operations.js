@@ -22,7 +22,7 @@ import {
     subscriberList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
 
-import { confirm } from "../components/modal.js"
+import { confirm } from "../components/addressModal.js"
 import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
 
@@ -54,12 +54,12 @@ async function getAddressAndSubscriberRecords() {
  */
 export async function startNetwork() {
 
-    progressText.set("starting libp2p node")
+    progressText.set("Starting libp2p node")
     progressState.set(1)
     _libp2p =  await createLibp2p(config)
     libp2p.set(_libp2p)
 
-    progressText.set("starting Helia (IPFS) node")
+    progressText.set("Starting Helia (IPFS) node")
     progressState.set(2)
     _helia = await createHelia({
         libp2p: _libp2p,
@@ -70,20 +70,15 @@ export async function startNetwork() {
     helia.set(_helia)
     window.helia = _helia
 
-    progressText.set("creating Identity and starting OrbitDB")
-    // const identitySeed = convertTo32BitSeed(_masterSeed)
-    _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
-    orbitdb.set(_orbitdb)
+    progressText.set(`Starting deContact pub sub protocol`)
     progressState.set(3)
-
-
     _libp2p.addEventListener('connection:open',  async (c) => {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
 
         if(_connectedPeers>1) {
-                await getAddressAndSubscriberRecords();
-                progressState.set(6)
+            await getAddressAndSubscriberRecords();
+            progressState.set(6)
         }
     });
 
@@ -91,7 +86,20 @@ export async function startNetwork() {
         console.log("connection:close",c.detail.id)
         connectedPeers.update(n => n - 1);
     });
-    progressText.set(`opening peer-to-peer storage protocol`)
+
+    _libp2p.services.pubsub.addEventListener('message', event => {
+        const topic = event.detail.topic
+        const message = toString(event.detail.data)
+        if(!topic.startsWith(CONTENT_TOPIC)) return
+        console.log(`Message received on topic '${topic}': ${message}`)
+        handleMessage(message)
+    })
+
+    progressText.set(`Opening our address book from OrbitDB... `)
+    _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
+    orbitdb.set(_orbitdb)
+    progressState.set(3)
+
 
     /**
      * My Address Book (with own contact data and contact data of others
@@ -105,6 +113,7 @@ export async function startNetwork() {
     })
     console.log("dbMyAddressBook",_dbMyAddressBook)
     dbMyAddressBook.set(_dbMyAddressBook)
+    window.dbMyAddressBook = _dbMyAddressBook
     await getAddressAndSubscriberRecords()
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
         console.log("one of my devices joined and synced myaddressbook",peerId)
@@ -117,27 +126,31 @@ export async function startNetwork() {
         getAddressAndSubscriberRecords()
     })
 
-    _libp2p.services.pubsub.addEventListener('message', event => {
-        const topic = event.detail.topic
-        const message = toString(event.detail.data)
-        if(!topic.startsWith(CONTENT_TOPIC)) return
-        console.log(`Message received on topic '${topic}': ${message}`)
-        handleMessage(message)
-    })
+
 }
 async function handleMessage (dContactMessage) {
     console.log("dContactMessage",dContactMessage   )
     if (!dContactMessage) return;
     const messageObj = JSON.parse(dContactMessage)
-    let result
+    let result, data, requesterDB
     if (messageObj.recipient === _orbitdb.identity.id){
         switch (messageObj.command) {
-            case REQUEST_ADDRESS: //we received a SEND_ADDRESS_REQUEST and sending our address //TODO verify signature with public key
-                result = await confirm({data:messageObj})
+            case REQUEST_ADDRESS:
+                data = JSON.parse(messageObj.data)
+                requesterDB = await _orbitdb.open(data.sharedAddress, {
+                    type: 'documents',sync: true})
+
+                result = await confirm({data:messageObj,
+                    db:requesterDB,
+                    sender: messageObj.sender})
                 if(result){
-                    //const contact =  _myAddressBook.find((entry) => entry.owner === _orbitdb.identity.id) //TODO check if requester (Alice) was sending her own data
-                    await writeMyAddressIntoRequesterDB(messageObj);
-                    await addRequestersContactDataToMyDB(messageObj)
+                    if(result==='ONLY_HANDOUT')
+                        await writeMyAddressIntoRequesterDB(requesterDB);
+                    else {
+                        await writeMyAddressIntoRequesterDB(requesterDB);
+                        await addRequestersContactDataToMyDB(requesterDB,messageObj.sender)
+                    }
+
                 }else{
                     //TODO send "rejected sending address"
                 }
@@ -210,26 +223,14 @@ export const requestAddress = async (_scannedAddress) => {
  * @param data
  * @returns {Promise<void>}
  */
-export async function writeMyAddressIntoRequesterDB(messageObj) {
+export async function writeMyAddressIntoRequesterDB(requesterDB) {
 
     try {
-        const data = JSON.parse(messageObj.data)
-        console.log("writeMyAddressIntoRequesterDB.data",data)
-        const requesterDB = await _orbitdb.open(data.sharedAddress, {
-            type: 'documents',
-            sync: true,
-            AccessController: OrbitDBAccessController({
-                admin: [ messageObj.recipient ],
-                write: [ messageObj.recipient,
-                    messageObj.recipient, _orbitdb.identity.id]})
-        })
-
-        const records = await requesterDB.all() //.then(async (records)=> {
-
-        console.log(`the requester database ${requesterDB.name} has ${records.length} now writing records`,records)
-        console.log("requesterDB",requesterDB)
-        const capabilities = await requesterDB.access.capabilities()
-        console.log(`capabilities of db: ${requesterDB.name}`,capabilities)
+        // const records = await requesterDB.all()
+        // console.log(`the requester database ${requesterDB.name} has ${records.length} now writing records`,records)
+        // console.log("requesterDB",requesterDB)
+        // const capabilities = await requesterDB.access.capabilities()
+        // console.log(`capabilities of db: ${requesterDB.name}`,capabilities)
         const writeFirstOfOurAddresses = _myAddressBook[0]
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
         notify(`wrote my address into requesters db with hash ${hash}`);
@@ -238,13 +239,17 @@ export async function writeMyAddressIntoRequesterDB(messageObj) {
     }
 }
 
-async function addRequestersContactDataToMyDB(messageObj){
-    if(!messageObj.data){
-        notify(`sender didn't send his data, so I can't add it to my db`);
-        return
-    }
-    const contactData = JSON.parse(messageObj.data);
-    const hash = await _dbMyAddressBook.put(contactData)
+async function addRequestersContactDataToMyDB(requesterDB,sender){
+    // if(!requesterDB){
+    //     notify(`sender didn't send his data, so I can't add it to my db`);
+    //     return
+    // }
+    // const contactData = JSON.parse(messageObj.data);
+    const records = await requesterDB.all()
+    const filteredElements = records.filter(element => {
+        return element.value.owner === sender
+    });
+    const hash = await _dbMyAddressBook.put(filteredElements[0].value) //TODO we put only the first record of the requester but he might have send more
     await getAddressAndSubscriberRecords()
     notify(`wrote requesters data to my address db ${hash}`)
 }
