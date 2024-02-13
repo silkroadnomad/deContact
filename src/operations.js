@@ -50,10 +50,9 @@ export async function updateContact() {
     const newAddrBook = _myAddressBook.filter( el => el._id !== _selectedAddr._id )
     _selectedAddr.owner = _orbitdb?.identity?.id
     await _dbMyAddressBook.put(_selectedAddr)
-    console.log("updated contact in orbitdb")
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
-    notify(`Contact added successfully - informing subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
+    notify(`Contact updated successfully - informing our subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
     if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
         for (const s in  _subscriberList) {
             console.log("updating address in ",_subscriberList[s].db.address)

@@ -27,11 +27,11 @@
         <Row>
             <Column><Dropdown
                     titleText="Category"
-                    selectedId="0"
+                    bind:selectedId={$selectedAddr.category}
                     items={[
-                            { id: "0", text: "Private" },
-                            { id: "1", text: "Business" },
-                            { id: "2", text: "Other" },
+                            { id: "private", text: "Private" },
+                            { id: "business", text: "Business" },
+                            { id: "other", text: "Other" },
                     ]}
             /></Column>
             <Column><Checkbox labelText="our own address" name="own" bind:checked={$selectedAddr.own}/></Column>

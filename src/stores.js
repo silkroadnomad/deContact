@@ -63,6 +63,7 @@ const contact = {
     ipns: "",
     owner:"",
     own:false,
+    category: 'business',
     sharedAddress:""
 }
 export const selectedAddr = writable( contact)
