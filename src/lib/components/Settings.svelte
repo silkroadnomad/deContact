@@ -52,15 +52,32 @@
                                   value={$connectedPeers} /></Column>
     </Row>
     <Row class="custom-row">
-        <Column sm={3}><Button data-cy="DropAddressDB" size="sm" on:click={async () => {
-            console.log("dropping address db!")
+        <Column sm={1}><Button data-cy="DropFollowerDBs" size="sm" on:click={async () => {
+            console.log("dropping DropFollowerDBs db!")
 
+
+            const addressRecords = await $dbMyAddressBook.all();
+            for (const addressRecord of addressRecords) {
+                if(addressRecord.own) continue
+                console.log("dropping follower db",addressRecord.sharedAddress)
+                 const followerDB2DDrop = await $orbitdb.open(addressRecord.sharedAddress)
+                 await followerDB2DDrop.drop()
+            }
+            console.log("addressRecords",addressRecords)
+            selectedAddr.set({})
+            selectedTab.set(0)
+        }}>Drop Follower DBs</Button></Column>
+        <Column>&nbsp;</Column>
+        <Column sm={1}><Button data-cy="DropAddressDB" size="sm" on:click={async () => {
+            console.log("dropping address db!")
             await $dbMyAddressBook.drop()
             const addressRecords = await $dbMyAddressBook.all();
             console.log("addressRecords",addressRecords)
             selectedAddr.set({})
             selectedTab.set(0)
         }}>Drop AddressDB</Button></Column>
+
+
     </Row>
 
 </Grid>
