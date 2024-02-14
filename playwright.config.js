@@ -14,6 +14,9 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 
+import dotenv from 'dotenv';
+dotenv.config();
+
 
 // @ts-check
 import { defineConfig, devices } from '@playwright/test';

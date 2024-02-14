@@ -20,7 +20,6 @@
         orbitdb,
         qrCodeOpen,
         qrCodeData,
-        handle,
         progressState,
         progressText,
         showNotification,

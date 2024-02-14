@@ -2,25 +2,9 @@ const type = 'custom'
 let address = '/custom/address-book-access-controller'
 const AddressBookAccessController = ({  } = {}) => async ({ orbitdb, identities, subscriberList}) => {
     address = '/custom/address-book-access-controller'//+identity.id //TODO create address from something else ?!?
-    // if (governorAddress && proposalId) {
-    //     address = pathJoin('/', type, governorAddress, proposalId)
-    // } else {
-    //     const parts = address.split('/')
-    //     proposalId = parts.pop()
-    //     governorAddress = parts.pop()
-    // }
-    //
-    // if (!governorAddress) {
-    //     throw new Exception('No governor contract specified')
-    // }
-    //
-    // if (!proposalId) {
-    //     throw new Exception("no proposalId specified")
-    // }
 
     const canAppend = async (entry) => {
-        return true // TODO remove this
-       // return true;
+        return true
         console.log("orbitdb",orbitdb)
         console.log("orbitdb.identity.hash",orbitdb.identity.hash)
         console.log("entry.identity",entry.identity)

@@ -1,3 +1,5 @@
+![example workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
+
 # create-svelte
 
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
@@ -42,7 +44,10 @@ npx playwright test test.spec.js
 
 To run the Playwright test, use the command npx playwright test test.spec.js. This command will execute the test.spec.js test with Playwright. Make sure you have Playwright installed in your project 
 
-npx playwright test test.spec.js --debug  --trace on
+npx playwright test BasicAddressExchange.spec.js --debug --trace on 
+
+npx playwright test MyDevicesAutoSync.spec.js --debug  --trace on 
+
 npx playwright codegen
 
 The command npx playwright codegen is a helpful tool provided by Playwright to facilitate writing test scripts. It launches a browser and records the user's interactions to generate a Playwright test script.

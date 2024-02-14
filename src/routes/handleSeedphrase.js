@@ -31,18 +31,17 @@ export const handleSeedphrase = async () => {
         switch (result) {
             case ENTER_EXISTING:
                 notify("enter existing masterSeed phrase in settings please!")
-                selectedTab.set(2)
+                selectedTab.set(3)
                 break;
             case GENERATE_NEW:
                 _seedPhrase = generateMnemonic();
                 seedPhrase.set(_seedPhrase)
-                selectedTab.set(2)
+                selectedTab.set(3)
                 notify(`generated a new seed phrase ${_seedPhrase}`)
                 break;
         }
-        masterSeed.set(_masterSeed)
-
     }
     _masterSeed = generateMasterSeed(_seedPhrase,"password")
+    console.log("generated masterseed",_masterSeed)
     masterSeed.set(_masterSeed)
 }
