@@ -1,20 +1,16 @@
-![example workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
+![github workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
 
-# create-svelte
+# deContact
 
+A peer-to-peer address book and protocol built on Libp2p, Helia and OrbitDB
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
-## Creating a project
+## Main Use Case
+1. My address book on my phone is outdated. We need a way to automatically update contact data as somebody is moving into a new city or country.
+2. I don't like to host my data on Google, Amazon or Facebook any longer. 
 
-If you're seeing this, you've probably already done this step. Congrats!
-
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Features
+1. Alice requests 
 
 ## Developing
 
