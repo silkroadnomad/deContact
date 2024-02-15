@@ -161,6 +161,11 @@ async function handleMessage (dContactMessage) {
                 requesterDB = await _orbitdb.open(data.sharedAddress, {
                     type: 'documents',sync: true})
 
+                const isRes = await isResipientInSenderDB(requesterDB, messageObj)                  
+                    
+                if (isRes == true)
+                break;        
+
                 result = await confirm({
                     data:messageObj,
                     db:requesterDB,
@@ -190,6 +195,23 @@ async function handleMessage (dContactMessage) {
                 console.error(`Unknown command: ${messageObj.command}`);
         }
     }
+}
+
+async function  isResipientInSenderDB (requesterDB, messageObj){
+
+    const records = await requesterDB.all()
+
+        if(records.length!=0){
+            const isRecipient = records.filter(element => {
+                    return element.value.owner === messageObj.recipient
+            });          
+
+            if(isRecipient.length != 0 ){
+                 return true  
+            }else{
+                return false
+            }
+        }
 }
 
 /**

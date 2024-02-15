@@ -51,7 +51,7 @@
             <TabContent>
                 <Grid fullWidth>
                     <Row>
-                        <Column><TextInput size="sm" bind:value={scannedAddress}/></Column>
+                        <Column><TextInput role="scanContact" size="sm" bind:value={scannedAddress}/></Column>
                         <Column><Button size="sm" on:click={() => requestAddress(scannedAddress)}>Scan Contact</Button></Column>
                         <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
                     </Row>
