@@ -60,9 +60,10 @@ const contact = {
     city: "",
     stateProvince: "",
     countryRegion:"",
-    own: false,
     ipns: "",
     owner:"",
+    own:false,
+    category: 'business',
     sharedAddress:""
 }
 export const selectedAddr = writable( contact)

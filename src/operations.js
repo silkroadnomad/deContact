@@ -8,9 +8,8 @@ import {
     qrCodeOpen,
     orbitdb,
     myDal,
-    dbMyAddressBook
+    dbMyAddressBook, subscriberList
 } from "./stores.js";
-import {writeMyAddressIntoRequesterDB} from "./lib/network/p2p-operations.js";
 
 
 
@@ -51,14 +50,14 @@ export async function updateContact() {
     const newAddrBook = _myAddressBook.filter( el => el._id !== _selectedAddr._id )
     _selectedAddr.owner = _orbitdb?.identity?.id
     await _dbMyAddressBook.put(_selectedAddr)
-    console.log("updated contact in orbitdb")
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
-    notify(`Contact added successfully - informing subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
-    console.log("_subscriberList",_subscriberList)
+    notify(`Contact updated successfully - informing our subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
     if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
         for (const s in  _subscriberList) {
-            writeMyAddressIntoRequesterDB(_subscriberList[s],_selectedAddr)
+            console.log("updating address in ",_subscriberList[s].db.address)
+            _subscriberList[s].db.put(_selectedAddr)
+            notify(`Updated db ${_subscriberList[s].db.address} `)
         }
     }
     selectedAddr.set({})
@@ -96,6 +95,11 @@ let _myAddressBook;
 myAddressBook.subscribe((value) => {
     _myAddressBook = value
 })
+
+let _subscriberList
+subscriberList.subscribe((val) => {
+    _subscriberList = val
+});
 
 let _myDal;
 myDal.subscribe((value) => {

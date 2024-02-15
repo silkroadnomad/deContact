@@ -1,6 +1,6 @@
 {
 	"name": "decontact",
-	"version": "0.1.9",
+	"version": "0.2.2",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -23,6 +23,7 @@
 		"@sveltejs/vite-plugin-svelte": "^3.0.0",
 		"@types/eslint": "8.56.0",
 		"carbon-components-svelte": "^0.82.7",
+		"dotenv": "^16.4.1",
 		"eslint": "^8.56.0",
 		"eslint-config-prettier": "^9.1.0",
 		"eslint-plugin-svelte": "^2.35.1",

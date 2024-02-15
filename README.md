@@ -1,31 +1,32 @@
-![example workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
+![github workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
 
-# create-svelte
-
+# deContact
+A peer-to-peer address book and protocol built on Libp2p, Helia and OrbitDB
 Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
-## Creating a project
+## Main Use Case
+1. My address book on my phone is outdated. We need a way to automatically update contact data as somebody is moving into a new city or country.
+2. I don't like to host my data on Google, Amazon or Facebook any longer. 
 
-If you're seeing this, you've probably already done this step. Congrats!
+## Features
+1. Alice requests 
 
-```bash
-# create a new project in the current directory
-npm create svelte@latest
-
-# create a new project in my-app
-npm create svelte@latest my-app
-```
+## Use Cases
+1. Onboarding of a new user and account creation
+2. Backup seed on new device (Auto Device Sync)
+3. Add my own contact data (private, business, other)
+4. Contact List (see my own contact data and others (decentralized and traditional))
+5. Search in contact list
+6. Request contact data by (scanning a) DID
+7. Answer contact data request and write contact data in requesters db
+8. Update own contact data and write updates into follower dbs
+9. Backup of follower dbs
+10. Backup of followed dbs
 
 ## Developing
-
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
-```bash
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
-```
+1. Clone this repository
+2. npm i 
+3. npm run dev
 
 ## Building
 

@@ -1,7 +1,7 @@
 <script>
      import { selectedAddr, orbitdb } from "../../stores.js";
      import {addContact, deleteContact, updateContact} from "../../operations.js";
-     import {Button, Column, Grid, Row, TextInput} from "carbon-components-svelte";
+     import {Button, Checkbox, Column, Dropdown, Grid, Row, TextInput} from "carbon-components-svelte";
 </script>
 
 <section>
@@ -23,6 +23,18 @@
                                 bind:value={$selectedAddr.city}  /></Column>
             <Column><TextInput  data-cy="txtCountry" size="sm" labelText="country" placeholder="Enter country..."
                                 bind:value={$selectedAddr.countryRegion}  /></Column>
+        </Row>
+        <Row>
+            <Column><Dropdown
+                    titleText="Category"
+                    bind:selectedId={$selectedAddr.category}
+                    items={[
+                            { id: "private", text: "Private" },
+                            { id: "business", text: "Business" },
+                            { id: "other", text: "Other" },
+                    ]}
+            /></Column>
+            <Column><Checkbox labelText="our own address" name="own" bind:checked={$selectedAddr.own}/></Column>
         </Row>
         <Row>
             <Column>

@@ -5,32 +5,16 @@
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
     import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
     import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
-    import {
-        Header,
-        HeaderGlobalAction,
-        HeaderNav,
-        HeaderUtilities,
-        Theme,
-    } from "carbon-components-svelte";
+    import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";
     import Modals from "$lib/components/QRCodeModal.svelte";
-    import {
-        myDal,
-        qrCodeOpen,
-        qrCodeData,
-        subscriberList,
-        seedPhrase,
-        helia,
-        synced,
-        recordsSynced,
-        orbitdb, masterSeed // Assuming you have an orbitdb store
-    } from "../stores.js";
+    import { myDal, qrCodeOpen, qrCodeData, subscriberList, seedPhrase, helia, synced, recordsSynced, orbitdb, masterSeed } from "../stores.js";
 
     import { startNetwork } from "../lib/network/p2p-operations.js"
     import { getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js"
 
     import { connectedPeers } from "../stores.js";
-    import {confirmExperimentalUse} from "./confirmExperimentalUse.js";
-    import {handleSeedphrase} from "./handleSeedphrase.js";
+    import { confirmExperimentalUse } from "./confirmExperimentalUse.js";
+    import { handleSeedphrase } from "./handleSeedphrase.js";
 
     const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
 
@@ -42,14 +26,16 @@
 
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
-    $: if ($helia!==undefined && $masterSeed!==undefined) {
-        getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
-            .then(dbInstance => {
-                orbitdb.set(dbInstance);
-            })
-            .catch(error => {
-                console.error('Failed to create OrbitDB instance:', error);
-            });
+    $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
+        handleSeedphrase().then(() => {
+            getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
+                .then(dbInstance => {
+                    orbitdb.set(dbInstance);
+                })
+                .catch(error => {
+                    console.error('Failed to create OrbitDB instance:', error);
+                });
+        })
     }
 
     onMount(async ()=>{
@@ -84,13 +70,13 @@
                      <ConnectionSignal title="Swarm connected" class="statusGreen" />&nbsp;{$connectedPeers}
                  {/if}
             </div>
-            <div class="flags">
+<!--            <div class="flags">
                 {#if $synced===true}
                     <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
                 {:else}
                     <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}
                 {/if}
-            </div>
+            </div>-->
         </HeaderNav>
 
         <HeaderUtilities>
@@ -108,7 +94,10 @@
             </HeaderGlobalAction>
     </HeaderUtilities>
 </Header>
-<Modals on:close={() => $qrCodeOpen = false} bind:qrCodeOpen={$qrCodeOpen} qrCodeData={$qrCodeData} dbMyDal={$myDal} />
+<Modals on:close={() => $qrCodeOpen = false}
+        bind:qrCodeOpen={$qrCodeOpen}
+        qrCodeData={$qrCodeData}
+        dbMyDal={$myDal} />
 <slot></slot>
 <style>
     :global(.bx--toast-notification) {
