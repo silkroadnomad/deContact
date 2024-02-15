@@ -267,7 +267,7 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
 }
 
 /**
- * //TODO remove this sicne this is probably not needed - we just ask Alice again after Bob get asked by Alice!
+ * //TODO remove this since this is probably not needed - we just ask Alice again after Bob get asked by Alice!
  * @param requesterDB
  * @param sender
  * @returns {Promise<void>}
