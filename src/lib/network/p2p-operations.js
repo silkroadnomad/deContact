@@ -41,7 +41,7 @@ async function getAddressRecords() {
             id: record.value._id
         }));
         transformedRecords = transformedRecords.filter((addr)=> {
-            return addr.id !==undefined
+            return addr.id !==undefined && addr.firstName !== undefined && addr.lastName
         })
         myAddressBook.set(transformedRecords);
         console.log("records in dbMyAddressBook ",addressRecords)
@@ -165,7 +165,7 @@ async function handleMessage (dContactMessage) {
                 requesterDB = await _orbitdb.open(data.sharedAddress, {
                     type: 'documents',sync: true})
 
-                const isRes = await isResipientInSenderDB(requesterDB, messageObj)                  
+                const isRes = await isRecipientInSenderDB(requesterDB, messageObj)
                     
                 if (isRes == true)
                 break;        
@@ -178,6 +178,10 @@ async function handleMessage (dContactMessage) {
                 if(result){
                     if(result==='ONLY_HANDOUT'){
                         await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
+                        //add a subscriber to our address book (should not be displayed in datatable
+                        const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                        subscriber._id = await sha256(JSON.stringify(subscriber));
+                        await _dbMyAddressBook.put(subscriber)
                     }
                     else {
                         await writeMyAddressIntoRequesterDB(requesterDB);
@@ -185,10 +189,7 @@ async function handleMessage (dContactMessage) {
                         //await addRequestersContactDataToMyDB(requesterDB,messageObj.sender) //we want to write Alice contact data into our address book same time
                         //TODO in case Bob want's to exchange the data he should just send another request to Alice (just as Alice did)
                     }
-                    //add a subscriber to our address book (should not be displayed in datatable
-                    const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
-                    subscriber._id = await sha256(JSON.stringify(subscriber));
-                    await _dbMyAddressBook.put(subscriber)
+
                     initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
 
                 }else{
@@ -201,7 +202,7 @@ async function handleMessage (dContactMessage) {
     }
 }
 
-async function  isResipientInSenderDB (requesterDB, messageObj){
+async function  isRecipientInSenderDB (requesterDB, messageObj){
 
     const records = await requesterDB.all()
 
