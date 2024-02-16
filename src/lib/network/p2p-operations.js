@@ -147,8 +147,6 @@ export async function startNetwork() {
         console.log("someone updated my addressbook with data",entry)
         getAddressRecords()
     })
-
-
 }
 async function handleMessage (dContactMessage) {
     console.log("dContactMessage",dContactMessage   )
@@ -163,6 +161,11 @@ async function handleMessage (dContactMessage) {
                 requesterDB = await _orbitdb.open(data.sharedAddress, {
                     type: 'documents',sync: true})
 
+                const isRes = await isResipientInSenderDB(requesterDB, messageObj)                  
+                    
+                if (isRes == true)
+                break;        
+
                 result = await confirm({
                     data:messageObj,
                     db:requesterDB,
@@ -170,7 +173,7 @@ async function handleMessage (dContactMessage) {
 
                 if(result){
                     if(result==='ONLY_HANDOUT'){
-                        await writeMyAddressIntoRequesterDB(requesterDB);
+                        await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
 
                         //add a subscriber to our address book (should not be displayed in datatable
                         const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
@@ -179,7 +182,9 @@ async function handleMessage (dContactMessage) {
 
                     else {
                         await writeMyAddressIntoRequesterDB(requesterDB);
-                        await addRequestersContactDataToMyDB(requesterDB,messageObj.sender)
+                        await requestAddress(messageObj.sender)
+                        //await addRequestersContactDataToMyDB(requesterDB,messageObj.sender) //we want to write Alice contact data into our address book same time
+                        //TODO in case Bob want's to exchange the data he should just send another request to Alice (just as Alice did)
                     }
 
                 }else{
@@ -190,6 +195,23 @@ async function handleMessage (dContactMessage) {
                 console.error(`Unknown command: ${messageObj.command}`);
         }
     }
+}
+
+async function  isResipientInSenderDB (requesterDB, messageObj){
+
+    const records = await requesterDB.all()
+
+        if(records.length!=0){
+            const isRecipient = records.filter(element => {
+                    return element.value.owner === messageObj.recipient
+            });          
+
+            if(isRecipient.length != 0 ){
+                 return true  
+            }else{
+                return false
+            }
+        }
 }
 
 /**
@@ -226,21 +248,22 @@ export const requestAddress = async (_scannedAddress) => {
         console.log("request requestAddress from", _orbitdb?.identity?.id); //TODO remove white spaces from scannedAddress string
         const data = { sharedAddress:_dbMyAddressBook.address }
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
-        await _dbMyAddressBook.access.grant("write",_orbitdb.identity.id) //my own
+        // await _dbMyAddressBook.access.grant("write",_orbitdb.identity.id) //my own
         await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
         const capabilities = await _dbMyAddressBook.access.capabilities()
         console.log(`granted write permission to ${scannedAddress}`,capabilities)
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg))) //TODO when publishing a message sign content and enrypt content
-        const backupDBName = await sha256(scannedAddress)
-        const weDoNothingWithABackupDB = await _orbitdb.open("/myAddressBook/"+backupDBName, {
-            type: 'documents',
-            sync: true
-        })
-        weDoNothingWithABackupDB.all().then((records)=>{
-            console.log(`the database ${weDoNothingWithABackupDB.name} has ${records.length} and should be encrypted`,records)
-        }).catch((error)=>{
-            console.log("backupRecords",error)
-        })
+
+        // const backupDBName = await sha256(scannedAddress)
+        // const weDoNothingWithABackupDB = await _orbitdb.open("/myAddressBook/"+backupDBName, { //TODO this address is wrong - if it would be needed we need to check how to build that address first
+        //     type: 'documents',
+        //     sync: true
+        // })
+        // weDoNothingWithABackupDB.all().then((records)=>{
+        //     console.log(`the database ${weDoNothingWithABackupDB.name} has ${records.length} and should be encrypted`,records)
+        // }).catch((error)=>{
+        //     console.log("backupRecords",error)
+        // })
 
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
@@ -265,12 +288,18 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     }
 }
 
+/**
+ * //TODO remove this since this is probably not needed - we just ask Alice again after Bob get asked by Alice!
+ * @param requesterDB
+ * @param sender
+ * @returns {Promise<void>}
+ */
 async function addRequestersContactDataToMyDB(requesterDB,sender){
     const records = await requesterDB.all()
     const filteredElements = records.filter(element => {
         return element.value.owner === sender
     });
-    const newSubscriber = filteredElements[0].value
+    const newSubscriber = filteredElements[0].value //Bob is writing it himselfs //TODO better would if Bob would give Alice write permission and Alice would write it herself into Bobs - only then she can update Bobs address
     newSubscriber.subscriber = true //we mark a subscriber
     const hash = await _dbMyAddressBook.put(newSubscriber) //TODO we put only the first record of the requester but he might have send more
     await getAddressRecords()

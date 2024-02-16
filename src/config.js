@@ -24,8 +24,8 @@ const multiaddrs =
 
 const pubSubPeerDiscoveryTopics = [
 	import.meta.env.MODE == 'development'
-		? `dev-dcontact._peer-discovery._p2p._pubsub`
-		: `dcontact._peer-discovery._p2p._pubsub`
+		? import.meta.env.VITE_DEV_P2P_PUPSUB
+        : import.meta.env.VITE_P2P_PUPSUB
 ];
 
 export const bootstrapConfig = {list: multiaddrs};
@@ -71,7 +71,7 @@ export const config = {
     peerDiscovery: [
         bootstrap(bootstrapConfig),
         pubsubPeerDiscovery({
-            interval: 10000,
+            interval: 1000,
             topics: pubSubPeerDiscoveryTopics, // defaults to ['_peer-discovery._p2p._pubsub']
             listenOnly: false
         })

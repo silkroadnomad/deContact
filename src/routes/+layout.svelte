@@ -70,13 +70,13 @@
                      <ConnectionSignal title="Swarm connected" class="statusGreen" />&nbsp;{$connectedPeers}
                  {/if}
             </div>
-            <div class="flags">
+<!--            <div class="flags">
                 {#if $synced===true}
                     <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
                 {:else}
                     <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}
                 {/if}
-            </div>
+            </div>-->
         </HeaderNav>
 
         <HeaderUtilities>
