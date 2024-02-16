@@ -50,11 +50,16 @@ async function getAddressRecords() {
     }
 }
 
-async function replicateSubsriberDBs(ourDID) {
+/**
+ * Loop through our address book and filter all addresses where others are the owners
+ * @param ourDID our DID
+ * @returns {Promise<void>}
+ */
+async function initReplicationOfSubscriberDBs(ourDID) {
     console.log("replicateSubsriberDBs")
     const addressRecords = await _dbMyAddressBook.all();
     _subscriberList = addressRecords.filter((addr)=> {
-        return addr.value.owner !== ourDID && addr.value.sharedAddress!==undefined
+        return addr.value.owner !== ourDID && addr.value.sharedAddress!==undefined //sharedAddress undefined for all not decentralized addresses
     })
     console.log("_subscriberList",_subscriberList)
     subscriberList.set(_subscriberList)
@@ -62,7 +67,7 @@ async function replicateSubsriberDBs(ourDID) {
         const dbAddress = _subscriberList[s].value.sharedAddress
         console.log("loading subscribers db s",dbAddress)
         _subscriberList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
-        _subscriberList[s].db.all().then((records)=> {
+        _subscriberList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
             console.log(`dbAddress: ${dbAddress} records`,records)
         })
     }
@@ -136,7 +141,7 @@ export async function startNetwork() {
     dbMyAddressBook.set(_dbMyAddressBook)
     window.dbMyAddressBook = _dbMyAddressBook
     await getAddressRecords()
-    replicateSubsriberDBs(_orbitdb.identity.id)
+    initReplicationOfSubscriberDBs(_orbitdb.identity.id)
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
         console.log("one of my devices joined and synced myaddressbook",peerId)
         syncedDevices.set(true)
@@ -169,18 +174,17 @@ async function handleMessage (dContactMessage) {
                 if(result){
                     if(result==='ONLY_HANDOUT'){
                         await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
-
-                        //add a subscriber to our address book (should not be displayed in datatable
-                        const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
-                        await _dbMyAddressBook.put(subscriber)
                     }
-
                     else {
                         await writeMyAddressIntoRequesterDB(requesterDB);
                         await requestAddress(messageObj.sender)
                         //await addRequestersContactDataToMyDB(requesterDB,messageObj.sender) //we want to write Alice contact data into our address book same time
                         //TODO in case Bob want's to exchange the data he should just send another request to Alice (just as Alice did)
                     }
+                    //add a subscriber to our address book (should not be displayed in datatable
+                    const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                    await _dbMyAddressBook.put(subscriber)
+                    initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
 
                 }else{
                     //TODO send "rejected sending address"
@@ -250,7 +254,7 @@ export const requestAddress = async (_scannedAddress) => {
 }
 
 /**
- * Now we are writing our address directly into Bobs address book (we got write permission for a maximum of 3 records and only our own records)
+ * Now we are writing our address directly into Alice address book (we got write permission)
  * @param recipient
  * @param data
  * @returns {Promise<void>}
@@ -260,6 +264,7 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
         const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
         delete writeFirstOfOurAddresses.own;
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
+        _subscriberList.
         notify(`wrote my address into requesters db with hash ${hash}`);
     } catch (error) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
