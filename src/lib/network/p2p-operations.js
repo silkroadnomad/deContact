@@ -187,6 +187,7 @@ async function handleMessage (dContactMessage) {
                     }
                     //add a subscriber to our address book (should not be displayed in datatable
                     const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                    subscriber._id = await sha256(JSON.stringify(subscriber));
                     await _dbMyAddressBook.put(subscriber)
                     initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
 
@@ -234,7 +235,6 @@ async function createMessage(command, recipient, data = null) {
         data: data ? JSON.stringify(data) : null,
     };
     message._id = await sha256(JSON.stringify(message));
-    // message.publicKey = _ourIdentity.publicKey;
     return message;
 }
 
