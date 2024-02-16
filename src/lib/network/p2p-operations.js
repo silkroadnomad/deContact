@@ -274,7 +274,6 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
         const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
         delete writeFirstOfOurAddresses.own;
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
-        _subscriberList.
         notify(`wrote my address into requesters db with hash ${hash}`);
     } catch (error) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
