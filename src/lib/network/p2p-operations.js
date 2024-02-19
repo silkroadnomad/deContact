@@ -159,16 +159,15 @@ async function handleMessage (dContactMessage) {
     let result, data, requesterDB
     if (messageObj.recipient === _orbitdb.identity.id){
         switch (messageObj.command) {
-            case REQUEST_ADDRESS:
+            case REQUEST_ADDRESS:            
                 data = JSON.parse(messageObj.data)
-
                 requesterDB = await _orbitdb.open(data.sharedAddress, {
-                    type: 'documents',sync: true})
+                    type: 'documents',sync: true})  
 
                 const isRes = await isRecipientInSenderDB(requesterDB, messageObj)
                     
                 if (isRes == true)
-                break;        
+                break;                       
 
                 result = await confirm({
                     data:messageObj,

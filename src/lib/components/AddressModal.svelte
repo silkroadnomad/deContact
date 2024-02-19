@@ -16,6 +16,7 @@
     export let sender;
 
     let businessCard
+    let buttonDisabled
 
     /**
      * //TODO if Alice db is encrypted, Bob cannot read it? What we are going todo here?
