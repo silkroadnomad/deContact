@@ -45,6 +45,11 @@ export async function addContact() {
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
 }
 
+/**
+ * 1. Save the current edited address into the Svelte storage (local only)
+ * 2. Inform the subscribers about the address update
+ * @returns {Promise<void>}
+ */
 export async function updateContact() {
     console.log("updating contact",_selectedAddr)
     const newAddrBook = _myAddressBook.filter( el => el._id !== _selectedAddr._id )

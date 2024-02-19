@@ -12,10 +12,8 @@ export const progressState = writable(0)
 //0d3c4655d0fa1f9bcaa6c824eaae27fbb494e3a763d1bdd8b764d66e73ce8c4a
 export const masterSeed = writable()
 export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
-// export const identities = writable()
-// export const ourIdentity = writable()
 
-export const myAddressBook = writable(JSON.parse(window.localStorage.getItem('myAddressBook') || "[]"))
+export const myAddressBook = writable([])
 /** an orbitdb which will replace the myAddressBook store based on localstorage //TODO */
 export const dbMyAddressBook = writable([])
 
