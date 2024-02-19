@@ -87,6 +87,7 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 	});
 	
 	test('Alice and Bob can exchange addresses', async () => {
+
 		test.setTimeout(50000);
 
 		await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
@@ -124,8 +125,8 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 		await page2.getByRole('button', { name: 'Update' }).click();
 
 		await page2.getByRole('row', { name: users[1].identity }).locator('span').click();		
-		await page.getByRole('row', { name: users[2].street }).locator('span').click();
-		
+		await page.getByRole('row', { name: users[2].street }).locator('span').click();		
+
 	});
 
 	test.afterEach(async () => {

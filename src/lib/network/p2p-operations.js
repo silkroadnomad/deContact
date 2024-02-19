@@ -169,6 +169,11 @@ async function handleMessage (dContactMessage) {
                 if (isRes == true)
                 break;        
 
+                const isRes = await isRecipientInSenderDB(requesterDB, messageObj)
+                    
+                if (isRes == true)
+                break;        
+
                 result = await confirm({
                     data:messageObj,
                     db:requesterDB,

@@ -27,15 +27,15 @@
         </Column>
     </Row>
 
-    <Row>
-        <Column sm={2}>Global Storage Protocol Synced Messages: </Column>
-        <Column sm={1}>
-            {#if $synced===true}
-            <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
-        {:else}
-            <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}
-        {/if}</Column>
-    </Row>
+<!--    <Row>-->
+<!--        <Column sm={2}>Global Storage Protocol Synced Messages: </Column>-->
+<!--        <Column sm={1}>-->
+<!--            {#if $synced===true}-->
+<!--            <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}-->
+<!--        {:else}-->
+<!--            <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}-->
+<!--        {/if}</Column>-->
+<!--    </Row>-->
 
 </Grid>
 <style>
