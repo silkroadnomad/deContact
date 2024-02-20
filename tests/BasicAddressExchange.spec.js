@@ -96,7 +96,7 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 		await page2.getByRole('textbox', { role: 'scanContact' }).click();
 		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
 		await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 250000 });
-		
+		await new Promise(resolve => setTimeout(resolve, 10000));
 		let i = 0;
 		while (i < 100) {
 				i++;
