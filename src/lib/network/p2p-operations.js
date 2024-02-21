@@ -205,22 +205,18 @@ async function handleMessage (dContactMessage) {
 async function  isRecipientInSenderDB (requesterDB, messageObj){
 
     const records = await requesterDB.all()
+    if(records.length>0){
+        const isRecipient = records.filter(element => {
+                return element.value.owner === messageObj.recipient
+        });
 
-        if(records.length!=0){
-            const isRecipient = records.filter(element => {
-                    return element.value.owner === messageObj.recipient
-            });          
-
-            if(isRecipient.length != 0 ){
-                 return true  
-            }else{
-                return false
-            }
-        }
+        if(isRecipient.length>0 ) return true
+    }
+    return false
 }
 
 /**
- * When ever we want to send something out to a pear we create a message here
+ * When ever we want to send something out to a peer we create a message here
  * //TODO add encryption
  * @param command
  * @param recipient
@@ -279,31 +275,6 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     } catch (error) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
     }
-}
-
-/**
- * //TODO remove this since this is probably not needed - we just ask Alice again after Bob get asked by Alice!
- * @param requesterDB
- * @param sender
- * @returns {Promise<void>}
- */
-async function addRequestersContactDataToMyDB(requesterDB,sender){
-    const records = await requesterDB.all()
-    const filteredElements = records.filter(element => {
-        return element.value.owner === sender
-    });
-    const newSubscriber = filteredElements[0].value //Bob is writing it himselfs //TODO better would if Bob would give Alice write permission and Alice would write it herself into Bobs - only then she can update Bobs address
-    newSubscriber.subscriber = true //we mark a subscriber
-    const hash = await _dbMyAddressBook.put(newSubscriber) //TODO we put only the first record of the requester but he might have send more
-    await getAddressRecords()
-    notify(`wrote requesters data to my address db ${hash}`)
-}
-
-async function updateAddressBook(messageObj) {
-    const contactData = JSON.parse(messageObj.data);
-    // const hash = _dbMyAddressBook.put(contactData)
-    await getAddressRecords()
-    notify(`address updated to local ipfs ${hash}`)
 }
 
 let _libp2p;

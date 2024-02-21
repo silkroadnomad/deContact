@@ -11,8 +11,6 @@ import {
     dbMyAddressBook, subscriberList
 } from "./stores.js";
 
-
-
 /**
  * Loading a contact from memory into the contactForm
  * @param id
