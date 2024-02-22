@@ -1,7 +1,46 @@
 <script>
-     import { selectedAddr, orbitdb } from "../../stores/stores.js";
-     import {addContact, deleteContact, updateContact} from "../operations.js";
-     import {Button, Checkbox, Column, Dropdown, Grid, Row, TextInput} from "carbon-components-svelte";
+    import { Button, Checkbox, Column, Dropdown, Grid, Row, TextInput } from "carbon-components-svelte";
+    import { getAddressRecords } from "decontact";
+    import { orbitdb, deContact, myAddressBook, selectedTab, selectedAddr } from "../../stores/stores.js";
+    import { notify } from "../../utils/utils.js";
+     // Utility function to update address book
+     async function updateAddressBook() {
+         const myDBAddressBook = await $deContact.getMyAddressBook();
+         const result = await getAddressRecords(myDBAddressBook);
+         $myAddressBook = result;
+     }
+     /**
+      * Adds a new contact into orbitdb dbMyAddressBook and switches back to ContactList Tab
+      */
+     async function addContact() {
+         const hash = await $deContact.addContact($selectedAddr);
+         await updateAddressBook();
+         $selectedAddr = {};
+         $selectedTab = 0
+         notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
+     }
+
+     /**
+      * Saves the current edited address into the Svelte storage and informs the subscribers about the address update
+      */
+     export async function updateContact() {
+         await $deContact.updateContact($selectedAddr);
+         await updateAddressBook();
+         $selectedAddr = {};
+         $selectedTab = 0
+         notify(`Contact updated successfully - informing our subscribers!`);
+     }
+
+     /**
+      * Deletes a contact from our db
+      */
+     export async function deleteContact() {
+         const deleteHash = await $deContact.deleteContact($selectedAddr._id);
+         await updateAddressBook();
+         $selectedAddr = {};
+         $selectedTab = 0
+         notify(`Contact deleted successfully! ${deleteHash}`);
+     }
 </script>
 
 <section>
@@ -51,5 +90,4 @@
             </Column>
         </Row>
     </Grid>
-
 </section>

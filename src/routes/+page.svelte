@@ -26,9 +26,10 @@
         notificationMessage,
         selectedTab,
         selectedRowIds,
+        selectedAddr,
+        myAddressBook,
         deContact
     } from "../stores/stores.js";
-    import { loadContact } from "$lib/operations.js";
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
@@ -36,6 +37,18 @@
         $qrCodeData = $orbitdb.identity.id
         $qrCodeOpen = !$qrCodeOpen;
     };
+
+    /**
+     * Loading and selecting a contact from Svelte store into the contactForm
+     */
+    export async function loadContact(id) {
+        console.log("loading");
+        if (!$myAddressBook) return;
+        const address = $myAddressBook.find(obj => obj.id === id);
+        if (!address) return; // Do not set undefined here
+        $selectedAddr = address;
+        $selectedTab = 1
+    }
 </script>
 
 <div class="content">

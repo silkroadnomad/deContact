@@ -1,11 +1,8 @@
 <script>
     import {DataTable} from "carbon-components-svelte";
-    import {selectedRowIds, dbMyAddressBook,myAddressBook} from "../../stores/stores.js";
-    import { generateQRForAddress } from "../operations.js"
+    import {selectedRowIds, dbMyAddressBook, myAddressBook, qrCodeData, qrCodeOpen} from "../../stores/stores.js";
     import { getAddressRecords } from "decontact";
     $: $dbMyAddressBook && getAddressRecords($dbMyAddressBook).then(result => $myAddressBook = result);
-
-    $: console.log("myAddressBook",$myAddressBook)
 </script>
 
 <DataTable
@@ -13,7 +10,8 @@
             sortable
             on:click={event => {
                     if (event?.detail?.cell?.key === 'qr') {
-                         generateQRForAddress(event.detail.row);
+                            qrCodeData.set(event.detail.row);
+                            qrCodeOpen.set(true);
                     }
             }}
             bind:selectedRowIds={$selectedRowIds}
