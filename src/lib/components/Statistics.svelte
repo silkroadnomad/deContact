@@ -6,7 +6,7 @@
 
     import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
     import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
-    import {connectedPeers, recordsSynced, synced} from "../../stores.js";
+    import {connectedPeers, recordsSynced, synced} from "../../stores/stores.js";
 </script>
 
 <!--

@@ -1,11 +1,11 @@
 <script>
     import {DataTable} from "carbon-components-svelte";
-    import { selectedRowIds,dbMessages } from "../../stores.js";
-    import { generateQRForAddress } from "../../operations.js"
+    import {selectedRowIds, dbMyAddressBook,myAddressBook} from "../../stores/stores.js";
+    import { generateQRForAddress } from "../operations.js"
     import { getAddressRecords } from "decontact";
+    $: $dbMyAddressBook && getAddressRecords($dbMyAddressBook).then(result => $myAddressBook = result);
 
-    let addresses = []
-    $: $dbMessages && getAddressRecords($dbMessages).then(result => addresses = result);
+    $: console.log("myAddressBook",$myAddressBook)
 </script>
 
 <DataTable
@@ -26,5 +26,5 @@
                         { key: "countryRegion", value: "Country" },
                         { key: "owner", value: "Owner" }
                 ]}
-            rows={addresses}
+            rows={$myAddressBook}
     />

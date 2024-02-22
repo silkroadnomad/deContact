@@ -1,4 +1,4 @@
-import { notificationMessage, showNotification } from "../stores.js";
+import { notificationMessage, showNotification } from "../stores/stores.js";
 import { mnemonicToSeedSync } from "bip39";
 import HDKey from "hdkey";
 import { createHash } from 'crypto';

@@ -1,6 +1,6 @@
 <script>
-     import { selectedAddr, orbitdb } from "../../stores.js";
-     import {addContact, deleteContact, updateContact} from "../../operations.js";
+     import { selectedAddr, orbitdb } from "../../stores/stores.js";
+     import {addContact, deleteContact, updateContact} from "../operations.js";
      import {Button, Checkbox, Column, Dropdown, Grid, Row, TextInput} from "carbon-components-svelte";
 </script>
 

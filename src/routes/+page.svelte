@@ -27,8 +27,8 @@
         selectedTab,
         selectedRowIds,
         deContact
-    } from "../stores.js";
-    import { loadContact } from "../operations.js";
+    } from "../stores/stores.js";
+    import { loadContact } from "$lib/operations.js";
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;

@@ -4,7 +4,7 @@
     import {createEventDispatcher} from "svelte";
     const dispatch = createEventDispatcher();
     import { clickToCopy } from "../../utils/utils.js"
-    import { myDal } from "../../stores.js"
+    import { myDal } from "../../stores/stores.js"
 
     /**
      * @type {boolean}

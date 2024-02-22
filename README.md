@@ -9,24 +9,26 @@ Everything you need to build a Svelte project, powered by [`create-svelte`](http
 2. I don't like to host my data on Google, Amazon or Facebook any longer. 
 
 ## Features
-1. Alice requests 
+1. onboarding of a new user and account creation
+2. backup seed on new device (auto sync my devices)
+3. add my own contact data (private, business, other)
+4. contact List (see my own contact data and others (decentralized and traditional))
+5. search in contact list
+6. request contact data by (scanning a) DID
+7. answer contact data request and write contact data in requesters db
+8. update own contact data and write updates into follower dbs
+9. backup of follower dbs
+10. backup of followed dbs
 
-## Use Cases
-1. Onboarding of a new user and account creation
-2. Backup seed on new device (Auto Device Sync)
-3. Add my own contact data (private, business, other)
-4. Contact List (see my own contact data and others (decentralized and traditional))
-5. Search in contact list
-6. Request contact data by (scanning a) DID
-7. Answer contact data request and write contact data in requesters db
-8. Update own contact data and write updates into follower dbs
-9. Backup of follower dbs
-10. Backup of followed dbs
+## Todo's
+- Alice is Onboarding Bob via QR-Code (two different QR-Codes are provided)
+  - a) Bob has deContact pwa/app and is scanning a DID
+  - b) Bob doesn't have deContact and is scanning a public url 
 
 ## Developing
 1. Clone this repository
-2. npm i 
-3. npm run dev
+2. ```npm i ```
+3. ```npm run dev```
 
 ## Building
 
@@ -42,28 +44,6 @@ You can preview the production build with `npm run preview`.
 ## Tests
 
 npm run test:e2e
-
-To run the Playwright test, use the command npm run test:e2e. This command will execute the BasicAddressExchange.spec.js test with Playwright. Make sure you have Playwright installed in your project 
-
-npx playwright test BasicAddressExchange.spec.js --debug --trace on 
-
-npx playwright test MyDevicesAutoSync.spec.js --debug  --trace on 
-
-npx playwright test BasicAddressExchange.spec.js --debug --trace on 
-
-npx playwright test MyDevicesAutoSync.spec.js --debug  --trace on 
-
-npx playwright codegen
-
-The command npx playwright codegen is a helpful tool provided by Playwright to facilitate writing test scripts. It launches a browser and records the user's interactions to generate a Playwright test script.
-
-Here are the steps to use it:
-
-1. Run the command npx playwright codegen in your terminal.
-2. A new browser will be launched.
-3. Interact with the browser as you would in your test.
-4. The actions you perform in the browser will be recorded in the terminal and converted into Playwright code.
-5. Copy the generated code into your test file.
-
-> To deploy your app, you may need to install an [adapter](https://kit.svelte.dev/docs/adapters) for your target environment.
-
+npx playwright test BasicAddressExchange.spec.js --debug --trace on
+npx playwright test MyDevicesAutoSync.spec.js --debug  --trace on
+npx playwright codegen - The command npx playwright codegen is a helpful tool provided by Playwright to facilitate writing test scripts. It launches a browser and records the user's interactions to generate a Playwright test script.

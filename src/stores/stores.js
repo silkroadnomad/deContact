@@ -5,7 +5,7 @@ export const orbitdb = writable()
 export const deContact = writable()
 
 export const helia = writable()
-export const dbMessages = writable()
+// export const dbMessages = writable()
 export const subscription = writable()
 export const connectedPeers = writable(0)
 export const progressText = writable("initializing...")
@@ -16,8 +16,12 @@ export const masterSeed = writable()
 export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
 
 export const myAddressBook = writable([])
-/** an orbitdb which will replace the myAddressBook store based on localstorage //TODO */
-export const dbMyAddressBook = writable([])
+
+/**
+ * An OrbitDB holding our addressbook
+ * @type {Writable<unknown>}
+ */
+export const dbMyAddressBook = writable()
 
 export const myDal = writable()
 

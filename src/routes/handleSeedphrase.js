@@ -1,6 +1,6 @@
 import {ENTER_EXISTING, GENERATE_NEW, generateSeed} from "$lib/components/seedModal.js";
 import {generateMasterSeed, notify} from "../utils/utils.js";
-import {masterSeed, seedPhrase, selectedTab} from "../stores.js";
+import {masterSeed, seedPhrase, selectedTab} from "../stores/stores.js";
 import {generateMnemonic} from "bip39";
 
 let _masterSeed;
