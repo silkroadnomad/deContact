@@ -2,6 +2,8 @@ import { writable } from 'svelte/store'
 export const handle = writable(window.localStorage.getItem('handle') || 'unknown')
 export const libp2p = writable()
 export const orbitdb = writable()
+export const deContact = writable()
+
 export const helia = writable()
 export const dbMessages = writable()
 export const subscription = writable()

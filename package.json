@@ -38,6 +38,7 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@helia/block-brokers": "^2.0.1",
 		"@libp2p/autonat": "^1.0.7",
 		"@libp2p/circuit-relay-v2": "^1.0.10",
 		"@libp2p/identify": "^1.0.9",
@@ -52,6 +53,7 @@
 		"blockstore-level": "^1.1.7",
 		"carbon-icons-svelte": "^12.4.2",
 		"datastore-level": "^10.1.6",
+		"decontact": "file:../js-decontact/decontact-0.0.7.tgz",
 		"dotenv": "^16.4.1",
 		"hdkey": "^2.1.0",
 		"helia": "^3.0.0",

@@ -14,8 +14,6 @@
     export let data
 
     let text
-
-    console.log("data",data)
     function copySuccess(){
         text = "Copied!"
     }

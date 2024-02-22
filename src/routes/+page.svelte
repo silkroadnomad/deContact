@@ -25,10 +25,10 @@
         showNotification,
         notificationMessage,
         selectedTab,
-        selectedRowIds
+        selectedRowIds,
+        deContact
     } from "../stores.js";
     import { loadContact } from "../operations.js";
-    import { requestAddress } from "../lib/network/p2p-operations.js"
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
@@ -52,7 +52,7 @@
                 <Grid fullWidth>
                     <Row>
                         <Column><TextInput role="scanContact" size="sm" bind:value={scannedAddress}/></Column>
-                        <Column><Button size="sm" on:click={() => requestAddress(scannedAddress)}>Scan Contact</Button></Column>
+                        <Column><Button size="sm" on:click={() => $deContact.requestAddress(scannedAddress)}>Scan Contact</Button></Column>
                         <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
                     </Row>
                 </Grid>
