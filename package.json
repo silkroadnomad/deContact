@@ -17,6 +17,7 @@
 		"test:unit": "vitest"
 	},
 	"devDependencies": {
+		"@capacitor/cli": "^5.7.0",
 		"@playwright/test": "^1.28.1",
 		"@sveltejs/adapter-static": "^3.0.1",
 		"@sveltejs/kit": "^2.0.0",
@@ -38,6 +39,9 @@
 	},
 	"type": "module",
 	"dependencies": {
+		"@capacitor/android": "^5.7.0",
+		"@capacitor/core": "^5.7.0",
+		"@capacitor/ios": "^5.7.0",
 		"@libp2p/autonat": "^1.0.7",
 		"@libp2p/circuit-relay-v2": "^1.0.10",
 		"@libp2p/identify": "^1.0.9",

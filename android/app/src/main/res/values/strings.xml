@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">decontact</string>
+    <string name="title_activity_main">decontact</string>
+    <string name="package_name">org.doichain.deContact</string>
+    <string name="custom_url_scheme">org.doichain.deContact</string>
+</resources>
