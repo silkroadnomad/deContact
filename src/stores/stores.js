@@ -8,6 +8,7 @@ export const helia = writable()
 // export const dbMessages = writable()
 export const subscription = writable()
 export const connectedPeers = writable(0)
+export const synchedFollowerDBs = writable(0)
 export const progressText = writable("initializing...")
 export const progressState = writable(0)
 

@@ -19,7 +19,7 @@ import {
     progressText,
     progressState,
     subscriberList,
-    selectedTab,
+    selectedTab, synchedFollowerDBs,
 } from "../../stores/stores.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
 import { createDeContact } from "decontact";
@@ -59,9 +59,33 @@ export async function startNetwork() {
     deContact.set(_deContact);
 
     const _dbMyAddressBook = await _deContact.open();
+    _dbMyAddressBook.events.on('join', async (peerId, heads) => {
+        console.log("join",peerId)
+        _myAddressBook = _deContact.getMyAddressBook()
+        myAddressBook.set(_myAddressBook)
+        connectedPeers.set(_deContact.getConnectedPeers())
+        synchedFollowerDBs.set(_deContact.getSyncedFollowerDBs())
+    })
+    _dbMyAddressBook.events.on('update', async (entry) => {
+        console.log("update",entry)
+        _myAddressBook = _deContact.getMyAddressBook()
+        myAddressBook.set(_myAddressBook)
+        connectedPeers.set(_deContact.getConnectedPeers())
+        synchedFollowerDBs.set(_deContact.getSyncedFollowerDBs())
+    })
+    _libp2p.addEventListener('connection:open',  async (c) => {
+        console.log("_deContact.getSyncedDevices()",_deContact.getConnectedPeers())
+        connectedPeers.set(_deContact.getConnectedPeers())
+    });
+
+    _libp2p.addEventListener('connection:close', (c) => {
+        connectedPeers.set(_deContact.getConnectedPeers())
+    });
+
     window.dbMyAddressBook = _dbMyAddressBook;
     console.log("dbMyAddressBook", _dbMyAddressBook);
     dbMyAddressBook.set(_dbMyAddressBook);
+    progressState.set(6);
 }
 
 // Subscription setup

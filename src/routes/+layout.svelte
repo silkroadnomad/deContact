@@ -8,7 +8,6 @@
     import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";
     import Modals from "$lib/components/QRCodeModal.svelte";
     import { myDal, qrCodeOpen, qrCodeData, subscriberList, seedPhrase, helia, orbitdb, masterSeed } from "../stores/stores.js";
-
     import { startNetwork } from "../lib/network/p2p-operations.js"
     import { getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js"
 

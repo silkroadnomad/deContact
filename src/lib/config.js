@@ -6,7 +6,7 @@ import { bootstrap } from '@libp2p/bootstrap'
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
 import { noise } from "@chainsafe/libp2p-noise";
 import { yamux } from "@chainsafe/libp2p-yamux";
-import { pubsubPeerDiscovery} from "@libp2p/pubsub-peer-discovery";
+import { pubsubPeerDiscovery } from "@libp2p/pubsub-peer-discovery";
 import { identify } from '@libp2p/identify'
 import { autoNAT } from '@libp2p/autonat'
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
