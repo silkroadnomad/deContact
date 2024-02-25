@@ -15,6 +15,7 @@
     import { connectedPeers } from "../stores.js";
     import { confirmExperimentalUse } from "./confirmExperimentalUse.js";
     import { handleSeedphrase } from "./handleSeedphrase.js";
+    import {Capacitor} from "@capacitor/core";
 
     const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
 
@@ -45,7 +46,7 @@
     })
 
     onDestroy(handleDestroy);
-
+    console.log("Capacitor.isNativePlatform()",Capacitor.isNativePlatform())
     let isSideNavOpen
     let title = "   - the cloud we are!"
 </script>

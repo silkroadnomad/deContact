@@ -15,16 +15,15 @@ import { dcutr } from '@libp2p/dcutr'
 import { kadDHT } from '@libp2p/kad-dht'
 import { FaultTolerance } from '@libp2p/interface-transport'
 
-
 const multiaddrs =
-    import.meta.env.MODE == 'development'
+    import.meta.env.MODE === 'development'
         ? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',')
         : import.meta.env.VITE_SEED_NODES.replace('\n','').split(',')
 
 
 const pubSubPeerDiscoveryTopics = [
-	import.meta.env.MODE == 'development'
-		? import.meta.env.VITE_DEV_P2P_PUPSUB
+	import.meta.env.MODE === 'development'
+		? import.meta.env.VITE_P2P_PUPSUB_DEV
         : import.meta.env.VITE_P2P_PUPSUB
 ];
 
