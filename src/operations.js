@@ -36,10 +36,12 @@ export async function loadContact(id) {
  * @returns {Promise<void>}
  */
 export async function addContact() {
+    console.log("add contact",_dbMyAddressBook)
     _selectedAddr.owner = _orbitdb?.identity?.id
     _selectedAddr.sharedAddress = _dbMyAddressBook?.address
     _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
     const hash = await _dbMyAddressBook.put(_selectedAddr)
+    console.log("hash",hash)
     selectedAddr.set({})
     selectedTab.set(0)
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
