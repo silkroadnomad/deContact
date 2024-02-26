@@ -22,19 +22,18 @@
         bind:selectedRowIds={$selectedRowIds}
         headers={[
                     { key: "lastName", value: "Name" },
-                    { key: "firstName", value: "Firstname" },
-                    { key: "city", value: "City" },
+                    { key: "firstName", value: "Firstname" }
         ]}
 >
-    <Toolbar>
-        <ToolbarContent>
+        <Toolbar>
+            <ToolbarContent>
             <ToolbarSearch
                     persistent
                     value=""
                     shouldFilterRows
                     bind:filteredRowIds
             />
-        </ToolbarContent>
+            </ToolbarContent>
     </Toolbar>
     <svelte:fragment slot="expanded-row" let:row>
         <pre>{JSON.stringify(row, null, 2)}</pre>
