@@ -2,7 +2,6 @@
 
 # deContact
 A peer-to-peer address book and protocol built on Libp2p, Helia and OrbitDB
-Everything you need to build a Svelte project, powered by [`create-svelte`](https://github.com/sveltejs/kit/tree/main/packages/create-svelte).
 
 ## Main Use Case
 1. My address book on my phone is outdated. We need a way to automatically update contact data as somebody is moving into a new city or country.
