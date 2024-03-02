@@ -16,7 +16,7 @@ export const progressState = writable(0)
 export const masterSeed = writable()
 export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
 
-export const myAddressBook = writable([])
+export const myAddresses = writable([])
 
 /**
  * An OrbitDB holding our addressbook

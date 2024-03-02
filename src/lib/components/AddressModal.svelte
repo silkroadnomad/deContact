@@ -33,7 +33,7 @@
     }
 </script>
 <ComposedModal open on:close={() => dispatch('result', false)} on:submit={() => dispatch('result', true)}>
-    <ModalHeader label="deContact Protocoll Action" title={heading} />
+    <ModalHeader label="deContact Protocol Action" title={heading} />
     <ModalBody hasForm>
 <!--        <Checkbox labelText="I have reviewed the changes" bind:checked />-->
         <ExpandableTile>

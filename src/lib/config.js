@@ -27,7 +27,7 @@ const pubSubPeerDiscoveryTopics = [
 		? import.meta.env.VITE_P2P_PUPSUB_DEV
         : import.meta.env.VITE_P2P_PUPSUB
 ];
-console.log("pubSubPeerDiscoveryTopics",pubSubPeerDiscoveryTopics)
+
 export const bootstrapConfig = {list: multiaddrs};
 
 export const config = {

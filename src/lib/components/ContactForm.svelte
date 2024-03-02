@@ -1,23 +1,27 @@
 <script>
     import { Button, Checkbox, Column, Dropdown, Grid, Row, TextInput } from "carbon-components-svelte";
     import { getAddressRecords } from "decontact";
-    import { orbitdb, deContact, myAddressBook, selectedTab, selectedAddr } from "../../stores/stores.js";
+    import { orbitdb, deContact, myAddresses, selectedTab, selectedAddr } from "../../stores/stores.js";
     import { notify } from "../../utils/utils.js";
-     // Utility function to update address book
+
+    /**
+     * Synchronizes the address book in store with the addressbook in orbitdb
+     */
      async function updateAddressBook() {
          const myDBAddressBook = await $deContact.getMyAddressBook();
          const result = await getAddressRecords(myDBAddressBook);
-         $myAddressBook = result;
+         $myAddresses = result;
      }
+
      /**
       * Adds a new contact into orbitdb dbMyAddressBook and switches back to ContactList Tab
       */
      async function addContact() {
          const hash = await $deContact.addContact($selectedAddr);
-         await updateAddressBook();
+         notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
          $selectedAddr = {};
          $selectedTab = 0
-         notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
+         updateAddressBook();
      }
 
      /**
@@ -25,10 +29,11 @@
       */
      export async function updateContact() {
          await $deContact.updateContact($selectedAddr);
-         await updateAddressBook();
+         notify(`Contact updated successfully - informing our subscribers!`);
          $selectedAddr = {};
          $selectedTab = 0
-         notify(`Contact updated successfully - informing our subscribers!`);
+         updateAddressBook();
+
      }
 
      /**
@@ -36,11 +41,12 @@
       */
      export async function deleteContact() {
          const deleteHash = await $deContact.deleteContact($selectedAddr._id);
-         await updateAddressBook();
+         notify(`Contact deleted successfully! ${deleteHash}`);
          $selectedAddr = {};
          $selectedTab = 0
-         notify(`Contact deleted successfully! ${deleteHash}`);
+         updateAddressBook();
      }
+
 </script>
 
 <section>
@@ -85,7 +91,7 @@
                     <Button data-cy="deleteContact" size="sm" on:click={() => deleteContact()}>Delete</Button>
 
                 {:else}
-                    <Button data-cy="addContact" size="sm" on:click={() => addContact()}>Add</Button>
+                    <Button data-cy="addContact" size="sm" on:click={() => addContact($selectedAddr)}>Add</Button>
                 {/if}
             </Column>
         </Row>

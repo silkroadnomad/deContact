@@ -27,9 +27,10 @@
         selectedTab,
         selectedRowIds,
         selectedAddr,
-        myAddressBook,
+        myAddresses,
         deContact
     } from "../stores/stores.js";
+    import { notify } from "../utils/utils.js"
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
@@ -42,9 +43,9 @@
      * Loading and selecting a contact from Svelte store into the contactForm
      */
     export async function loadContact(id) {
-        console.log("loading");
-        if (!$myAddressBook) return;
-        const address = $myAddressBook.find(obj => obj.id === id);
+
+        if (!$myAddresses) return;
+        const address = $myAddresses.find(obj => obj.id === id);
         if (!address) return; // Do not set undefined here
         $selectedAddr = address;
         $selectedTab = 1
@@ -65,7 +66,10 @@
                 <Grid fullWidth>
                     <Row>
                         <Column><TextInput role="scanContact" size="sm" bind:value={scannedAddress}/></Column>
-                        <Column><Button size="sm" on:click={() => $deContact.requestAddress(scannedAddress)}>Scan Contact</Button></Column>
+                        <Column><Button size="sm" on:click={() => {
+                            $deContact.requestAddress(scannedAddress)
+                            notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
+                        }}>Scan Contact</Button></Column>
                         <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
                     </Row>
                 </Grid>

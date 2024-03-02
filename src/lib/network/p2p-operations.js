@@ -11,7 +11,7 @@ import {
     deContact,
     masterSeed,
     seedPhrase,
-    myAddressBook,
+    myAddresses,
     dbMyAddressBook,
     subscription,
     connectedPeers,
@@ -61,15 +61,15 @@ export async function startNetwork() {
     const _dbMyAddressBook = await _deContact.open();
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
         console.log("join",peerId)
-        _myAddressBook = _deContact.getMyAddressBook()
-        myAddressBook.set(_myAddressBook)
+        _myAddresses = _deContact.getMyAddressBook()
+        myAddresses.set(_myAddresses)
         connectedPeers.set(_deContact.getConnectedPeers())
         synchedFollowerDBs.set(_deContact.getSyncedFollowerDBs())
     })
     _dbMyAddressBook.events.on('update', async (entry) => {
         console.log("update",entry)
-        _myAddressBook = _deContact.getMyAddressBook()
-        myAddressBook.set(_myAddressBook)
+        _myAddresses = _deContact.getMyAddresses()
+        myAddresses.set(_myAddresses)
         connectedPeers.set(_deContact.getConnectedPeers())
         synchedFollowerDBs.set(_deContact.getSyncedFollowerDBs())
     })
@@ -89,7 +89,7 @@ export async function startNetwork() {
 }
 
 // Subscription setup
-let _libp2p, _helia, _orbitdb, _deContact, _dbMyAddressBook, _masterSeed, _seedPhrase, _subscription, _handle, _connectedPeers, _myAddressBook, _subscriberList, _selectedTab;
+let _libp2p, _helia, _orbitdb, _deContact, _dbMyAddressBook, _masterSeed, _seedPhrase, _subscription, _handle, _connectedPeers, _myAddresses, _subscriberList, _selectedTab;
 
 function setupSubscriptions() {
     const subscriptions = [
@@ -103,7 +103,7 @@ function setupSubscriptions() {
         { store: subscription, setter: val => _subscription = val },
         { store: handle, setter: val => _handle = val },
         { store: connectedPeers, setter: val => _connectedPeers = val },
-        { store: myAddressBook, setter: val => _myAddressBook = val },
+        { store: myAddresses, setter: val => _myAddresses = val },
         { store: subscriberList, setter: val => _subscriberList = val },
         { store: selectedTab, setter: val => _selectedTab = val },
     ];

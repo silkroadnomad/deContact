@@ -1,0 +1,8 @@
+{
+	"appId": "org.doichain.deContact",
+	"appName": "decontact",
+	"webDir": "build",
+	"server": {
+		"androidScheme": "https"
+	}
+}

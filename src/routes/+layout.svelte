@@ -20,9 +20,8 @@
     let theme = "g90";
 
     async function handleDestroy() {
-        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]); //TODO remove this again if there is no native pub sub inside our app
+        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]);
     }
-
     $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
     $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {

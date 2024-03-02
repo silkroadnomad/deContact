@@ -1,0 +1,19 @@
+{
+  "short_name":"deContact",
+  "name": "deContact a peer-to-peer",
+  "start_url": "/",
+  "icons": [{
+    "src": "launchericon-144-144.png",
+    "purpose": "any",
+    "type": "image/png",
+    "sizes": "144x144"
+  }],
+  "screenshots": [
+
+  ],
+  "background-color": "#3367d6",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3367D6",
+  "description": "A decentralized local first peer-to-peer address book"
+}

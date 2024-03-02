@@ -1,6 +1,6 @@
 {
 	"name": "decontact",
-	"version": "0.2.3",
+	"version": "0.2.5",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -53,7 +53,7 @@
 		"blockstore-level": "^1.1.7",
 		"carbon-icons-svelte": "^12.4.2",
 		"datastore-level": "^10.1.6",
-		"decontact": "^0.0.12",
+		"decontact": "^0.0.13",
 		"dotenv": "^16.4.1",
 		"hdkey": "^2.1.0",
 		"helia": "^3.0.0",
