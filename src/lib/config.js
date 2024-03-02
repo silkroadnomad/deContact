@@ -24,10 +24,10 @@ const multiaddrs =
 
 const pubSubPeerDiscoveryTopics = [
 	import.meta.env.MODE == 'development'
-		? import.meta.env.VITE_DEV_P2P_PUPSUB
+		? import.meta.env.VITE_P2P_PUPSUB_DEV
         : import.meta.env.VITE_P2P_PUPSUB
 ];
-
+console.log("pubSubPeerDiscoveryTopics",pubSubPeerDiscoveryTopics)
 export const bootstrapConfig = {list: multiaddrs};
 
 export const config = {
