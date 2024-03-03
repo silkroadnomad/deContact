@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     timeout-minutes: 60
-    runs-on: istanbul-kubo
+    #runs-on: istanbul-kubo
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
