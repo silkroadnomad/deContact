@@ -1,9 +1,9 @@
-name: Self hosted runner
+name: Basic Tests
 on:
   push:
-    branches: [ githubCI, playwright, develop, main ]
+    branches: [ develop, main ]
   pull_request:
-    branches: [ githubCI, playwright, develop, main ]
+    branches: [ develop, main ]
 
 jobs:
   build:
