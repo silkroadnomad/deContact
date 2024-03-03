@@ -1,16 +1,14 @@
 name: Self hosted runner
 on:
   push:
-    runs-on: [istanbul-kubo]
     branches: [ githubCI, playwright, develop, main ]
   pull_request:
     branches: [ githubCI, playwright, develop, main ]
-    runs-on: [istanbul-kubo]
 
 jobs:
   build:
     timeout-minutes: 60
-    runs-on: deContact
+    runs-on: istanbul-kubo
     permissions:
       pages: write      # to deploy to Pages
       id-token: write   # to verify the deployment originates from an appropriate source
