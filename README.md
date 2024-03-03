@@ -1,7 +1,7 @@
 ![github workflow](https://github.com/silkroadnomad/deContact/actions/workflows/playwright.yml/badge.svg)
 
 # deContact
-A peer-to-peer address book and protocol built on Libp2p, Helia and OrbitDB
+A peer-to-peer address book and protocol built on libp2p, Helia and OrbitDB
 
 ## Main Use Case
 1. My address book on my phone is outdated. We need a way to automatically update contact data as somebody is moving into a new city or country.
