@@ -1,4 +1,4 @@
-![github workflow](https://github.com/davidreband/deContact/actions/workflows/playwright.yml/badge.svg)
+![github workflow](https://github.com/silkroadnomad/deContact/actions/workflows/playwright.yml/badge.svg)
 
 # deContact
 A peer-to-peer address book and protocol built on Libp2p, Helia and OrbitDB
