@@ -1,9 +1,11 @@
 name: Self hosted runner
 on:
   push:
+    runs-on: [istanbul-kubo]
     branches: [ githubCI, playwright, develop, main ]
   pull_request:
     branches: [ githubCI, playwright, develop, main ]
+    runs-on: [istanbul-kubo]
 
 jobs:
   build:
