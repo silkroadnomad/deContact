@@ -4,7 +4,7 @@
 A peer-to-peer address book and protocol built on libp2p, Helia and OrbitDB
 
 ## Main Use Case
-1. My address book on my phone is outdated. We need a way to automatically update contact data as somebody is moving into a new city or country.
+1. My address book on my phone is outdated. I need a way to automatically update contact data as somebody is moving into a new city or country.
 2. I don't like to host my data on Google, Amazon or Facebook any longer. 
 
 ## Use Cases
