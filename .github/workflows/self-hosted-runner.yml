@@ -1,9 +1,9 @@
 name: Self hosted runner
 on:
   push:
-    branches: [ githubCI, playwright, develop ]    
+    branches: [ githubCI, playwright, develop, main ]
   pull_request:
-    branches: [ githubCI, playwright, develop ]    
+    branches: [ githubCI, playwright, develop, main ]
 
 jobs:
   build:
