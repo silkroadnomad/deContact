@@ -39,7 +39,6 @@
     <!--{#each myContactData as contact, index}-->
     <!--    <li>{contact.value.firstname} {contact.value.lastname}</li>-->
     <!--{/each}-->
-
     {#if qrCodeData && qrCodeOpen}
         <div class="container">
             <QrCode value={linkUrl} />
