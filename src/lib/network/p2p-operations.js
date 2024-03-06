@@ -66,10 +66,13 @@ async function initReplicationOfSubscriberDBs(ourDID) {
     for (const s in _subscriberList) {
         const dbAddress = _subscriberList[s].value.sharedAddress
         console.log("loading subscribers db s",dbAddress)
-        _subscriberList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
-        _subscriberList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
-            console.log(`dbAddress: ${dbAddress} records`,records)
-        })
+        try{
+            _subscriberList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
+            _subscriberList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
+                console.log(`dbAddress: ${dbAddress} records`,records)
+            })
+        }catch(e){console.log(`error while loading ${dbAddress} `)}
+
     }
 }
 

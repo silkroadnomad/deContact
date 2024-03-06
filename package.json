@@ -58,6 +58,7 @@
 		"key-did-provider-ed25519": "^4.0.2",
 		"key-did-resolver": "^4.0.0",
 		"qrcode-generator": "^1.4.4",
+		"svelte-qrcode": "^1.0.0",
 		"vite-plugin-node-polyfills": "^0.19.0"
 	}
 }

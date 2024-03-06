@@ -6,7 +6,7 @@
     import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
     import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
     import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";
-    import Modals from "$lib/components/QRCodeModal.svelte";
+    import QRCodeModal from "$lib/components/QRCodeModal.svelte";
     import { myDal, qrCodeOpen, qrCodeData, subscriberList, seedPhrase, helia, synced, recordsSynced, orbitdb, masterSeed } from "../stores.js";
 
     import { startNetwork } from "../lib/network/p2p-operations.js"
@@ -50,7 +50,7 @@
     let title = "   - the cloud we are!"
 </script>
 
-<svelte:window on:beforeinstallprompt={()=>{ console.log("beforeinstallprompt") }} />
+<svelte:window on:beforeinstallprompt={ () => { console.log("beforeinstallprompt") }} />
 
     <Header
         class="header-title"
@@ -94,10 +94,11 @@
             </HeaderGlobalAction>
     </HeaderUtilities>
 </Header>
-<Modals on:close={() => $qrCodeOpen = false}
-        bind:qrCodeOpen={$qrCodeOpen}
-        qrCodeData={$qrCodeData}
-        dbMyDal={$myDal} />
+<QRCodeModal
+        on:close={ () => $qrCodeOpen = false }
+        bind:qrCodeOpen={ $qrCodeOpen }
+        qrCodeData={ $qrCodeData }
+        dbMyDal={ $myDal } />
 <slot></slot>
 <style>
     :global(.bx--toast-notification) {

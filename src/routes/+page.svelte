@@ -11,6 +11,7 @@
         ProgressBar,
         ToastNotification
     } from "carbon-components-svelte";
+
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
@@ -32,10 +33,6 @@
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
-    const toggleQrCode = () => {
-        $qrCodeData = $orbitdb.identity.id
-        $qrCodeOpen = !$qrCodeOpen;
-    };
 </script>
 
 <div class="content">
@@ -51,10 +48,18 @@
             <TabContent>
                 <Grid fullWidth>
                     <Row>
-                        <Column><TextInput role="scanContact" size="sm" bind:value={scannedAddress} on:keydown={
-                        (e) => e.code==='Enter'?requestAddress(scannedAddress):null} /></Column>
-<!--                        <Column><Button size="sm" on:click={() => requestAddress(scannedAddress)}>Scan Contact</Button></Column>-->
-                        <Column><Button size="sm" on:click={toggleQrCode}>Show QR-Code</Button></Column>
+                        <Column>
+                            <TextInput role="scanContact" size="sm" bind:value={scannedAddress} on:keydown={(e) => e.code==='Enter'?requestAddress(scannedAddress):null} />
+                        </Column>
+                            <Column>
+<!--                                <Scan on:click={()=>requestAddress(scannedAddress)}/>-->
+                            <Button size="sm" on:click={async () => await requestAddress(scannedAddress)}>Scan Contact</Button>
+                        </Column>
+                        <Column><Button size="sm" on:click={
+                        () => {
+                            $qrCodeData = $orbitdb?.identity?.id
+                            $qrCodeOpen = !$qrCodeOpen; }
+                            }>Show QR-Code</Button></Column>
                     </Row>
                 </Grid>
                 <ContactList/>
