@@ -27,8 +27,8 @@ const users = [
 		country: 'Germany'
 	},
 	{
-		identity: 'Alice',
-		firstname: 'Alice',
+		identity: 'Bob',
+		firstname: 'Bob',
 		lastname: 'Fox',
 		street: 'Schulgasse 150',
 		zipcode: '1111111',
@@ -87,54 +87,48 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 	});
 
 	test('Alice and Bob can exchange addresses', async () => {
-		test.setTimeout(150000);
+		test.setTimeout(50000);
 
-
+		await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
+		await page2.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
 		await page2.getByRole('tab', { name: 'Contacts' }).click({ timeout: 250000 });
 		await page2.getByRole('textbox', { role: 'scanContact' }).click();
 		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
-		await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 150000 });
 
-		//await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 150000 });
+		await page2.getByRole('textbox').press('Enter');
+		//await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 250000 });
+		await new Promise(resolve => setTimeout(resolve, 10000));
+		let i = 0;
+		while (i < 100) {
+			i++;
+			const exchangeButtonCount = await page.getByRole('button', { name: 'Exchange Contact Data' }).count();
+			if (exchangeButtonCount == 0) {
+				await page2.getByRole('textbox').press('Enter');
+			} else {
+				break;
+			}
+			console.log("i", i);
+			await new Promise(resolve => setTimeout(resolve, 10000));
+		}
 
 		await page.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
+		await page2.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
+		await page2.getByRole('row', { name: users[1].identity }).locator('label').click();
+		await page2.getByPlaceholder('Enter lastname...').click();
+		await page2.getByPlaceholder('Enter lastname...').fill(users[2].lastname);
+		await page2.getByPlaceholder('Enter street...').click();
+		await page2.getByPlaceholder('Enter street...').fill(users[2].street);
+		await page2.getByPlaceholder('Enter zipcode...').click();
+		await page2.getByPlaceholder('Enter zipcode...').fill(users[2].zipcode);
+		await page2.getByPlaceholder('Enter city...').click();
+		await page2.getByPlaceholder('Enter city...').fill(users[2].city);
+		await page2.getByPlaceholder('Enter country...').fill(users[2].country);
+		await page2.getByRole('button', { name: 'Update' }).click();
 
-		//await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 50000 });
+		await page2.getByRole('row', { name: users[1].identity }).locator('span').click();
 
-		//await page.getByRole('button', { name: 'Exchange Contact Data' }).click();
+		await page.getByRole('row', { name: users[2].lastname }).locator('span').click();
 
-		//await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 50000 });
-
-		//await page.getByRole('button', { name: 'Exchange Contact Data' }).click();
-
-
-		//await page.locator('label').filter({ hasText: 'Exchange Contact Data' }).click();
-
-
-		/*
-                await page2.getByRole('button', { name: 'Scan Contact' }).click();
-                await page.getByRole('button', { name: 'Continue' }).click();
-                await page2.getByRole('button', { name: 'Continue' }).click();
-                await page.getByRole('textbox').click({ timeout: 50000 });
-                await page.getByRole('textbox').fill(users[1].did);
-                await page.getByRole('button', { name: 'Scan Contact' }).click();
-                await page2.getByRole('button', { name: 'Continue' }).click();
-                await page.getByRole('button', { name: 'Continue' }).click();
-                await page.getByRole('row', { name: users[0].identity }).locator('label').click();
-                await page.getByPlaceholder('Enter lastname...').click();
-                await page.getByPlaceholder('Enter lastname...').fill(users[2].lastname);
-                await page.getByPlaceholder('Enter street...').click();
-                await page.getByPlaceholder('Enter street...').fill(users[2].street);
-                await page.getByPlaceholder('Enter zipcode...').click();
-                await page.getByPlaceholder('Enter zipcode...').fill(users[2].zipcode);
-                await page.getByPlaceholder('Enter city...').click();
-                await page.getByPlaceholder('Enter city...').fill(users[2].city);
-                await page.getByPlaceholder('Enter country...').fill(users[2].country);
-                await page.getByRole('button', { name: 'Update' }).click();
-
-                */
-		//await page2.getByRole('button', { name: 'Continue' }).click();
-		await page2.getByRole('row', { name: users[0].identity }).locator('label').click();
 	});
 
 	test.afterEach(async () => {
@@ -144,3 +138,84 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 		]);
 	});
 });
+
+
+/*
+
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('http://localhost:5173/');
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('button', { name: 'Generate New' }).click();
+  await page.getByRole('tab', { name: 'My Address' }).click();
+  await page.getByPlaceholder('Enter firstname...').click();
+  await page.getByPlaceholder('Enter firstname...').fill('David');
+  await page.getByPlaceholder('Enter firstname...').press('Tab');
+  await page.getByPlaceholder('Enter lastname...').fill('reb');
+  await page.getByPlaceholder('Enter lastname...').press('Tab');
+  await page.getByPlaceholder('Enter street...').fill('Hhhh');
+  await page.getByPlaceholder('Enter street...').press('Tab');
+  await page.getByPlaceholder('Enter zipcode...').fill('7575');
+  await page.getByPlaceholder('Enter zipcode...').press('Tab');
+  await page.getByPlaceholder('Enter city...').fill('Ghjghj');
+  await page.locator('label').filter({ hasText: 'our own address' }).click();
+  await page.getByRole('button', { name: 'Add' }).click();
+  await page.getByRole('textbox').click();
+  await page.getByRole('textbox').fill('did:key:z6MkwLMucNJ6ueHwoWY4ShMT8ZzFfsrmwS8gGv3CuLxsZRZx');
+  await page.getByRole('textbox').press('Enter');
+  await page.getByRole('button', { name: 'Exchange Contact Data' }).click();
+  await page.getByRole('row', { name: 'Expand current row reb David' }).locator('span').click();
+  await page.getByPlaceholder('Enter street...').click();
+  await page.getByPlaceholder('Enter street...').fill('Hhhh 1000');
+  await page.getByRole('button', { name: 'Update' }).click();
+
+	await page.getByRole('button', { name: 'Expand current row' }).click();
+});
+
+
+
+
+
+import { test, expect } from '@playwright/test';
+
+test('test', async ({ page }) => {
+  await page.goto('http://localhost:5173/');
+  await page.getByRole('button', { name: 'Continue' }).click();
+  await page.getByRole('button', { name: 'Generate New' }).click();
+  await page.getByRole('tab', { name: 'My Address' }).click();
+  await page.getByPlaceholder('Enter firstname...').click();
+  await page.getByPlaceholder('Enter firstname...').fill('Dodo');
+  await page.getByPlaceholder('Enter firstname...').press('Tab');
+  await page.getByPlaceholder('Enter lastname...').fill('Reee');
+  await page.getByPlaceholder('Enter lastname...').press('Tab');
+  await page.getByPlaceholder('Enter street...').fill('Zuzt');
+  await page.getByPlaceholder('Enter street...').press('Tab');
+  await page.getByPlaceholder('Enter zipcode...').fill('765676');
+  await page.locator('label').filter({ hasText: 'our own address' }).click();
+  await page.getByRole('button', { name: 'Add' }).click();
+  await page.getByRole('tab', { name: 'Settings' }).click();
+  await page.getByLabel('DID', { exact: true }).click({
+    clickCount: 3
+  });
+  await page.getByLabel('DID', { exact: true }).press('Control+c');
+  await page.getByRole('button', { name: 'Exchange Contact Data' }).click();
+  await page.getByRole('tab', { name: 'Contacts' }).click();
+  await page.getByRole('row', { name: 'Expand current row Reee Dodo' }).locator('span').click();
+  await page.getByRole('tab', { name: 'Contacts' }).click();
+  await page.getByRole('row', { name: 'Expand current row reb David' }).locator('span').click();
+  await page.getByRole('tab', { name: 'Contacts' }).click();
+});
+
+
+await page.getByRole('button', { name: 'Exchange Contact Data' }).click();
+  await page.getByRole('row', { name: 'Expand current row Baa Reef' }).getByLabel('Expand current row').click();
+  await page.getByLabel('Expand current row').click();
+  await page.getByRole('row', { name: 'Collapse current row Baa Reef' }).locator('span').click();
+  await page.getByPlaceholder('Enter street...').click();
+  await page.getByPlaceholder('Enter street...').fill('asfda 77777');
+  await page.getByRole('button', { name: 'Update' }).click();
+  await page.getByText('{ "id": "2cd58ca3d5df16603c45c58fac41958e2546973987a696576a05553c4b223302", "').click();
+  await page.getByText('{ "id": "2cd58ca3d5df16603c45c58fac41958e2546973987a696576a05553c4b223302", "').dblclick();
+
+*/
