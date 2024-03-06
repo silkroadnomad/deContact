@@ -4,7 +4,7 @@
         ModalHeader,
         ModalBody,
         ModalFooter, Column, Grid, Row } from "carbon-components-svelte";
-    import { createEventDispatcher } from "svelte";
+    import {createEventDispatcher, onMount} from "svelte";
     const dispatch = createEventDispatcher();
 
     export let heading = 'deContact Protocol Action';
@@ -31,6 +31,9 @@
     $:{
         getBusinessCard(db).then(bc => businessCard=bc)
     }
+    onMount(()=>{
+        dispatch("addressExchangeOpened")
+    })
 </script>
 <ComposedModal open on:close={() => dispatch('result', false)} on:submit={() => dispatch('result', true)}>
     <ModalHeader label="deContact Protocoll Action" title={heading} />

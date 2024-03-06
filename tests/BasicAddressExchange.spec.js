@@ -52,16 +52,16 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		test.setTimeout(50000);
 
 		await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
-		await page2.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
+		await page2.getByRole('img', { name: 'Swarm connected' }).exists({ timeout: 50000 });
 		await page2.getByRole('tab', { name: 'Contacts' }).click({ timeout: 250000 });
 		await page2.getByRole('textbox', { role: 'scanContact' }).click();
 		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
 
 		await page2.getByRole('textbox').press('Enter');
 		//await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 250000 });
-		await new Promise(resolve => setTimeout(resolve, 10000));
+		await new Promise(resolve => setTimeout(resolve, 10000)); //TODO is that necessary?
 		let i = 0;
-		while (i < 100) {
+		while (i < 100) { //TODO what is that here?
 			i++;
 			const exchangeButtonCount = await page.getByRole('button', { name: 'Exchange Contact Data' }).count();
 			if (exchangeButtonCount == 0) {
@@ -72,6 +72,7 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 			console.log("i", i);
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
+
 		//Exchanging data
 		await page.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
 		await page2.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
