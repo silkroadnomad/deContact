@@ -1,4 +1,4 @@
-[![Self hosted runner](https://github.com/silkroadnomad/deContact/actions/workflows/self-hosted-runner.yml/badge.svg)](https://github.com/silkroadnomad/deContact/actions/workflows/self-hosted-runner.yml)
+[![Basic Tests](https://github.com/silkroadnomad/deContact/actions/workflows/main.yml/badge.svg)](https://github.com/silkroadnomad/deContact/actions/workflows/main.yml)
 
 # deContact
 A peer-to-peer address book and protocol built on libp2p, Helia and OrbitDB
