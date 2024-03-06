@@ -15,7 +15,7 @@ jobs:
       id-token: write   # to verify the deployment originates from an appropriate source
       actions: read
     environment:
-      name: github-pages
+      name: dcontact #github-pages
       url: ${{ steps.deployment.outputs.page_url }} 
     env:
       VITE_SEED_NODES:  ${{ secrets.VITE_SEED_NODES }} 
