@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch({
-	headless: true //TODO can we set this value in scripts (package.json) via env?
+	headless: process.env.HEADLESS==="true"?process.env.HEADLES==="true":true
 });
 
 //TODO can we put this into fixtures?

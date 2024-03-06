@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch({
-	headless: true
+	headless: process.env.HEADLESS?process.env.HEADLESS:true
 });
 
 const users = [ //TODO can we put this into assets?
