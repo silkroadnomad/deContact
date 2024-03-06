@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch({
-	headless: false
+	headless: true //TODO can we set this value in scripts (package.json) via env?
 });
 
 //TODO can we put this into fixtures?
@@ -39,10 +39,10 @@ const users = [
 	}
 ];
 
-test.describe('Simple exchange of adress between Alice and Bob', () => {
+test.describe('Simple exchange of address between Alice and Bob', () => {
 	let page, page2;
 
-	test.beforeEach(async ({ browser }) => {
+	test.beforeAll(async ({ browser }) => {
 		test.setTimeout(50000);
 		page = await initializeNewPage(browser, users[0]);
 		page2 = await initializeNewPage(browser, users[1]);
@@ -72,9 +72,11 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 			console.log("i", i);
 			await new Promise(resolve => setTimeout(resolve, 10000));
 		}
-
+		//Exchanging data
 		await page.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
 		await page2.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
+
+		//Update Test
 		await page2.getByRole('row', { name: users[1].identity }).locator('label').click();
 		await page2.getByPlaceholder('Enter lastname...').click();
 		await page2.getByPlaceholder('Enter lastname...').fill(users[2].lastname);
@@ -93,7 +95,15 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 
 	});
 
-	test.afterEach(async () => {
+	test('Alice updates her address and Bob receives the update', async () => {
+
+	})
+
+	test('Bob updates his address and Alice receives the update', async () => {
+
+	})
+
+	test.afterAll(async () => {
 		await Promise.all([
 			page.close(),
 			page2.close()
