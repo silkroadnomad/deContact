@@ -1,7 +1,7 @@
 [![Basic Tests](https://github.com/silkroadnomad/deContact/actions/workflows/main.yml/badge.svg)](https://github.com/silkroadnomad/deContact/actions/workflows/main.yml)
 
 # deContact
-A peer-to-peer address book and protocol built on libp2p, Helia and OrbitDB
+A peer-to-peer address book in Svelte with local first protocol built on libp2p, Helia and OrbitDB
 
 ## Main Use Case
 1. My address book on my phone is outdated. I need a way to automatically update contact data as somebody is moving into a new city or country.
