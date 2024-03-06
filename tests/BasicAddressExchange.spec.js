@@ -2,9 +2,10 @@ import { test, expect } from '@playwright/test';
 import { chromium } from 'playwright';
 
 const browser = await chromium.launch({
-	headless: true
+	headless: false
 });
 
+//TODO can we put this into fixtures?
 const users = [
 	{
 		identity: 'Alice',
@@ -37,45 +38,6 @@ const users = [
 		country: 'Italy'
 	}
 ];
-
-async function fillInput(page, placeholder, value) {
-	await page.click(`[placeholder="${placeholder}"]`);
-	await page.fill(`[placeholder="${placeholder}"]`, value);
-}
-
-async function fillForm(page, user) {
-	await fillInput(page, 'Enter firstname...', user.firstname);
-	await fillInput(page, 'Enter lastname...', user.lastname);
-	await fillInput(page, 'Enter street...', user.street);
-	await fillInput(page, 'Enter zipcode...', user.zipcode);
-	await fillInput(page, 'Enter city...', user.city);
-	await fillInput(page, 'Enter country...', user.country);
-	await page.getByLabel('Category').click();
-	await page.getByText('Private').click();
-	await page.locator('label').filter({ hasText: 'our own address' }).click();
-}
-
-async function initializeNewPage(browser, user) {
-	try {
-		const context = await browser.newContext();
-		const page = await context.newPage();
-		const page_url = process.env.PAGE_URL;
-		await page.goto(page_url);
-		await page.evaluate(() => window.localStorage.clear());
-		await page.evaluate(() => window.sessionStorage.clear());
-		await page.getByRole('button', { name: 'Continue' }).click();
-		await page.getByRole('button', { name: 'Generate New' }).click();
-		await page.getByRole('tab', { name: 'Settings' }).click();
-		await page.getByLabel('DID', { exact: true }).click();
-		user.did = await page.getByLabel('DID', { exact: true }).inputValue();
-		await page.getByRole('tab', { name: 'My Address' }).click();
-		await fillForm(page, user);
-		await page.getByRole('button', { name: 'Add' }).click({ timeout: 50000 });
-		return page;
-	} catch (error) {
-		console.error('Error opening new page:', error);
-	}
-}
 
 test.describe('Simple exchange of adress between Alice and Bob', () => {
 	let page, page2;
@@ -138,7 +100,44 @@ test.describe('Simple exchange of adress between Alice and Bob', () => {
 		]);
 	});
 });
+async function fillInput(page, placeholder, value) {
+	await page.click(`[placeholder="${placeholder}"]`);
+	await page.fill(`[placeholder="${placeholder}"]`, value);
+}
 
+async function fillForm(page, user) {
+	await fillInput(page, 'Enter firstname...', user.firstname);
+	await fillInput(page, 'Enter lastname...', user.lastname);
+	await fillInput(page, 'Enter street...', user.street);
+	await fillInput(page, 'Enter zipcode...', user.zipcode);
+	await fillInput(page, 'Enter city...', user.city);
+	await fillInput(page, 'Enter country...', user.country);
+	await page.getByLabel('Category').click();
+	await page.getByText('Private').click();
+	await page.locator('label').filter({ hasText: 'our own address' }).click();
+}
+
+async function initializeNewPage(browser, user) {
+	try {
+		const context = await browser.newContext();
+		const page = await context.newPage();
+		const page_url = process.env.PAGE_URL;
+		await page.goto(page_url);
+		await page.evaluate(() => window.localStorage.clear());
+		await page.evaluate(() => window.sessionStorage.clear());
+		await page.getByRole('button', { name: 'Continue' }).click();
+		await page.getByRole('button', { name: 'Generate New' }).click();
+		await page.getByRole('tab', { name: 'Settings' }).click();
+		await page.getByLabel('DID', { exact: true }).click();
+		user.did = await page.getByLabel('DID', { exact: true }).inputValue();
+		await page.getByRole('tab', { name: 'My Address' }).click();
+		await fillForm(page, user);
+		await page.getByRole('button', { name: 'Add' }).click({ timeout: 50000 });
+		return page;
+	} catch (error) {
+		console.error('Error opening new page:', error);
+	}
+}
 
 /*
 
