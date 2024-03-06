@@ -78,7 +78,7 @@ test.describe('Devices auto synchronization', () => {
 			await page2.getByRole('button', { name: 'Enter Existing Seed Phrase' }).click();
 			await page2.getByRole('button', { name: 'Enter Existing Seed Phrase' }).click();
 			await page2.getByRole('tab', { name: 'Contacts' }).click();  
-  		await page2.getByLabel('Contacts').locator('span').click();		
+  			await page2.getByLabel('Contacts').locator('span').first().click();
 	});
 
 	test.afterEach(async () => {
