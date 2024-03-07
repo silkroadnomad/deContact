@@ -5,17 +5,29 @@
     import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
     import { clickToCopy } from "../../utils/utils.js"
+    import {connectedPeers, libp2p} from "../../stores.js";
 
     const page_url = import.meta.env.VITE_PAGE_URL?import.meta.env.VITE_PAGE_URL+'/#':'https://deContact.xyz/#';
     export let qrCodeData
     export let qrCodeOpen
 
+    let multiAddrString
+    $:{
+        if($connectedPeers>0){
+            const multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString())
+            multiAddrString = encodeURI(JSON.stringify(multiaddrs))
+        }
+    }
+
     let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an animation)
     let linkUrl = `${page_url}/onboarding/${qrCodeData || '' }`
     let fullDeContactUrl
-    $: linkUrl = !fullDeContactUrl?`${page_url}/onboarding/${qrCodeData || '' }`:qrCodeData
+    $: linkUrl = !fullDeContactUrl?`${page_url}/onboarding/${qrCodeData+'?multiaddr='+multiAddrString || '' }`:qrCodeData
 </script>
-<svelte:window on:copysuccess={ () => text = "Copied!"} on:copyerror={ (e) => text = `Error! ${e.detail}`}/>
+<svelte:window on:copysuccess={ () => {
+    text = "Copied!"
+    dispatch('close')
+    }} on:copyerror={ (e) => text = `Error! ${e.detail}`}/>
 <Modal bind:open={ qrCodeOpen }
        modalHeading="Scan (DID) - Decentralized Identity"
        primaryButtonText="OK"

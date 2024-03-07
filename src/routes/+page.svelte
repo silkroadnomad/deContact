@@ -19,6 +19,8 @@
     import Statistics from "$lib/components/Statistics.svelte";
 
     import {
+        libp2p,
+        connectedPeers,
         orbitdb,
         qrCodeOpen,
         qrCodeData,

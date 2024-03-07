@@ -4,20 +4,24 @@ import { browser } from '$app/environment';
 function getHash () {
     if(browser){
         const hashWithDID = location.hash.replace(/^#/, '')
-        return hashWithDID.lastIndexOf('/')!==-1?hashWithDID.substring(0,hashWithDID.lastIndexOf('/')):hashWithDID
+        // console.log("hash",hashWithDID.indexOf('/',1)!==-1?hashWithDID.substring(0,hashWithDID.indexOf('/',1)):hashWithDID)
+        return hashWithDID.indexOf('/',1)!==-1?hashWithDID.substring(0,hashWithDID.indexOf('/',1)):hashWithDID
     }
 }
 
 function getDID () {
     if(browser){
         const hashWithDID = location.hash.replace(/^#/, '')
-        return hashWithDID.lastIndexOf('/')!==-1?hashWithDID.substring(hashWithDID.lastIndexOf('/')+1):hashWithDID
+        if(!hashWithDID) return
+        // console.log("did",hashWithDID.split("/")[2].substring(0,hashWithDID.split("/")[2].indexOf("?")));
+        return hashWithDID.split("/")[2].substring(0,hashWithDID.split("/")[2].indexOf("?"))
     }
 }
 
 function getQuery(){
     if(browser) {
         const hashWithQueryParam = location.hash.replace(/^#/, '')
+        // console.log("query", hashWithQueryParam.indexOf('?') !== -1 ? hashWithQueryParam.substring(hashWithQueryParam.indexOf('?') + 1, hashWithQueryParam.length) : undefined)
         return hashWithQueryParam.indexOf('?') !== -1 ? hashWithQueryParam.substring(hashWithQueryParam.indexOf('?') + 1, hashWithQueryParam.length) : undefined
     }
 }

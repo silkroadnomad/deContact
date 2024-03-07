@@ -47,7 +47,7 @@
         '': Home,
         '/onboarding': OnBoarding
     }
-
+    // $: console.log("$hash",$hash)
     $: view = routes[$hash]
 
         //    const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
