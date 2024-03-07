@@ -1,5 +1,6 @@
 <script>
-    import {Modal, Toggle} from "carbon-components-svelte";
+    import {Column, Modal, Toggle, Grid, Row} from "carbon-components-svelte";
+    import Information from "carbon-icons-svelte/lib/Information.svelte";
     import QrCode from "svelte-qrcode"
     import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
@@ -8,16 +9,10 @@
     export let qrCodeData
     export let qrCodeOpen
 
-    let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an anymation)
-    let linkUrl = ''
-    let fullDeContactUrl = true
-
-    $:{
-        if(fullDeContactUrl){
-            linkUrl = `${page_url}/onboarding/${qrCodeData || '' }`
-        }
-        else linkUrl = qrCodeData
-    }
+    let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an animation)
+    let linkUrl = `${page_url}/onboarding/${qrCodeData || '' }`
+    let fullDeContactUrl
+    $: linkUrl = !fullDeContactUrl?`${page_url}/onboarding/${qrCodeData || '' }`:qrCodeData
 </script>
 <svelte:window on:copysuccess={ () => text = "Copied!"} on:copyerror={ (e) => text = `Error! ${e.detail}`}/>
 <Modal bind:open={ qrCodeOpen }
@@ -27,15 +22,20 @@
        on:click:button--primary={ () => dispatch('close') }
        on:click:button--secondary={ () => dispatch('close') }
        on:close={()=>dispatch('close')} >
+    <Grid>
+        <Row>
+            <Column>
+                <Information />
+                <Toggle
+                    labelText="Scan from deContact?"
+                    labelA="No"
+                    labelB="Yes"
+                    bind:toggled={fullDeContactUrl}/></Column>
+        </Row>
+    </Grid>
 
-    <Toggle labelText="Scan from deContact?" labelA="No" labelB="Yes" bind:toggled={fullDeContactUrl}/>
-
-    <p>&nbsp;</p>
-    <label for="qrCodeModal"
-        use:clickToCopy>{linkUrl}</label>
-        <span id="qrCodeModal">{text}</span>
-    <p></p>
-    <p>&nbsp;</p>
+    <label for="qrCodeModal" use:clickToCopy>{linkUrl}</label>
+    <span id="qrCodeModal">{text}</span>
     <!--{#each myContactData as contact, index}-->
     <!--    <li>{contact.value.firstname} {contact.value.lastname}</li>-->
     <!--{/each}-->

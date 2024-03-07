@@ -27,12 +27,12 @@
 >
         <Toolbar>
             <ToolbarContent>
-            <ToolbarSearch
-                    persistent
-                    value=""
-                    shouldFilterRows
-                    bind:filteredRowIds
-            />
+                <ToolbarSearch
+                        persistent
+                        value=""
+                        shouldFilterRows
+                        bind:filteredRowIds
+                />
             </ToolbarContent>
     </Toolbar>
     <svelte:fragment slot="expanded-row" let:row>

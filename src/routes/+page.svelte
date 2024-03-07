@@ -11,7 +11,8 @@
         ProgressBar,
         ToastNotification
     } from "carbon-components-svelte";
-
+    import QrCode from "carbon-icons-svelte/lib/QrCode.svelte";
+    import Scan from "carbon-icons-svelte/lib/Scan.svelte";
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
@@ -52,14 +53,17 @@
                             <TextInput role="scanContact" size="sm" bind:value={scannedAddress} on:keydown={(e) => e.code==='Enter'?requestAddress(scannedAddress):null} />
                         </Column>
                             <Column>
-<!--                                <Scan on:click={()=>requestAddress(scannedAddress)}/>-->
-                            <Button size="sm" on:click={async () => await requestAddress(scannedAddress)}>Scan Contact</Button>
+                                <Button size="sm"
+                                        on:click={async () => await requestAddress(scannedAddress)}>
+                                    <Scan size="16"/> &nbsp; Scan
+                                </Button>
+                                <Button size="sm" on:click={() => {
+                                    $qrCodeData = $orbitdb?.identity?.id;
+                                    $qrCodeOpen = !$qrCodeOpen;
+                                }}>
+                                    <QrCode size="16" /> &nbsp; QR Code
+                                </Button>
                         </Column>
-                        <Column><Button size="sm" on:click={
-                        () => {
-                            $qrCodeData = $orbitdb?.identity?.id
-                            $qrCodeOpen = !$qrCodeOpen; }
-                            }>Show QR-Code</Button></Column>
                     </Row>
                 </Grid>
                 <ContactList/>

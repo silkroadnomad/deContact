@@ -28,9 +28,11 @@
         });
         return filteredElements[0].value
     }
+
     $:{
         getBusinessCard(db).then(bc => businessCard=bc)
     }
+
     onMount(()=>{
         dispatch("addressExchange")
     })
