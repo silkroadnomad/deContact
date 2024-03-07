@@ -37,5 +37,6 @@ You can preview the production build with `npm run preview`.
 
 ## Tests
 ```bash
-npm run test:e2e
+npm run test:e2e   #headless
+npm run test:e2e:manual 
 ```
