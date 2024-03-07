@@ -5,6 +5,7 @@
     import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
     import { clickToCopy } from "../../utils/utils.js"
+
     const page_url = import.meta.env.VITE_PAGE_URL?import.meta.env.VITE_PAGE_URL+'/#':'https://deContact.xyz/#';
     export let qrCodeData
     export let qrCodeOpen
@@ -26,11 +27,14 @@
         <Row>
             <Column>
                 <Information />
+            </Column>
+            <Column>
                 <Toggle
                     labelText="Scan from deContact?"
                     labelA="No"
                     labelB="Yes"
-                    bind:toggled={fullDeContactUrl}/></Column>
+                    bind:toggled={fullDeContactUrl}/>
+            </Column>
         </Row>
     </Grid>
 

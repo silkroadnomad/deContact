@@ -8,6 +8,13 @@ function getHash () {
     }
 }
 
+function getDID () {
+    if(browser){
+        const hashWithDID = location.hash.replace(/^#/, '')
+        return hashWithDID.lastIndexOf('/')!==-1?hashWithDID.substring(hashWithDID.lastIndexOf('/')+1):hashWithDID
+    }
+}
+
 function getQuery(){
     if(browser) {
         const hashWithQueryParam = location.hash.replace(/^#/, '')
@@ -31,5 +38,14 @@ export const query = new readable(getQuery(), set => {
 
     window.addEventListener('hashchange', setQuery)
     return () => window.removeEventListener('hashchange', setQuery)
+})
+
+export const did = new readable(getDID(), set => {
+    function setDID () {
+        set(getDID())
+    }
+
+    window.addEventListener('hashchange', setDID)
+    return () => window.removeEventListener('hashchange', setDID)
 })
 

@@ -8,7 +8,7 @@
     import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";
     import { hash } from './router.js'
     import QRCodeModal from "$lib/components/QRCodeModal.svelte";
-    import { myDal, qrCodeOpen, qrCodeData, subscriberList, seedPhrase, helia, synced, recordsSynced, orbitdb, masterSeed } from "../stores.js";
+    import { myDal, qrCodeOpen, qrCodeData, seedPhrase, helia, orbitdb, masterSeed } from "../stores.js";
 
     import { startNetwork } from "../lib/network/p2p-operations.js"
     import { getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js"
@@ -20,11 +20,6 @@
     import OnBoarding from "$lib/components/OnBoarding.svelte";
 
     let theme = "g90";
-
-    async function handleDestroy() {
-        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]); //TODO remove this again if there is no native pub sub inside our app
-    }
-    // $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
 
     $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
         handleSeedphrase().then(() => {
@@ -44,8 +39,6 @@
         await startNetwork();
     })
 
-    onDestroy(handleDestroy);
-
     let isSideNavOpen
     let title = "   - the cloud we are!"
 
@@ -54,7 +47,7 @@
         '': Home,
         '/onboarding': OnBoarding
     }
-    console.log("hash",$hash)
+
     $: view = routes[$hash]
 
         //    const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL

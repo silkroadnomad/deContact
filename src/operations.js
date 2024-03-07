@@ -19,14 +19,12 @@ import {
  * @returns {Promise<void>}
  */
 export async function loadContact(id) {
-    console.log("loading")
     if (!myAddressBook || !_myAddressBook) return;
     const address = _myAddressBook.find(obj => obj.id === id)
     _selectedAddr = address
     if(!address) return //do not set undefined here
     selectedAddr.set(_selectedAddr)
     selectedTab.set(1)
-    console.log("loading contact",id)
 }
 
 /**
@@ -36,12 +34,10 @@ export async function loadContact(id) {
  * @returns {Promise<void>}
  */
 export async function addContact() {
-    console.log("add contact",_dbMyAddressBook)
     _selectedAddr.owner = _orbitdb?.identity?.id
     _selectedAddr.sharedAddress = _dbMyAddressBook?.address
     _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
     const hash = await _dbMyAddressBook.put(_selectedAddr)
-    console.log("hash",hash)
     selectedAddr.set({})
     selectedTab.set(0)
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
@@ -53,7 +49,6 @@ export async function addContact() {
  * @returns {Promise<void>}
  */
 export async function updateContact() {
-    console.log("updating contact",_selectedAddr)
     const newAddrBook = _myAddressBook.filter( el => el._id !== _selectedAddr._id )
     _selectedAddr.owner = _orbitdb?.identity?.id
     await _dbMyAddressBook.put(_selectedAddr)

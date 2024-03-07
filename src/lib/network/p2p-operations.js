@@ -4,7 +4,6 @@ import { OrbitDBAccessController, useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
-import { config } from "../../config.js";
 import { fromString, toString } from 'uint8arrays';
 import {
     libp2p,
@@ -21,10 +20,11 @@ import {
     progressState,
     subscriberList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
-
+import {config} from "../../config.js";
 import { confirm } from "../components/addressModal.js"
 import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
+
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
@@ -192,7 +192,6 @@ async function handleMessage (dContactMessage) {
                         //await addRequestersContactDataToMyDB(requesterDB,messageObj.sender) //we want to write Alice contact data into our address book same time
                         //TODO in case Bob want's to exchange the data he should just send another request to Alice (just as Alice did)
                     }
-
                     initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
 
                 }else{
@@ -283,32 +282,6 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
     }
 }
-
-/**
- * //TODO remove this since this is probably not needed - we just ask Alice again after Bob get asked by Alice!
- * @param requesterDB
- * @param sender
- * @returns {Promise<void>}
- */
-async function addRequestersContactDataToMyDB(requesterDB,sender){
-    const records = await requesterDB.all()
-    const filteredElements = records.filter(element => {
-        return element.value.owner === sender
-    });
-    const newSubscriber = filteredElements[0].value //Bob is writing it himselfs //TODO better would if Bob would give Alice write permission and Alice would write it herself into Bobs - only then she can update Bobs address
-    newSubscriber.subscriber = true //we mark a subscriber
-    const hash = await _dbMyAddressBook.put(newSubscriber) //TODO we put only the first record of the requester but he might have send more
-    await getAddressRecords()
-    notify(`wrote requesters data to my address db ${hash}`)
-}
-
-async function updateAddressBook(messageObj) {
-    const contactData = JSON.parse(messageObj.data);
-    // const hash = _dbMyAddressBook.put(contactData)
-    await getAddressRecords()
-    notify(`address updated to local ipfs ${hash}`)
-}
-
 let _libp2p;
 libp2p.subscribe((val) => {
     _libp2p = val
