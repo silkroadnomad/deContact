@@ -5,7 +5,7 @@
     import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
     import { clickToCopy } from "../../utils/utils.js"
-    const page_url = process.env.PAGE_URL?process.env.PAGE_URL:'https://deContact.xyz';
+    const page_url = import.meta.env.VITE_PAGE_URL?import.meta.env.VITE_PAGE_URL+'/#':'https://deContact.xyz/#';
     export let qrCodeData
     export let qrCodeOpen
 
