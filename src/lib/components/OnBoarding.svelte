@@ -21,18 +21,19 @@
             })
         }
     }
-
-    $:{
-        if($connectedPeers>1 && //if connected
-            $did!==undefined &&
-            $orbitdb!==undefined &&
-            $dbMyAddressBook.access!==undefined)
-            requestAddress($did)
-    }
-
     let scannedContact
     $:{
-        if(!scannedContact && $myAddressBook.length>0){ //if a record arrives in my address book show it on the page //TODO go to ContactList (would be better)
+            if(!scannedContact &&
+                $connectedPeers>1 && //if connected
+                $did!==undefined &&
+                $orbitdb!==undefined &&
+                $dbMyAddressBook.access!==undefined)
+                requestAddress($did)
+    }
+
+
+    $:{
+        if($myAddressBook.length>0){ //if a record arrives in my address book show it on the page //TODO go to ContactList (would be better)
             scannedContact = $myAddressBook?.filter((it) => { return it.owner === $did })
             console.log("scannedContact",scannedContact[0])
         }
