@@ -168,10 +168,9 @@ async function handleMessage (dContactMessage) {
                 requesterDB = await _orbitdb.open(data.sharedAddress, {
                     type: 'documents',sync: true})
 
-                const isRes = await isRecipientInSenderDB(requesterDB, messageObj)
-                    
-                if (isRes == true)
-                break;        
+                // const isRes = await isRecipientInSenderDB(requesterDB, messageObj) //TODO this seems contradicting we need to think twice again
+                // if (isRes === true)
+                // break;
 
                 result = await confirm({
                     data:messageObj,
@@ -204,21 +203,31 @@ async function handleMessage (dContactMessage) {
     }
 }
 
+/**
+ * Opens the db of the requesterDB (if Alice requests from Bob, Bob opens Alice db)
+ * And if the requester is already in the db we return false (and do not process the message)
+ *
+ * //TODO this seems contradicting at some point - needs solution
+ *
+ * @param requesterDB db of Alice
+ * @param messageObj the message of Alice
+ * @returns {Promise<boolean>}
+ */
 async function  isRecipientInSenderDB (requesterDB, messageObj){
 
     const records = await requesterDB.all()
 
-        if(records.length!=0){
-            const isRecipient = records.filter(element => {
-                    return element.value.owner === messageObj.recipient
-            });          
+    if(records.length !== 0){
 
-            if(isRecipient.length != 0 ){
-                 return true  
-            }else{
-                return false
-            }
-        }
+        const isRecipient = records.filter(element => {
+                return element.value.owner === messageObj.recipient
+        });
+
+        if(isRecipient.length !== 0 )
+             return true
+        else
+            return false
+    }
 }
 
 /**
