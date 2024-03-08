@@ -22,13 +22,16 @@
         }
     }
     let scannedContact
+    let requested
     $:{
-            if(!scannedContact &&
-                $connectedPeers>1 && //if connected
+            if($connectedPeers>1 && //if connected
                 $did!==undefined &&
                 $orbitdb!==undefined &&
-                $dbMyAddressBook.access!==undefined)
+                $dbMyAddressBook.access!==undefined){
                 requestAddress($did)
+                requested = true
+            }
+
     }
 
 
