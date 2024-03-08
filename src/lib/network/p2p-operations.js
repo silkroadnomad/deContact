@@ -168,7 +168,7 @@ async function handleMessage (dContactMessage) {
                 requesterDB = await _orbitdb.open(data.sharedAddress, {
                     type: 'documents',sync: true})
 
-                // const isRes = await isRecipientInSenderDB(requesterDB, messageObj) //TODO this seems contradicting we need to think twice again
+                // const isRes = await isRequesterInSenderDB(requesterDB, messageObj) //TODO this seems contradicting we need to think twice again
                 // if (isRes === true)
                 // break;
 
@@ -213,7 +213,7 @@ async function handleMessage (dContactMessage) {
  * @param messageObj the message of Alice
  * @returns {Promise<boolean>}
  */
-async function  isRecipientInSenderDB (requesterDB, messageObj){
+async function  isRequesterInSenderDB (requesterDB, messageObj){
 
     const records = await requesterDB.all()
 
