@@ -13,18 +13,22 @@
 
     const aliceMultiAddress = JSON.parse(decodeURI($query).split("=")[1])
     console.log("aliceMultiAddress",aliceMultiAddress[0])
+    let scannedContact
+    let requested
+    let aliceConnected
     $:{
-        if($libp2p && $connectedPeers>0){
+        if(!aliceConnected && $libp2p && $connectedPeers>0){
             $libp2p.dial(multiaddr(aliceMultiAddress[0])).then((info) => {
+                aliceConnected=true
                 console.log("connected peer",info)}).catch( (e) => {
                 console.log("e",e)
             })
         }
     }
-    let scannedContact
-    let requested
+
     $:{
-            if($connectedPeers>1 && //if connected
+            if(!requested &&
+                $connectedPeers>1 && //if connected
                 $did!==undefined &&
                 $orbitdb!==undefined &&
                 $dbMyAddressBook.access!==undefined){

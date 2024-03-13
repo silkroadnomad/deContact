@@ -36,6 +36,7 @@ export const handleSeedphrase = async () => {
             case GENERATE_NEW:
                 _seedPhrase = generateMnemonic();
                 seedPhrase.set(_seedPhrase)
+                localStorage.setItem("seedPhrase",_seedPhrase)
                 selectedTab.set(3)
                 notify(`generated a new seed phrase ${_seedPhrase}`)
                 break;

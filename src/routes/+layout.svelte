@@ -22,7 +22,9 @@
     let theme = "g90";
 
     $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
+        console.log("generating seed phrase")
         handleSeedphrase().then(() => {
+            console.log("generated seed phrase - creating identity and starting orbitdb")
             getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
                 .then(dbInstance => {
                     orbitdb.set(dbInstance);
