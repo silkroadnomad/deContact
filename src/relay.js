@@ -39,11 +39,11 @@ const server =
 		connectionEncryption: [noise()],
 		streamMuxers: [yamux()],
 		peerDiscovery: [
-			bootstrap({
-				list: ['/ip4/159.69.119.82/udp/9090/webrtc-direct/certhash/uEiAIh0DoA5Qk2xTpc_j58KZMvww9CQzN6UNgsJ-DTuM6XQ/p2p/12D3KooWF5fGyE4VeXMhSGd9rCwckyxCVkA6xfoyFJG9DWJis62v']}),
+			// bootstrap({
+			// 	list: ['/ip4/159.69.119.82/udp/9090/webrtc-direct/certhash/uEiAIh0DoA5Qk2xTpc_j58KZMvww9CQzN6UNgsJ-DTuM6XQ/p2p/12D3KooWF5fGyE4VeXMhSGd9rCwckyxCVkA6xfoyFJG9DWJis62v']}),
 			pubsubPeerDiscovery({
 				interval: 1000,
-				topics: ['dev-dcontact._peer-discovery._p2p._pubsub'], // defaults to ['_peer-discovery._p2p._pubsub']
+				topics: ['dev-decontact._peer-discovery._p2p._pubsub'], // defaults to ['_peer-discovery._p2p._pubsub']
 				listenOnly: false
 			})
 	],
