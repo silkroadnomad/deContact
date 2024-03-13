@@ -7,7 +7,7 @@
         ExpandableTile,
         Column,
         Grid,
-        Row
+        Row, Checkbox
     } from "carbon-components-svelte";
     import { createEventDispatcher, onMount } from "svelte";
 
@@ -15,13 +15,14 @@
 
     export let heading = 'deContact Protocol Action';
     export let ExchangeContactDataButtonText = 'Exchange Contact Data';
-    export let OnlyHandoutMyDataButtonText = 'Only hand out my contact data';
-    export let CancelOperationButtonText = 'Cancel this operation';
+    export let SendMyContactData = 'Send My Contact Data';
+    export let CancelOperationButtonText = 'Cancel';
     export let data;
     export let db;
     export let sender;
 
     let businessCard;
+    let exchangeData = true
 
     async function fetchBusinessCard() {
         const businessCardElements = await db.all();
@@ -40,17 +41,15 @@
     <ModalBody hasForm>
         <ExpandableTile>
             <div slot="above">
-                <div>
+                <div>From:
                     {#if businessCard}
-                        {businessCard.firstName} {businessCard.lastName} {businessCard.city} <br/> sent a contact data request
+                        {businessCard.firstName} {businessCard.lastName} {businessCard.city} <br/>
+                        owner: {businessCard.owner}<br/>
                     {/if}
                 </div>
-                <p>You can:</p>
-                <ul>
-                    <li>Exchange your contact data with {businessCard?.firstName}'s data</li>
-                    <li>ONLY write your contact data into {businessCard?.firstName}'s address book</li>
-                    <li>Don't do anything of this and cancel this request</li>
-                </ul>
+                <p>&nbsp;</p>
+                <Checkbox labelText="Request contact data from requester in exchange"  bind:checked={exchangeData} />
+                <p>&nbsp;</p>
                 <div>View Transaction Details</div>
             </div>
             <div slot="below">
@@ -64,17 +63,17 @@
             </div>
         </ExpandableTile>
     </ModalBody>
+
     <ModalFooter
-        primaryButtonText={ExchangeContactDataButtonText}
-        on:click:button--primary={() => dispatch('result', true)}
+        primaryButtonText={ SendMyContactData }
+        on:click:button--primary={() => exchangeData?dispatch('result', true):dispatch('result', "ONLY_HANDOUT")}
         selectorPrimaryFocus=".bx--btn--primary"
         secondaryButtons={[
-            { text: CancelOperationButtonText },
-            { text: OnlyHandoutMyDataButtonText }
+            { text: CancelOperationButtonText }
         ]}
         on:click:button--secondary={({ detail }) => {
             if (detail.text === CancelOperationButtonText) dispatch('result', false);
-            if (detail.text === OnlyHandoutMyDataButtonText) dispatch('result', "ONLY_HANDOUT");
+
         }}
     />
 </ComposedModal>
