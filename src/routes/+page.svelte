@@ -19,13 +19,9 @@
     import Statistics from "$lib/components/Statistics.svelte";
 
     import {
-        libp2p,
-        connectedPeers,
         orbitdb,
         qrCodeOpen,
         qrCodeData,
-        progressState,
-        progressText,
         showNotification,
         notificationMessage,
         selectedTab,
@@ -55,14 +51,14 @@
                             <TextInput role="scanContact" size="sm" bind:value={scannedAddress} on:keydown={(e) => e.code==='Enter'?requestAddress(scannedAddress):null} />
                         </Column>
                             <Column>
-                                <Button size="sm"
-                                        on:click={async () => await requestAddress(scannedAddress)}>
-                                    <Scan size="16"/> &nbsp; Scan
-                                </Button>
-                                <Button size="sm" on:click={() => {
-                                    $qrCodeData = $orbitdb?.identity?.id;
-                                    $qrCodeOpen = !$qrCodeOpen;
-                                }}>
+                                    <Button size="sm"
+                                            on:click={async () => await requestAddress(scannedAddress)}>
+                                        <Scan size="16"/> &nbsp; Scan
+                                    </Button>
+                                    <Button size="sm" on:click={() => {
+                                        $qrCodeData = $orbitdb?.identity?.id;
+                                        $qrCodeOpen = !$qrCodeOpen;
+                                    }}>
                                     <QrCode size="16" /> &nbsp; QR Code
                                 </Button>
                         </Column>

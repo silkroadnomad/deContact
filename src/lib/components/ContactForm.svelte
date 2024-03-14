@@ -34,7 +34,11 @@
                             { id: "other", text: "Other" },
                     ]}
             /></Column>
-            <Column><Checkbox labelText="our own address" name="own" bind:checked={$selectedAddr.own}/></Column>
+            <Column>
+                {#if $selectedAddr.owner === $orbitdb?.identity?.id || !$selectedAddr._id}
+                    <Checkbox labelText="our own address" name="own" bind:checked={$selectedAddr.own}/>
+                {/if}
+            </Column>
         </Row>
         <Row>
             <Column>
