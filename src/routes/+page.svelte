@@ -39,9 +39,9 @@
 </script>
 
 <div class="content">
-    {#if $progressState!==6}
+<!--    {#if $progressState!==6}
     <ProgressBar helperText={"("+$progressState+"/6) "+$progressText} status={$progressState===6?"finished":"active"} />
-    {/if}
+    {/if}-->
     <Tabs class="tabs" bind:selected={$selectedTab}>
         <Tab label="Contacts" data-cy="contacts"/>
         <Tab label="My Address" data-cy="address"/>
