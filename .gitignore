@@ -3,6 +3,8 @@ node_modules
 /build
 /.svelte-kit
 /package
+android
+ios
 .env
 .env.*
 !.env.example

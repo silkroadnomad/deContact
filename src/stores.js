@@ -60,7 +60,7 @@ const contact = {
     countryRegion:"",
     ipns: "",
     owner:"",
-    own:false,
+    own:true,
     category: 'business',
     sharedAddress:""
 }

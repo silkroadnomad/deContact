@@ -6,8 +6,9 @@
     import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
     import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
     import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";
-    import Modals from "$lib/components/QRCodeModal.svelte";
-    import { myDal, qrCodeOpen, qrCodeData, subscriberList, seedPhrase, helia, synced, recordsSynced, orbitdb, masterSeed } from "../stores.js";
+    import { hash } from './router.js'
+    import QRCodeModal from "$lib/components/QRCodeModal.svelte";
+    import { myDal, qrCodeOpen, qrCodeData, seedPhrase, helia, orbitdb, masterSeed } from "../stores.js";
 
     import { startNetwork } from "../lib/network/p2p-operations.js"
     import { getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js"
@@ -15,19 +16,15 @@
     import { connectedPeers } from "../stores.js";
     import { confirmExperimentalUse } from "./confirmExperimentalUse.js";
     import { handleSeedphrase } from "./handleSeedphrase.js";
-
-    const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
+    import Home from './+page.svelte'
+    import OnBoarding from "$lib/components/OnBoarding.svelte";
 
     let theme = "g90";
 
-    async function handleDestroy() {
-        // if($subscription) await $subscription.unsubscribe([CONTENT_TOPIC]); //TODO remove this again if there is no native pub sub inside our app
-    }
-
-    $: window.localStorage.setItem('subscriberList', JSON.stringify($subscriberList));
-
     $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
+        console.log("generating seed phrase")
         handleSeedphrase().then(() => {
+            console.log("generated seed phrase - creating identity and starting orbitdb")
             getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
                 .then(dbInstance => {
                     orbitdb.set(dbInstance);
@@ -44,13 +41,20 @@
         await startNetwork();
     })
 
-    onDestroy(handleDestroy);
-
     let isSideNavOpen
     let title = "   - the cloud we are!"
-</script>
 
-<svelte:window on:beforeinstallprompt={()=>{ console.log("beforeinstallprompt") }} />
+    const routes = {
+        '/': Home,
+        '': Home,
+        '/onboarding': OnBoarding
+    }
+    // $: console.log("$hash",$hash)
+    $: view = routes[$hash]
+
+        //    const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
+</script>
+<svelte:window on:beforeinstallprompt={ () => { console.log("beforeinstallprompt") }} />
 
     <Header
         class="header-title"
@@ -94,11 +98,13 @@
             </HeaderGlobalAction>
     </HeaderUtilities>
 </Header>
-<Modals on:close={() => $qrCodeOpen = false}
-        bind:qrCodeOpen={$qrCodeOpen}
-        qrCodeData={$qrCodeData}
-        dbMyDal={$myDal} />
-<slot></slot>
+<QRCodeModal
+        on:close={ () => $qrCodeOpen = false }
+        bind:qrCodeOpen={ $qrCodeOpen }
+        qrCodeData={ $qrCodeData }
+        dbMyDal={ $myDal } />
+<!--<slot></slot>-->
+<svelte:component this={ view } />
 <style>
     :global(.bx--toast-notification) {
         z-index: 1;

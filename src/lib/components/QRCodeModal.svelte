@@ -1,76 +1,63 @@
 <script>
-    import {Modal} from "carbon-components-svelte";
-    import QRCode from "qrcode-generator";
-    import {createEventDispatcher} from "svelte";
+    import {Column, Modal, Toggle, Grid, Row} from "carbon-components-svelte";
+    import QrCode from "svelte-qrcode"
+    import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
-    import { clickToCopy } from "../../utils/utils.js"
-    import { myDal } from "../../stores.js"
+    import {connectedPeers, libp2p} from "../../stores.js";
+    import {notify} from "../../utils/utils.js";
 
-    /**
-     * @type {boolean}
-     * when true qr-code modal is open
-     */
-    export let qrCodeOpen = false
-
-    /**
-     * the data to be transformed into an qr-code
-     * @type {string}
-     */
+    const page_url = import.meta.env.VITE_PAGE_URL?import.meta.env.VITE_PAGE_URL+'/#':'https://deContact.xyz/#';
     export let qrCodeData
+    export let qrCodeOpen
 
-    /**
-     * myDal
-     */
-    // export let myDal;
+    let multiaddrs
 
-    let myContactData = []
-    /**
-     * Generates a QR-Code with the given data
-     * @param {string}data
-     * @return {string} the
-     */
-    function generateQRCode(data) {
-        const qr = QRCode(4, 'L');
-        qr.addData(data);
-        qr.make();
-        return qr.createImgTag(6);
+    $:{
+        if($connectedPeers>0){
+            multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString())
+        }
     }
 
-    /**
-     *
-     */
-    async function getMyData(db) {
-        if(!db) return
-        myContactData = await db.all()
-    }
-    $: getMyData($myDal)
-
-
-    let text = '';
-
-    function copySuccess(){
-        text = "Copied!"
-    }
-
-    function copyError(event){
-        text = `Error! ${event.detail}`
-    }
+    let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an animation)
+    let linkUrl = `${page_url}/onboarding/${qrCodeData || '' }`
+    let fullDeContactUrl = true
+    $: linkUrl = fullDeContactUrl?`${page_url}/onboarding/${qrCodeData+'?multiaddr='+encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
+    console.log("linkUrl",linkUrl)
+    $:console.log(multiaddrs)
 </script>
-<svelte:window on:copysuccess={copySuccess} on:copyerror={copyError}/>
-<Modal bind:open={ qrCodeOpen }
+
+    <Modal bind:open={ qrCodeOpen }
        modalHeading="Scan (DID) - Decentralized Identity"
        primaryButtonText="OK"
        secondaryButtonText=""
        on:click:button--primary={ () => dispatch('close') }
        on:click:button--secondary={ () => dispatch('close') }
        on:close={()=>dispatch('close')}>
-
-    <label for="qrCodeModal"
-            use:clickToCopy>{qrCodeData}</label>&nbsp;<span id="qrCodeModal">{text}</span>
-    <p></p>
-    {#each myContactData as contact, index}
-        <li>{contact.value.firstname} {contact.value.lastname}</li>
-    {/each}
-
-    {#if qrCodeData && qrCodeOpen}{@html generateQRCode(qrCodeData)}{/if}
+    <Grid>
+        <Row>
+            <Column>
+                {#if multiaddrs && multiaddrs.length>0}
+                    <Toggle
+                        labelText="Generate invitation?"
+                        labelA="No"
+                        labelB="Yes"
+                        bind:toggled={fullDeContactUrl}/>
+                {/if}
+            </Column>
+        </Row>
+        <Row>
+            <Column>
+                {#if qrCodeData && qrCodeOpen}
+                    <div class="container" on:click={async () => {
+                            console.log("linkurl",linkUrl)
+                            await navigator.clipboard.writeText(linkUrl);
+                            dispatch('close')
+                            notify(`copied invitation`);
+                        }}>
+                        <QrCode  value={linkUrl} />
+                    </div>
+                {/if}
+            </Column>
+        </Row>
+    </Grid>
 </Modal>

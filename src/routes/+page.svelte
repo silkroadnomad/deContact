@@ -11,6 +11,8 @@
         ProgressBar,
         ToastNotification
     } from "carbon-components-svelte";
+    import QrCode from "carbon-icons-svelte/lib/QrCode.svelte";
+    import Scan from "carbon-icons-svelte/lib/Scan.svelte";
     import ContactForm from "$lib/components/ContactForm.svelte";
     import ContactList from "$lib/components/ContactList.svelte";
     import Settings from "$lib/components/Settings.svelte";
@@ -20,8 +22,6 @@
         orbitdb,
         qrCodeOpen,
         qrCodeData,
-        progressState,
-        progressText,
         showNotification,
         notificationMessage,
         selectedTab,
@@ -32,16 +32,12 @@
 
     $: $selectedRowIds.length>0?loadContact($selectedRowIds[0]):null; //as the datatable gets clicked we load the contact into the contact form
     let scannedAddress;
-    const toggleQrCode = () => {
-        $qrCodeData = $orbitdb.identity.id
-        $qrCodeOpen = !$qrCodeOpen;
-    };
 </script>
 
 <div class="content">
-    {#if $progressState!==6}
+<!--    {#if $progressState!==6}
     <ProgressBar helperText={"("+$progressState+"/6) "+$progressText} status={$progressState===6?"finished":"active"} />
-    {/if}
+    {/if}-->
     <Tabs class="tabs" bind:selected={$selectedTab}>
         <Tab label="Contacts" data-cy="contacts"/>
         <Tab label="My Address" data-cy="address"/>
@@ -51,9 +47,21 @@
             <TabContent>
                 <Grid fullWidth>
                     <Row>
-                        <Column><TextInput role="scanContact" size="sm" bind:value={scannedAddress}/></Column>
-                        <Column><Button size="sm" on:click={() => requestAddress(scannedAddress)}>Scan Contact</Button></Column>
-                        <Column><Button size="sm" on:click={toggleQrCode}>My QR-Code</Button></Column>
+                        <Column>
+                            <TextInput role="scanContact" size="sm" bind:value={scannedAddress} on:keydown={(e) => e.code==='Enter'?requestAddress(scannedAddress):null} />
+                        </Column>
+                            <Column>
+                                    <Button size="sm"
+                                            on:click={async () => await requestAddress(scannedAddress)}>
+                                        <Scan size="16"/> &nbsp; Scan
+                                    </Button>
+                                    <Button size="sm" on:click={() => {
+                                        $qrCodeData = $orbitdb?.identity?.id;
+                                        $qrCodeOpen = !$qrCodeOpen;
+                                    }}>
+                                    <QrCode size="16" /> &nbsp; QR Code
+                                </Button>
+                        </Column>
                     </Row>
                 </Grid>
                 <ContactList/>

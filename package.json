@@ -1,6 +1,6 @@
 {
 	"name": "decontact",
-	"version": "0.2.3",
+	"version": "0.2.6",
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
@@ -11,6 +11,7 @@
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json --watch",
 		"test": "npm run test:integration && npm run test:unit",
 		"test:e2e": "npx playwright test BasicAddressExchange.spec.js",
+		"test:e2e:manual": "HEADLESS=false npx playwright test BasicAddressExchange.spec.js --debug --trace on",
 		"lint": "prettier --check . && eslint .",
 		"format": "prettier --write .",
 		"test:integration": "playwright test",
@@ -58,6 +59,7 @@
 		"key-did-provider-ed25519": "^4.0.2",
 		"key-did-resolver": "^4.0.0",
 		"qrcode-generator": "^1.4.4",
+		"svelte-qrcode": "^1.0.0",
 		"vite-plugin-node-polyfills": "^0.19.0"
 	}
 }
