@@ -263,6 +263,17 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     try {
         const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
         delete writeFirstOfOurAddresses.own;
+        const all = await requesterDB.all()
+        console.log("all before deleting",all)
+
+        //find id of dummy record and delte
+        const foundDummy = all.filter((it) => {
+            console.log("it.value.owner",it.value.owner)
+            console.log("_orbitdb?.identity?.id",_orbitdb?.identity?.id)
+            return it.value.owner === _orbitdb?.identity?.id
+        })
+        console.log("foundDummy and deleting it",foundDummy)
+        await requesterDB.del(foundDummy[0].value._id)
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
         notify(`wrote my address into requesters db with hash ${hash}`);
     } catch (error) {
