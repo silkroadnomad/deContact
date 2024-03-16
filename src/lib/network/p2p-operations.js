@@ -110,7 +110,7 @@ async function getAddressRecords() {
             id: record.value._id
         }));
         transformedRecords = transformedRecords.filter((addr)=> {
-            return addr.id !==undefined
+            return addr.id !==undefined && addr.subscriber===undefined
         })
         myAddressBook.set(transformedRecords);
         console.log("records in dbMyAddressBook ",addressRecords)
@@ -122,6 +122,16 @@ async function getAddressRecords() {
 /**
  * Loop through our address book and open all other address books of the people we follow (and replicate them in order to keep a backup)
  * We back up the dbs of the people (the addresses) we follow.
+ *
+ * In case Bob doesn't follow Alice he keeps an invisible dummy in his address book (which he can decide if he wants to back it up or not)
+ *
+ * TODO: If a contact db gets too large we still need a solution for that! e.g. all other follower (like us) could agree on only backing up
+ * a certain part of the data. E.g. Bob has 100 MB data, Alice wants to backup only 10MB, she could create her own version of Bobs data w ith only slice of his data.
+ * Alice could let others know about her slice, so those who want to backup Bobs data can take the next slice.
+ * If Bob looses his data, he could open his db address with a slice index as an extension e.g. /orbitdb/address/01 /orbitdb/address/02 etc
+ * He could do so right in the moment when his data gets over 10MB and create a new db for new contacts. The new contacts would then automatically backup the correct slice
+ * (something like that)
+ *
  * @param ourDID our DID
  * @returns {Promise<void>}
  */
@@ -308,10 +318,6 @@ subscription.subscribe((val) => {
     _subscription = val
 });
 
-let _handle
-handle.subscribe((val) => {
-    _handle = val
-});
 let _connectedPeers
 connectedPeers.subscribe((val) => {
     _connectedPeers = val

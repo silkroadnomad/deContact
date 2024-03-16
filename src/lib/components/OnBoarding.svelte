@@ -6,7 +6,7 @@
         libp2p,
         dbMyAddressBook,
         myAddressBook,
-        progressText,
+        // progressText,
         connectedPeers
     } from "../../stores.js";
     import { requestAddress } from "../../lib/network/p2p-operations.js"
