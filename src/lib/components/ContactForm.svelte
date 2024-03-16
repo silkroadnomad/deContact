@@ -25,6 +25,12 @@
                                 bind:value={$selectedAddr.countryRegion}  /></Column>
         </Row>
         <Row>
+            <Column>
+                <TextInput data-cy="txtEmail" size="sm" labelText="Email" placeholder="Email" bind:value={$selectedAddr.email}  />
+            </Column>
+            <Column></Column>
+        </Row>
+        <Row>
             <Column><Dropdown
                     titleText="Category"
                     bind:selectedId={$selectedAddr.category}

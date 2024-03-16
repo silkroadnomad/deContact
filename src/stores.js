@@ -58,6 +58,7 @@ const contact = {
     city: "",
     stateProvince: "",
     countryRegion:"",
+    email:"",
     ipns: "",
     owner:"",
     own:true,

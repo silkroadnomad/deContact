@@ -25,7 +25,6 @@ import { confirm } from "../components/addressModal.js"
 import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
 
-
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
 
@@ -131,28 +130,26 @@ async function getAddressRecords() {
 }
 
 /**
- * Loop through our address book and filter all other's addresses
+ * Loop through our address book and open all address books of the people we follow (and replicate them)
  * @param ourDID our DID
  * @returns {Promise<void>}
  */
 async function initReplicationOfSubscriberDBs(ourDID) {
-    // console.log("replicateSubsriberDBs")
+
     const addressRecords = await _dbMyAddressBook.all();
     _subscriberList = addressRecords.filter((addr)=> {
         return addr.value.owner !== ourDID && addr.value.sharedAddress!==undefined //sharedAddress undefined for all not decentralized addresses
     })
-    // console.log("_subscriberList",_subscriberList)
+
     subscriberList.set(_subscriberList)
     for (const s in _subscriberList) {
         const dbAddress = _subscriberList[s].value.sharedAddress
-        // console.log("loading subscribers db s",dbAddress)
-        try{
+        try {
             _subscriberList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
             _subscriberList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
                 console.log(`dbAddress: ${dbAddress} records`,records)
             })
-        }catch(e){console.log(`error while loading ${dbAddress} `)}
-
+        } catch(e){console.log(`error while loading ${dbAddress} `)}
     }
 }
 async function handleMessage (dContactMessage) {
@@ -164,32 +161,14 @@ async function handleMessage (dContactMessage) {
         switch (messageObj.command) {
             case REQUEST_ADDRESS:
                 data = JSON.parse(messageObj.data)
-
-                requesterDB = await _orbitdb.open(data.sharedAddress, {
-                    type: 'documents',sync: true})
-
-                // const isRes = await isRequesterInSenderDB(requesterDB, messageObj) //TODO this seems contradicting we need to think twice again
-                // if (isRes === true)
-                // break;
-
-                result = await confirm({
-                    data:messageObj,
-                    db:requesterDB,
-                    sender: messageObj.sender })
-
+                requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents',sync: true})
+                result = await confirm({ data:messageObj, db:requesterDB})
                 if(result){
-                    if(result==='ONLY_HANDOUT'){
-                        await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
-                        //add a subscriber to our address book (should not be displayed in datatable
-                        const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
-                        subscriber._id = await sha256(JSON.stringify(subscriber));
-                        await _dbMyAddressBook.put(subscriber)
-                    }
+                    if(result==='ONLY_HANDOUT')
+                        await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
                     else {
                         await writeMyAddressIntoRequesterDB(requesterDB);
-                        await requestAddress(messageObj.sender)
-                        //await addRequestersContactDataToMyDB(requesterDB,messageObj.sender) //we want to write Alice contact data into our address book same time
-                        //TODO in case Bob want's to exchange the data he should just send another request to Alice (just as Alice did)
+                        await requestAddress(messageObj.sender,true)
                     }
                     initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
 
@@ -229,24 +208,36 @@ async function createMessage(command, recipient, data = null) {
  * 2. Bob adds write permission to Alice identity to his own address book //TODO please make sure Alice can only write up to 3 addresses into Bobs db and can only update and delte her own.
  * 3. Bob is so kind and backups Alice (encrypted) address db on his device by opening it.
  * @param scannedAddress
+ * @param nopingpong set to true if Bob should not ask again to exchange the contacts if just happened (prevent the ping pong)
  * @returns {Promise<void>}
  */
-export const requestAddress = async (_scannedAddress) => {
+export const requestAddress = async (_scannedAddress,nopingpong) => {
     const scannedAddress = _scannedAddress.trim()
     try {
         console.log("request requestAddress from", _orbitdb?.identity?.id); //TODO remove white spaces from scannedAddress string
         const data = { sharedAddress:_dbMyAddressBook.address }
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
+        if(nopingpong===true) msg.nopingpong = true
+
         await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
 
-        const dummyContact  = {owner:scannedAddress, firstName:'requested', lastName:scannedAddress}
-        dummyContact._id = await sha256(JSON.stringify(dummyContact));
-        await _dbMyAddressBook.put(dummyContact)
+        //look if a dummy is inside
+        const all = await _dbMyAddressBook.all()
+        const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress})
+        console.log("foundDummy",foundDummy)
+        if(foundDummy.length===0){
+            const dummyContact  = {
+                owner: scannedAddress,
+                firstName: 'invited',
+                lastName: scannedAddress
+            }
 
-        const capabilities = await _dbMyAddressBook.access.capabilities()
-        console.log(`granted write permission to ${scannedAddress}`,capabilities)
+            dummyContact._id = await sha256(JSON.stringify(dummyContact));
+            await _dbMyAddressBook.put(dummyContact)
+            const capabilities = await _dbMyAddressBook.access.capabilities()
+            console.log(`granted write permission to ${scannedAddress}`,capabilities)
+        }
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg))) //TODO when publishing a message sign content and enrypt content
-
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
         console.error('Error in requestAddress:', error);
@@ -255,6 +246,7 @@ export const requestAddress = async (_scannedAddress) => {
 
 /**
  * Now we are writing our address directly into Alice address book (we got write permission)
+ *
  * @param recipient
  * @param data
  * @returns {Promise<void>}
@@ -263,19 +255,19 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     try {
         const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
         delete writeFirstOfOurAddresses.own;
+        //delete the dummy which alice added for us!
         const all = await requesterDB.all()
-        console.log("all before deleting",all)
-
-        //find id of dummy record and delte
         const foundDummy = all.filter((it) => {
-            console.log("it.value.owner",it.value.owner)
-            console.log("_orbitdb?.identity?.id",_orbitdb?.identity?.id)
             return it.value.owner === _orbitdb?.identity?.id
         })
-        console.log("foundDummy and deleting it",foundDummy)
-        await requesterDB.del(foundDummy[0].value._id)
+
+        for (const foundDummyKey in foundDummy) {
+            await requesterDB.del(foundDummy[foundDummyKey].key)
+        }
+
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
         notify(`wrote my address into requesters db with hash ${hash}`);
+
     } catch (error) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
     }
