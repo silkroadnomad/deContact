@@ -1,5 +1,4 @@
 import {notify, sha256} from "./utils/utils.js";
-
 import {
     myAddressBook,
     selectedAddr,
@@ -10,8 +9,7 @@ import {
     myDal,
     dbMyAddressBook, followList
 } from "./stores.js";
-
-
+import {goto} from "$app/navigation";
 
 /**
  * Loading a contact from memory into the contactForm
@@ -33,13 +31,20 @@ export async function loadContact(id) {
  * At the end we switch back to ContactList Tab
  * @returns {Promise<void>}
  */
-export async function addContact() {
+export async function addContact(isOnBoarding) {
+    console.log("isOnBoarding",isOnBoarding)
     _selectedAddr.owner = _orbitdb?.identity?.id
     _selectedAddr.sharedAddress = _dbMyAddressBook?.address
     _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
     const hash = await _dbMyAddressBook.put(_selectedAddr)
-    selectedAddr.set({})
-    selectedTab.set(0)
+    if(!isOnBoarding){
+        selectedAddr.set({})
+        selectedTab.set(0)
+    }
+    else{
+        console.log("going to root now")
+        goto("/")
+    }
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
 }
 

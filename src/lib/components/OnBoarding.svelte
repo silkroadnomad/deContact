@@ -46,18 +46,21 @@
     }
 </script>
 <div class="content">
-    <li>loading did: {$did} </li>
-    <li>
-        {scannedContact && scannedContact.length>0?scannedContact[0].firstName:''}
-        {scannedContact && scannedContact.length>0?scannedContact[0].lastName:''} added to our address book please
-        add your name and email
-    </li>
-    <ContactForm/>
+    {#if !scannedContact}
+        <li>loading did: {$did} </li>
+    {:else}
+        <li>
+            {scannedContact && scannedContact.length>0?scannedContact[0].firstName:''}
+            {scannedContact && scannedContact.length>0?scannedContact[0].lastName:''} added to our address book please
+            add your name and email
+        </li>
+    {/if}
+
+    <ContactForm isOnBoarding={true}/>
 </div>
 
 <style>
     :global(.content) {
         margin: 3rem;
     }
-
 </style>
