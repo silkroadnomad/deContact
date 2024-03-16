@@ -8,7 +8,7 @@ import {
     qrCodeOpen,
     orbitdb,
     myDal,
-    dbMyAddressBook, subscriberList
+    dbMyAddressBook, followList
 } from "./stores.js";
 
 
@@ -54,12 +54,12 @@ export async function updateContact() {
     await _dbMyAddressBook.put(_selectedAddr)
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
-    notify(`Contact updated successfully - informing our subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
+    notify(`Contact updated successfully - informing our followers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
     if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
-        for (const s in  _subscriberList) {
-            console.log("updating address in ",_subscriberList[s].db.address)
-            _subscriberList[s].db.put(_selectedAddr)
-            notify(`Updated db ${_subscriberList[s].db.address} `)
+        for (const s in  _followList) {
+            console.log("updating address in ",_followList[s].db.address)
+            _followList[s].db.put(_selectedAddr)
+            notify(`Updated db ${_followList[s].db.address} `)
         }
     }
     selectedAddr.set({})
@@ -98,9 +98,9 @@ myAddressBook.subscribe((value) => {
     _myAddressBook = value
 })
 
-let _subscriberList
-subscriberList.subscribe((val) => {
-    _subscriberList = val
+let _followList
+followList.subscribe((val) => {
+    _followList = val
 });
 
 let _myDal;

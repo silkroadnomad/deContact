@@ -15,10 +15,7 @@ import {
     dbMyAddressBook,
     subscription,
     connectedPeers,
-    handle,
-    progressText,
-    progressState,
-    subscriberList, dbMessages, selectedTab, syncedDevices,
+    followList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
 import {config} from "../../config.js";
 import { confirm } from "../components/addressModal.js"
@@ -39,13 +36,8 @@ const REQUEST_ADDRESS = 'REQUEST_ADDRESS';
  */
 export async function startNetwork() {
 
-    progressText.set("Starting libp2p node")
-    progressState.set(1)
     _libp2p =  await createLibp2p(config)
     libp2p.set(_libp2p)
-
-    progressText.set("Starting Helia (IPFS) node")
-    progressState.set(2)
     _helia = await createHelia({
         libp2p: _libp2p,
         blockstore,
@@ -55,8 +47,6 @@ export async function startNetwork() {
     helia.set(_helia)
     window.helia = _helia
 
-    progressText.set(`Starting deContact pub sub protocol`)
-    progressState.set(3)
     _libp2p.addEventListener('connection:open',  async (c) => {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
@@ -80,10 +70,8 @@ export async function startNetwork() {
         handleMessage(message)
     })
 
-    progressText.set(`Opening our address book from OrbitDB... `)
     _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
     orbitdb.set(_orbitdb)
-    progressState.set(3)
 
     /**
      * My Address Book (with own contact data and contact data of others
@@ -97,9 +85,11 @@ export async function startNetwork() {
     })
     // console.log("dbMyAddressBook",_dbMyAddressBook)
     dbMyAddressBook.set(_dbMyAddressBook)
-    window.dbMyAddressBook = _dbMyAddressBook
+    window.mydb = _dbMyAddressBook
     await getAddressRecords()
-    initReplicationOfSubscriberDBs(_orbitdb.identity.id)
+
+    initReplicationBackup(_orbitdb.identity.id)
+
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
         console.log("one of my devices joined and synced myaddressbook",peerId)
         syncedDevices.set(true)
@@ -130,24 +120,25 @@ async function getAddressRecords() {
 }
 
 /**
- * Loop through our address book and open all address books of the people we follow (and replicate them)
+ * Loop through our address book and open all other address books of the people we follow (and replicate them in order to keep a backup)
+ * We back up the dbs of the people (the addresses) we follow.
  * @param ourDID our DID
  * @returns {Promise<void>}
  */
-async function initReplicationOfSubscriberDBs(ourDID) {
+async function initReplicationBackup(ourDID) {
 
     const addressRecords = await _dbMyAddressBook.all();
-    _subscriberList = addressRecords.filter((addr)=> {
+    _followList = addressRecords.filter((addr)=> {
         return addr.value.owner !== ourDID && addr.value.sharedAddress!==undefined //sharedAddress undefined for all not decentralized addresses
     })
 
-    subscriberList.set(_subscriberList)
-    for (const s in _subscriberList) {
-        const dbAddress = _subscriberList[s].value.sharedAddress
+    followList.set(_followList)
+    for (const s in _followList) {
+        const dbAddress = _followList[s].value.sharedAddress
         try {
-            _subscriberList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
-            _subscriberList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
-                console.log(`dbAddress: ${dbAddress} records`,records)
+            _followList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
+            _followList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
+                console.log(`we follow and backup dbAddress: ${dbAddress} records`,records)
             })
         } catch(e){console.log(`error while loading ${dbAddress} `)}
     }
@@ -177,7 +168,7 @@ async function handleMessage (dContactMessage) {
                         await writeMyAddressIntoRequesterDB(requesterDB);
                         await requestAddress(messageObj.sender,true)
                     }
-                    initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
+                    initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
 
                 }else{
                     //TODO send "rejected sending address"
@@ -330,9 +321,9 @@ myAddressBook.subscribe((val) => {
     _myAddressBook = val
 });
 
-let _subscriberList
-subscriberList.subscribe((val) => {
-    _subscriberList = val
+let _followList
+followList.subscribe((val) => {
+    _followList = val
 });
 
 let _selectedTab
