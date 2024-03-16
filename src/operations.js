@@ -28,7 +28,7 @@ export async function loadContact(id) {
 }
 
 /**
- * Adds a new contact into orbitdb dbMyAddressBook.
+ * Adds a new contact to the orbitdb dbMyAddressBook.
  * The result is a hash
  * At the end we switch back to ContactList Tab
  * @returns {Promise<void>}

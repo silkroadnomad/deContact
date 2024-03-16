@@ -10,6 +10,7 @@
         connectedPeers
     } from "../../stores.js";
     import { requestAddress } from "../../lib/network/p2p-operations.js"
+    import ContactForm from "$lib/components/ContactForm.svelte";
 
     const aliceMultiAddress = JSON.parse(decodeURI($query).split("=")[1])
     console.log("aliceMultiAddress",aliceMultiAddress[0])
@@ -45,13 +46,13 @@
     }
 </script>
 <div class="content">
-    <h1>Thank you for scanning my address {$did}</h1>
-    <li>Peers connected: {$connectedPeers}</li>
-    <li>State: {$progressText}</li>
+    <li>loading did: {$did} </li>
     <li>
         {scannedContact && scannedContact.length>0?scannedContact[0].firstName:''}
-        {scannedContact && scannedContact.length>0?scannedContact[0].lastName:''} added to addressbook
+        {scannedContact && scannedContact.length>0?scannedContact[0].lastName:''} added to our address book please
+        add your name and email
     </li>
+    <ContactForm/>
 </div>
 
 <style>
