@@ -51,10 +51,8 @@ export async function startNetwork() {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
 
-        if(_connectedPeers>1) {
+        if(_connectedPeers>1)
             await getAddressRecords();
-            progressState.set(6)
-        }
     });
 
     _libp2p.addEventListener('connection:close', (c) => {
