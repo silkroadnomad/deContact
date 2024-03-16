@@ -164,8 +164,15 @@ async function handleMessage (dContactMessage) {
                 requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents',sync: true})
                 result = await confirm({ data:messageObj, db:requesterDB})
                 if(result){
-                    if(result==='ONLY_HANDOUT')
+                    if(result==='ONLY_HANDOUT'){
+                        //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
+                        //1) update his contact data in her addressbook
+                        //2) keep a backup of her data
+                        const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                        subscriber._id = await sha256(JSON.stringify(subscriber));
+                        await _dbMyAddressBook.put(subscriber)
                         await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
+                    }
                     else {
                         await writeMyAddressIntoRequesterDB(requesterDB);
                         await requestAddress(messageObj.sender,true)
@@ -204,38 +211,36 @@ async function createMessage(command, recipient, data = null) {
 }
 
 /**
- * 1. Bob requests an address from Alice via Pub Sub
- * 2. Bob adds write permission to Alice identity to his own address book //TODO please make sure Alice can only write up to 3 addresses into Bobs db and can only update and delte her own.
- * 3. Bob is so kind and backups Alice (encrypted) address db on his device by opening it.
- * @param scannedAddress
+ * 1. Alice requests an address from Bob via pub sub
+ * 2. Alice adds write permission to Bobs identity //TODO please make sure Alice can only write one address into Bobs db and can only update and delete his own.
+ * 3. Bob keeps a backup of Alice (encrypted)
+ * 4. If Bob changes his address he is iterating through all of his subscribers, opens their address book and updates writes his data in.
+ *
+ * @param scannedAddress a DID or any other handle supported by the system (e.g. ethereum addresses=
  * @param nopingpong set to true if Bob should not ask again to exchange the contacts if just happened (prevent the ping pong)
  * @returns {Promise<void>}
  */
 export const requestAddress = async (_scannedAddress,nopingpong) => {
     const scannedAddress = _scannedAddress.trim()
+
     try {
-        console.log("request requestAddress from", _orbitdb?.identity?.id); //TODO remove white spaces from scannedAddress string
+        console.log("request requestAddress from", _scannedAddress);
         const data = { sharedAddress:_dbMyAddressBook.address }
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
         if(nopingpong===true) msg.nopingpong = true
-
         await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
-
         //look if a dummy is inside
         const all = await _dbMyAddressBook.all()
         const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress})
-        console.log("foundDummy",foundDummy)
+
         if(foundDummy.length===0){
             const dummyContact  = {
                 owner: scannedAddress,
                 firstName: 'invited',
                 lastName: scannedAddress
             }
-
             dummyContact._id = await sha256(JSON.stringify(dummyContact));
             await _dbMyAddressBook.put(dummyContact)
-            const capabilities = await _dbMyAddressBook.access.capabilities()
-            console.log(`granted write permission to ${scannedAddress}`,capabilities)
         }
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg))) //TODO when publishing a message sign content and enrypt content
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
