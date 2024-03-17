@@ -33,8 +33,8 @@ export const config = {
         // swarm: [address],
         listen: [
             "/webrtc",
-            "/webtransport"
-            // "/wss", "/ws",
+            "/webtransport",
+            "/wss", "/ws",
         ]
     },
     transports: [

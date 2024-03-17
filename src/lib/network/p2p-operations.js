@@ -17,7 +17,7 @@ import {
     connectedPeers,
     followList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
-import {config} from "../../config.js";
+import { config } from "../../config.js";
 import { confirm } from "../components/addressModal.js"
 import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";

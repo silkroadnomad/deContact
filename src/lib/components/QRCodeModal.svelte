@@ -42,7 +42,6 @@
             <Column>
                 {#if qrCodeData && qrCodeOpen}
                     <div class="container" on:click={async () => {
-                            console.log("linkurl",linkUrl)
                             await navigator.clipboard.writeText(linkUrl);
                             dispatch('close')
                             notify(`copied invitation`);

@@ -17,6 +17,7 @@
     let scannedContact
     let requested
     let aliceConnected
+
     $:{
         if(!aliceConnected && $libp2p && $connectedPeers>0){
             $libp2p.dial(multiaddr(aliceMultiAddress[0])).then((info) => {

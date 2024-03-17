@@ -2,6 +2,7 @@
      import { selectedAddr, orbitdb } from "../../stores.js";
      import { addContact, deleteContact, updateContact } from "../../operations.js";
      import { Button, Checkbox, Column, Dropdown, Grid, Row, TextInput } from "carbon-components-svelte";
+     import {goto} from "$app/navigation";
      export let isOnBoarding = false
 </script>
 
@@ -57,7 +58,10 @@
                     <Button data-cy="deleteContact" size="sm" on:click={() => deleteContact()}>Delete</Button>
 
                 {:else}
-                    <Button data-cy="addContact" size="sm" on:click={() => addContact(isOnBoarding)}>Add</Button>
+                    <Button data-cy="addContact" size="sm" on:click={async () => {
+                        await addContact(isOnBoarding)
+                        if(isOnBoarding) await goto("/")
+                    }}>Add</Button>
                 {/if}
             </Column>
         </Row>

@@ -43,7 +43,8 @@ export async function addContact(isOnBoarding) {
     }
     else{
         console.log("going to root now")
-        goto("/")
+        selectedAddr.set({})
+        selectedTab.set(0)
     }
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
 }

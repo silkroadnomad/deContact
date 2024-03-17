@@ -39,8 +39,10 @@
         if($hash!=='/onboarding'){
             await confirmExperimentalUse();
             await handleSeedphrase();
-        }
-        await handleSeedphrase(true);
+        }else
+            await handleSeedphrase(true);
+
+
         await startNetwork();
     })
 
