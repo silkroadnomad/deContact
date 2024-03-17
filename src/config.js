@@ -81,7 +81,7 @@ export const config = {
         identify: identify(),
         autoNAT: autoNAT(),
         dcutr: dcutr(),
-        pubsub: gossipsub({allowPublishToZeroPeers: true, canRelayMessage: true}),
+        pubsub: gossipsub({allowPublishToZeroTopicPeers: true, canRelayMessage: true}),
 /*        aminoDHT: kadDHT({
             protocol: '/ipfs/kad/1.0.0',
             peerInfoMapper: removePrivateAddressesMapper
