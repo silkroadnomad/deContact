@@ -100,6 +100,10 @@ export async function startNetwork() {
     })
 }
 
+/**
+ * Transforms entries in the dbMyAddressBook orbitdb into an arraylist consumable e.g. by a datatable component
+ * @returns {Promise<void>}
+ */
 async function getAddressRecords() {
     try {
         const addressRecords = await _dbMyAddressBook.all();
