@@ -88,6 +88,7 @@ export async function startNetwork() {
 
     initReplicationBackup(_orbitdb.identity.id)
 
+    startInvitationCheckWorker()
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
         console.log("db replicated (join event received)",peerId)
         syncedDevices.set(true)

@@ -9,7 +9,6 @@ import {
     myDal,
     dbMyAddressBook, followList
 } from "./stores.js";
-import {goto} from "$app/navigation";
 
 /**
  * Loading a contact from memory into the contactForm
@@ -32,7 +31,7 @@ export async function loadContact(id) {
  * @returns {Promise<void>}
  */
 export async function addContact(isOnBoarding) {
-    console.log("isOnBoarding",isOnBoarding)
+
     _selectedAddr.owner = _orbitdb?.identity?.id
     _selectedAddr.sharedAddress = _dbMyAddressBook?.address
     _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
@@ -43,6 +42,7 @@ export async function addContact(isOnBoarding) {
     }
     else{
         console.log("going to root now")
+        window.location.pathname = "/"
         selectedAddr.set({})
         selectedTab.set(0)
     }
