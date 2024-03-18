@@ -16,7 +16,7 @@
     let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an animation)
     let linkUrl = qrCodeData //`${page_url}/onboarding/${qrCodeData || '' }`
     let fullDeContactUrl = true
-    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData+'?multiaddr='+encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
+    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData+'?onBoardingToken=mytoken&multiaddr='+encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
 </script>
 
     <Modal bind:open={ qrCodeOpen }

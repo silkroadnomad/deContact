@@ -10,9 +10,12 @@
     } from "../../stores.js";
     import { requestAddress } from "../../lib/network/p2p-operations.js"
     import ContactForm from "$lib/components/ContactForm.svelte";
+    console.log("query",$query.split("&"))
 
-    const aliceMultiAddress = JSON.parse(decodeURI($query).split("=")[1])
+    const onBoardingToken = decodeURI($query.split("&")[0]).split("=")[1]
+    const aliceMultiAddress = JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])
     console.log("aliceMultiAddress",aliceMultiAddress[0])
+
     let scannedContact
     let requested
     let aliceConnected
@@ -21,9 +24,10 @@
         if(!aliceConnected && $libp2p && $connectedPeers>0){
             $libp2p.dial(multiaddr(aliceMultiAddress[0])).then((info) => {
                 aliceConnected=true
-                console.log("connected peer",info)}).catch( (e) => {
-                console.log("e",e)
-            })
+                console.log("connected peer",info)}).catch(
+                    (e) => {
+                            console.log("e",e)
+                    })
         }
     }
 
@@ -33,7 +37,7 @@
                 $did!==undefined &&
                 $orbitdb!==undefined &&
                 $dbMyAddressBook.access!==undefined){
-                requestAddress($did)
+                requestAddress($did,false,onBoardingToken)
                 requested = true
             }
     }
@@ -42,6 +46,7 @@
         if($myAddressBook.length>0){ //if a record arrives in my address book show it on the page //TODO go to ContactList (would be better)
             scannedContact = $myAddressBook?.filter((it) => { return it.owner === $did })
             console.log("scannedContact",scannedContact[0])
+            window.location.hash="/"
         }
     }
 </script>
@@ -56,7 +61,7 @@
         </li>
     {/if}
 
-    <ContactForm isOnBoarding={true}/>
+<!--    <ContactForm isOnBoarding={true}/>-->
 </div>
 
 <style>

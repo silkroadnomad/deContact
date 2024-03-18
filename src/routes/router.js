@@ -21,7 +21,6 @@ function getDID () {
 function getQuery(){
     if(browser) {
         const hashWithQueryParam = location.hash.replace(/^#/, '')
-        // console.log("query", hashWithQueryParam.indexOf('?') !== -1 ? hashWithQueryParam.substring(hashWithQueryParam.indexOf('?') + 1, hashWithQueryParam.length) : undefined)
         return hashWithQueryParam.indexOf('?') !== -1 ? hashWithQueryParam.substring(hashWithQueryParam.indexOf('?') + 1, hashWithQueryParam.length) : undefined
     }
 }

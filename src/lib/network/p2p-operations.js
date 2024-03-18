@@ -126,7 +126,7 @@ async function processMessageQueue() {
 
         // Check if a confirmation dialog is already active for this sender
         if (activeConfirmations[sender]) {
-            continue; // Skip this message if confirmation is already in progress
+            continue;
         }
 
         let result, data, requesterDB;
@@ -134,11 +134,16 @@ async function processMessageQueue() {
             switch (messageObj.command) {
                 case REQUEST_ADDRESS:
                     data = JSON.parse(messageObj.data);
+
                     requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents', sync: true });
 
                     // Mark this sender as having an active confirmation
                     activeConfirmations[sender] = true;
-                    result = await confirm({ data: messageObj, db: requesterDB });
+
+                    if(data.onBoardingToken===undefined)
+                        result = 'ONLY_HANDOUT'
+                    else
+                        result = await confirm({ data: messageObj, db: requesterDB });
                     if(result){
                         if(result==='ONLY_HANDOUT'){
                             //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
@@ -257,15 +262,19 @@ async function createMessage(command, recipient, data = null) {
  *
  * @param scannedAddress a DID or any other handle supported by the system (e.g. ethereum addresses=
  * @param nopingpong set to true if Bob should not ask again to exchange the contacts if just happened (prevent the ping pong)
+ * @param onBoardingToken if set we send an onBoardingToken back to Alice so she doesn't need a confirmation
  * @returns {Promise<void>}
  */
-export const requestAddress = async (_scannedAddress,nopingpong) => {
+export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken) => {
     const scannedAddress = _scannedAddress.trim()
 
     try {
         console.log("request requestAddress from", _scannedAddress);
         const data = { sharedAddress:_dbMyAddressBook.address }
+
+        console.log("data",data)
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
+        if(onBoardingToken!==undefined) msg.onBoardingToken = onBoardingToken
         if(nopingpong===true) msg.nopingpong = true
         await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
         //look if a dummy is inside
@@ -293,8 +302,10 @@ export const requestAddress = async (_scannedAddress,nopingpong) => {
  * Periodically checks for 'invited' contacts and attempts to resend the address request.
  */
 function startInvitationCheckWorker() {
+
     const checkInterval = 10000 //1000 * 60 * 5; // Check every 5 minutes
     let intervalId = null; // Variable to hold the interval ID
+
     intervalId = setInterval(async () => {
         console.log("Checking for 'invited' contacts to resend requests...");
 
