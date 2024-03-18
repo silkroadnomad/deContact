@@ -25,6 +25,9 @@ import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOr
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
 
+let messageQueue = {};
+let activeConfirmations = {};
+
 export const CONTENT_TOPIC = "/dContact/3/message/proto";
 
 const REQUEST_ADDRESS = 'REQUEST_ADDRESS';
@@ -101,6 +104,75 @@ export async function startNetwork() {
     })
 }
 
+async function handleMessage(dContactMessage) {
+    console.log("dContactMessage", dContactMessage);
+    if (!dContactMessage) return;
+    const messageObj = JSON.parse(dContactMessage);
+
+    // Queue the message, keeping only the last message from each sender
+    messageQueue[messageObj.sender] = messageObj;
+
+    // Process the queued messages
+    await processMessageQueue();
+}
+
+/**
+ * We want to open a confirmation dialog for each sender sending a pub sub message. (in case it's coming in same time)
+ * @returns {Promise<void>}
+ */
+async function processMessageQueue() {
+    for (const sender in messageQueue) {
+        const messageObj = messageQueue[sender];
+
+        // Check if a confirmation dialog is already active for this sender
+        if (activeConfirmations[sender]) {
+            continue; // Skip this message if confirmation is already in progress
+        }
+
+        let result, data, requesterDB;
+        if (messageObj.recipient === _orbitdb.identity.id) {
+            switch (messageObj.command) {
+                case REQUEST_ADDRESS:
+                    data = JSON.parse(messageObj.data);
+                    requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents', sync: true });
+
+                    // Mark this sender as having an active confirmation
+                    activeConfirmations[sender] = true;
+                    result = await confirm({ data: messageObj, db: requesterDB });
+                    if(result){
+                        if(result==='ONLY_HANDOUT'){
+                            //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
+                            //1) update his contact data in her addressbook
+                            //2) keep a backup of her data
+                            const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                            subscriber._id = await sha256(JSON.stringify(subscriber));
+                            await _dbMyAddressBook.put(subscriber)
+                            await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
+                        }
+                        else {
+                            await writeMyAddressIntoRequesterDB(requesterDB);
+                            await requestAddress(messageObj.sender,true)
+                        }
+                        // Confirmation is complete; allow future confirmations for this sender
+                        delete activeConfirmations[sender];
+                        // Remove the message from the queue after processing
+                        delete messageQueue[sender];
+                        initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
+
+                    } else{
+                        //TODO send "rejected sending address"
+                    }
+
+                    break;
+                default:
+                    console.error(`Unknown command: ${messageObj.command}`);
+                    // Remove unprocessable messages from the queue
+                    delete messageQueue[sender];
+            }
+        }
+    }
+}
+
 /**
  * Transforms entries in the dbMyAddressBook orbitdb into an arraylist consumable e.g. by a datatable component
  * @returns {Promise<void>}
@@ -154,42 +226,6 @@ async function initReplicationBackup(ourDID) {
                 console.log(`we follow and backup dbAddress: ${dbAddress} records`,records)
             })
         } catch(e){console.log(`error while loading ${dbAddress} `)}
-    }
-}
-async function handleMessage (dContactMessage) {
-    console.log("dContactMessage",dContactMessage   )
-    if (!dContactMessage) return;
-    const messageObj = JSON.parse(dContactMessage)
-    let result, data, requesterDB
-    if (messageObj.recipient === _orbitdb.identity.id){
-        switch (messageObj.command) {
-            case REQUEST_ADDRESS:
-                data = JSON.parse(messageObj.data)
-                requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents',sync: true})
-                result = await confirm({ data:messageObj, db:requesterDB})
-                if(result) {
-                    if(result==='ONLY_HANDOUT'){
-                        //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
-                        //1) update his contact data in her addressbook
-                        //2) keep a backup of her data
-                        const subscriber  = { sharedAddress: data.sharedAddress, owner:messageObj.sender, subscriber:true }
-                        subscriber._id = await sha256(JSON.stringify(subscriber));
-                        await _dbMyAddressBook.put(subscriber)
-                        await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
-                    }
-                    else {
-                        await writeMyAddressIntoRequesterDB(requesterDB);
-                        await requestAddress(messageObj.sender,true)
-                    }
-                    initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
-
-                } else {
-                    //TODO send "rejected sending address"
-                }
-                break;
-            default:
-                console.error(`Unknown command: ${messageObj.command}`);
-        }
     }
 }
 

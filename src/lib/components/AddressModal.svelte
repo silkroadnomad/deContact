@@ -35,6 +35,7 @@
         fetchBusinessCard();
         dispatch("addressExchange");
     });
+
 </script>
 
 <ComposedModal open on:close={() => dispatch('result', false)} on:submit={() => dispatch('result', true)}>
