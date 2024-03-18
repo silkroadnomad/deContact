@@ -89,13 +89,13 @@ export async function startNetwork() {
     initReplicationBackup(_orbitdb.identity.id)
 
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
-        console.log("one of my devices joined and synced myaddressbook",peerId)
+        console.log("db replicated (join event received)",peerId)
         syncedDevices.set(true)
         getAddressRecords()
     })
 
     _dbMyAddressBook.events.on('update', async (entry) => {
-        console.log("someone updated my addressbook with data",entry)
+        console.log("someone updated my address book",entry) //TODO
         getAddressRecords()
     })
 }
@@ -166,12 +166,12 @@ async function handleMessage (dContactMessage) {
                 data = JSON.parse(messageObj.data)
                 requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents',sync: true})
                 result = await confirm({ data:messageObj, db:requesterDB})
-                if(result){
+                if(result) {
                     if(result==='ONLY_HANDOUT'){
                         //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
                         //1) update his contact data in her addressbook
                         //2) keep a backup of her data
-                        const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                        const subscriber  = { sharedAddress: data.sharedAddress, subscriber:true }
                         subscriber._id = await sha256(JSON.stringify(subscriber));
                         await _dbMyAddressBook.put(subscriber)
                         await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
@@ -182,7 +182,7 @@ async function handleMessage (dContactMessage) {
                     }
                     initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
 
-                }else{
+                } else {
                     //TODO send "rejected sending address"
                 }
                 break;
@@ -191,7 +191,6 @@ async function handleMessage (dContactMessage) {
         }
     }
 }
-
 
 /**
  * When ever we want to send something out to a pear we create a message here
@@ -246,10 +245,31 @@ export const requestAddress = async (_scannedAddress,nopingpong) => {
             await _dbMyAddressBook.put(dummyContact)
         }
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg))) //TODO when publishing a message sign content and enrypt content
+        startInvitationCheckWorker()
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
         console.error('Error in requestAddress:', error);
     }
+}
+
+/**
+ * Periodically checks for 'invited' contacts and attempts to resend the address request.
+ */
+function startInvitationCheckWorker() {
+    const checkInterval = 10000 //1000 * 60 * 5; // Check every 5 minutes
+
+    setInterval(async () => {
+        console.log("Checking for 'invited' contacts to resend requests...");
+        const allContacts = await _dbMyAddressBook.all();
+        const invitedContacts = allContacts.filter(contact => contact.value.firstName === 'invited');
+
+        for (const contact of invitedContacts) {
+            const data = { sharedAddress: _dbMyAddressBook.address };
+            const msg = await createMessage(REQUEST_ADDRESS, contact.value.owner, data);
+            await _libp2p.services.pubsub.publish(CONTENT_TOPIC + "/" + contact.value.owner, fromString(JSON.stringify(msg)));
+            console.log(`Resent address request to ${contact.value.owner}`);
+        }
+    }, checkInterval);
 }
 
 /**
