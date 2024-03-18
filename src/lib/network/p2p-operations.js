@@ -171,7 +171,7 @@ async function handleMessage (dContactMessage) {
                         //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
                         //1) update his contact data in her addressbook
                         //2) keep a backup of her data
-                        const subscriber  = { sharedAddress: data.sharedAddress, subscriber:true }
+                        const subscriber  = { sharedAddress: data.sharedAddress, owner:messageObj.sender, subscriber:true }
                         subscriber._id = await sha256(JSON.stringify(subscriber));
                         await _dbMyAddressBook.put(subscriber)
                         await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book

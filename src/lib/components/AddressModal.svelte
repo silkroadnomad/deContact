@@ -35,7 +35,6 @@
         fetchBusinessCard();
         dispatch("addressExchange");
     });
-console.log("dontRequestData",dontRequestData)
 </script>
 
 <ComposedModal open on:close={() => dispatch('result', false)} on:submit={() => dispatch('result', true)}>
