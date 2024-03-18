@@ -36,14 +36,24 @@ const users = [
 		did: '',
 		city: 'Rom',
 		country: 'Italy'
-	}
+	},
+	{
+		identity: 'Alice',
+		firstname: 'Alice',
+		lastname: 'May',
+		street: 'Moosecker str 789',
+		zipcode: '84444',
+		did: '',
+		city: 'Rom',
+		country: 'Italy'
+	},
 ];
 
 test.describe('Simple exchange of address between Alice and Bob', () => {
 	let page, page2;
 
 	test.beforeAll(async ({ browser }) => {
-		test.setTimeout(50000);
+		test.setTimeout(10000);
 		page = await initializeNewPage(browser, users[0]);
 		page2 = await initializeNewPage(browser, users[1]);
 	});
@@ -51,33 +61,51 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 	test('Alice and Bob can exchange addresses', async () => {
 		test.setTimeout(50000);
 
-		await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
-		await page2.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
-		await page2.getByRole('tab', { name: 'Contacts' }).click({ timeout: 250000 });
-		await page2.getByRole('textbox', { role: 'scanContact' }).click();
-		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
-
-		await page2.getByRole('textbox').press('Enter');
-		//await page2.getByRole('button', { name: 'Scan Contact' }).click({ timeout: 250000 });
-		await new Promise(resolve => setTimeout(resolve, 10000)); //TODO is that necessary?
-		let i = 0;
-		while (i < 100) { //TODO what is that here?
-			i++;
-			const exchangeButtonCount = await page.getByRole('button', { name: 'Exchange Contact Data' }).count();
-			if (exchangeButtonCount == 0) {
-				await page2.getByRole('textbox').press('Enter');
-			} else {
-				break;
-			}
-			console.log("i", i);
-			await new Promise(resolve => setTimeout(resolve, 10000));
+		try { 
+			await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
+		} catch(error){
+			console.log("no connection Alice")
 		}
 
-		//Exchanging data
-		await page.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
-		await page2.getByRole('button', { name: 'Exchange Contact Data' }).click({ timeout: 50000 });
+		try { 
+			await page2.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
+		} catch(error){
+			console.log("no connection Bob")
+		}
 
-		//Update Test
+		await page2.getByRole('tab', { name: 'Contacts' }).click();
+		await page2.getByRole('textbox', { role: 'scanContact' }).click();
+		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
+		
+	
+		await page.waitForTimeout(15000);
+		await page2.getByRole('button', { name: 'Scan' }).click();
+		
+   	//await Promise.all([
+   	// page.waitForEvent('addressExchange')  		
+  	//]);	
+		
+			
+		//Exchanging data	
+		try { 
+			await page.getByRole('button', { name: 'Send My Contact Data' }).click();
+		} catch(error){
+			throw new Error("Exchange of Alice's contact information was not successful")		
+		}
+
+		
+
+		try { 
+			await page2.getByRole('button', { name: 'Send My Contact Data' }).click();
+		} catch(error){
+			throw new Error("Exchange of Bob's contact information was not successful")	
+		}
+
+		//await page.getByRole('button', { name: 'Cancel' }).click();
+	});
+
+	test('Bob updates his address and Alice receives the update', async () => {
+
 		await page2.getByRole('row', { name: users[1].identity }).locator('label').click();
 		await page2.getByPlaceholder('Enter lastname...').click();
 		await page2.getByPlaceholder('Enter lastname...').fill(users[2].lastname);
@@ -89,20 +117,43 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		await page2.getByPlaceholder('Enter city...').fill(users[2].city);
 		await page2.getByPlaceholder('Enter country...').fill(users[2].country);
 		await page2.getByRole('button', { name: 'Update' }).click();
+		//await page2.getByRole('row', { name: users[1].identity }).locator('span').click();		
 
-		await page2.getByRole('row', { name: users[1].identity }).locator('span').click();
+		try { 
+			await page.getByRole('row', { name: users[2].lastname }).locator('span').click();
+			console.log("Bob update was successful")
+		} catch(error){
+			throw new Error("Update was not successful")	
+		}
 
-		await page.getByRole('row', { name: users[2].lastname }).locator('span').click();
-
-	});
+	})
 
 	test('Alice updates her address and Bob receives the update', async () => {
 
+		await page.getByRole('tab', { name: 'Contacts' }).click();
+		await page.getByRole('row', { name: users[0].identity }).locator('label').click();
+		await page.getByPlaceholder('Enter lastname...').click();
+		await page.getByPlaceholder('Enter lastname...').fill(users[3].lastname);
+		await page.getByPlaceholder('Enter street...').click();
+		await page.getByPlaceholder('Enter street...').fill(users[3].street);
+		await page.getByPlaceholder('Enter zipcode...').click();
+		await page.getByPlaceholder('Enter zipcode...').fill(users[3].zipcode);
+		await page.getByPlaceholder('Enter city...').click();
+		await page.getByPlaceholder('Enter city...').fill(users[3].city);
+		await page.getByPlaceholder('Enter country...').fill(users[3].country);
+		await page.getByRole('button', { name: 'Update' }).click();
+		await page.getByRole('row', { name: users[0].identity }).locator('span').click();		
+
+		try { 
+			await page2.getByRole('row', { name: users[3].lastname }).locator('span').click();
+			console.log("Alice update was successful")
+		} catch(error){
+			throw new Error("Update was not successful")	
+		}
+
 	})
 
-	test('Bob updates his address and Alice receives the update', async () => {
-
-	})
+	
 
 	test.afterAll(async () => {
 		await Promise.all([
@@ -149,4 +200,3 @@ async function initializeNewPage(browser, user) {
 		console.error('Error opening new page:', error);
 	}
 }
-
