@@ -257,11 +257,18 @@ export const requestAddress = async (_scannedAddress,nopingpong) => {
  */
 function startInvitationCheckWorker() {
     const checkInterval = 10000 //1000 * 60 * 5; // Check every 5 minutes
-
-    setInterval(async () => {
+    let intervalId = null; // Variable to hold the interval ID
+    intervalId = setInterval(async () => {
         console.log("Checking for 'invited' contacts to resend requests...");
+
         const allContacts = await _dbMyAddressBook.all();
         const invitedContacts = allContacts.filter(contact => contact.value.firstName === 'invited');
+
+        if (invitedContacts.length === 0) {
+            console.log("No 'invited' contacts found, stopping the worker...");
+            clearInterval(intervalId); // Stop the interval
+            return; // Exit the function
+        }
 
         for (const contact of invitedContacts) {
             const data = { sharedAddress: _dbMyAddressBook.address };
