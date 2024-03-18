@@ -1,7 +1,9 @@
 <script>
      import { selectedAddr, orbitdb } from "../../stores.js";
-     import {addContact, deleteContact, updateContact} from "../../operations.js";
-     import {Button, Checkbox, Column, Dropdown, Grid, Row, TextInput} from "carbon-components-svelte";
+     import { addContact, deleteContact, updateContact } from "../../operations.js";
+     import { Button, Checkbox, Column, Dropdown, Grid, Row, TextInput } from "carbon-components-svelte";
+     import {goto} from "$app/navigation";
+     export let isOnBoarding = false
 </script>
 
 <section>
@@ -23,6 +25,12 @@
                                 bind:value={$selectedAddr.city}  /></Column>
             <Column><TextInput  data-cy="txtCountry" size="sm" labelText="country" placeholder="Enter country..."
                                 bind:value={$selectedAddr.countryRegion}  /></Column>
+        </Row>
+        <Row>
+            <Column>
+                <TextInput data-cy="txtEmail" size="sm" labelText="Email" placeholder="Email" bind:value={$selectedAddr.email}  />
+            </Column>
+            <Column></Column>
         </Row>
         <Row>
             <Column><Dropdown
@@ -50,7 +58,10 @@
                     <Button data-cy="deleteContact" size="sm" on:click={() => deleteContact()}>Delete</Button>
 
                 {:else}
-                    <Button data-cy="addContact" size="sm" on:click={() => addContact()}>Add</Button>
+                    <Button data-cy="addContact" size="sm" on:click={async () => {
+                        await addContact(isOnBoarding)
+                        if(isOnBoarding) await goto("/")
+                    }}>Add</Button>
                 {/if}
             </Column>
         </Row>

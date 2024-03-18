@@ -14,20 +14,21 @@
     const dispatch = createEventDispatcher();
 
     export let heading = 'deContact Protocol Action';
-    export let ExchangeContactDataButtonText = 'Exchange Contact Data';
     export let SendMyContactData = 'Send My Contact Data';
     export let CancelOperationButtonText = 'Cancel';
     export let data;
     export let db;
-    export let sender;
 
     let businessCard;
-    let exchangeData = true
+    let checkboxLabel;
+    let exchangeData = data.nopingpong?true:false
+    let dontRequestData = data.nopingpong
 
-    async function fetchBusinessCard() {
+    async function fetchBusinessCard(){
         const businessCardElements = await db.all();
-        const filteredElements = businessCardElements.filter(element => element.value.owner === sender);
+        const filteredElements = businessCardElements.filter(element => element.value.owner === data.sender);
         businessCard = filteredElements.length > 0 ? filteredElements[0].value : null;
+        checkboxLabel =  `Request contact data from ${businessCard?.firstName} ${businessCard?.lastName} ${businessCard?.city} in exchange`
     }
 
     onMount(() => {
@@ -43,12 +44,12 @@
             <div slot="above">
                 <div>From:
                     {#if businessCard}
-                        {businessCard.firstName} {businessCard.lastName} {businessCard.city} <br/>
-                        owner: {businessCard.owner}<br/>
+                        {businessCard?.firstName} {businessCard?.lastName} {businessCard?.city} <br/>
+                        owner: {businessCard?.owner}<br/>
                     {/if}
                 </div>
                 <p>&nbsp;</p>
-                <Checkbox labelText="Request contact data from requester in exchange"  bind:checked={exchangeData} />
+                {#if !dontRequestData}<Checkbox labelText={checkboxLabel}  bind:checked={exchangeData} />{/if}
                 <p>&nbsp;</p>
                 <div>View Transaction Details</div>
             </div>
@@ -65,15 +66,14 @@
     </ModalBody>
 
     <ModalFooter
-        primaryButtonText={ SendMyContactData }
-        on:click:button--primary={() => exchangeData?dispatch('result', true):dispatch('result', "ONLY_HANDOUT")}
-        selectorPrimaryFocus=".bx--btn--primary"
-        secondaryButtons={[
-            { text: CancelOperationButtonText }
-        ]}
-        on:click:button--secondary={({ detail }) => {
-            if (detail.text === CancelOperationButtonText) dispatch('result', false);
-
-        }}
+            primaryButtonDisabled
+            selectorPrimaryFocus=".bx--btn--primary"
+            secondaryButtons={[
+                { text: CancelOperationButtonText },{ text: SendMyContactData }
+            ]}
+            on:click:button--secondary={({ detail }) => {
+                if (detail.text === CancelOperationButtonText) dispatch('result', false);
+                if (detail.text === SendMyContactData) dispatch('result', (dontRequestData || !exchangeData)?"ONLY_HANDOUT":true)
+            }}
     />
 </ComposedModal>

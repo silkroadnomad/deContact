@@ -15,16 +15,12 @@ import {
     dbMyAddressBook,
     subscription,
     connectedPeers,
-    handle,
-    progressText,
-    progressState,
-    subscriberList, dbMessages, selectedTab, syncedDevices,
+    followList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
-import {config} from "../../config.js";
+import { config } from "../../config.js";
 import { confirm } from "../components/addressModal.js"
 import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
-
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
@@ -40,13 +36,8 @@ const REQUEST_ADDRESS = 'REQUEST_ADDRESS';
  */
 export async function startNetwork() {
 
-    progressText.set("Starting libp2p node")
-    progressState.set(1)
     _libp2p =  await createLibp2p(config)
     libp2p.set(_libp2p)
-
-    progressText.set("Starting Helia (IPFS) node")
-    progressState.set(2)
     _helia = await createHelia({
         libp2p: _libp2p,
         blockstore,
@@ -56,16 +47,12 @@ export async function startNetwork() {
     helia.set(_helia)
     window.helia = _helia
 
-    progressText.set(`Starting deContact pub sub protocol`)
-    progressState.set(3)
     _libp2p.addEventListener('connection:open',  async (c) => {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
 
-        if(_connectedPeers>1) {
+        if(_connectedPeers>1)
             await getAddressRecords();
-            progressState.set(6)
-        }
     });
 
     _libp2p.addEventListener('connection:close', (c) => {
@@ -81,10 +68,8 @@ export async function startNetwork() {
         handleMessage(message)
     })
 
-    progressText.set(`Opening our address book from OrbitDB... `)
     _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
     orbitdb.set(_orbitdb)
-    progressState.set(3)
 
     /**
      * My Address Book (with own contact data and contact data of others
@@ -98,21 +83,28 @@ export async function startNetwork() {
     })
     // console.log("dbMyAddressBook",_dbMyAddressBook)
     dbMyAddressBook.set(_dbMyAddressBook)
-    window.dbMyAddressBook = _dbMyAddressBook
+    window.mydb = _dbMyAddressBook
     await getAddressRecords()
-    initReplicationOfSubscriberDBs(_orbitdb.identity.id)
+
+    initReplicationBackup(_orbitdb.identity.id)
+
+    startInvitationCheckWorker()
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
-        console.log("one of my devices joined and synced myaddressbook",peerId)
+        console.log("db replicated (join event received)",peerId)
         syncedDevices.set(true)
         getAddressRecords()
     })
 
     _dbMyAddressBook.events.on('update', async (entry) => {
-        console.log("someone updated my addressbook with data",entry)
+        console.log("someone updated my address book",entry) //TODO
         getAddressRecords()
     })
 }
 
+/**
+ * Transforms entries in the dbMyAddressBook orbitdb into an arraylist consumable e.g. by a datatable component
+ * @returns {Promise<void>}
+ */
 async function getAddressRecords() {
     try {
         const addressRecords = await _dbMyAddressBook.all();
@@ -121,7 +113,7 @@ async function getAddressRecords() {
             id: record.value._id
         }));
         transformedRecords = transformedRecords.filter((addr)=> {
-            return addr.id !==undefined
+            return addr.id !==undefined && addr.subscriber===undefined
         })
         myAddressBook.set(transformedRecords);
         console.log("records in dbMyAddressBook ",addressRecords)
@@ -131,28 +123,37 @@ async function getAddressRecords() {
 }
 
 /**
- * Loop through our address book and filter all other's addresses
+ * Loop through our address book and open all other address books of the people we follow (and replicate them in order to keep a backup)
+ * We back up the dbs of the people (the addresses) we follow.
+ *
+ * In case Bob doesn't follow Alice he keeps an invisible dummy in his address book (which he can decide if he wants to back it up or not)
+ *
+ * TODO: If a contact db gets too large we still need a solution for that! e.g. all other follower (like us) could agree on only backing up
+ * a certain part of the data. E.g. Bob has 100 MB data, Alice wants to backup only 10MB, she could create her own version of Bobs data w ith only slice of his data.
+ * Alice could let others know about her slice, so those who want to backup Bobs data can take the next slice.
+ * If Bob looses his data, he could open his db address with a slice index as an extension e.g. /orbitdb/address/01 /orbitdb/address/02 etc
+ * He could do so right in the moment when his data gets over 10MB and create a new db for new contacts. The new contacts would then automatically backup the correct slice
+ * (something like that)
+ *
  * @param ourDID our DID
  * @returns {Promise<void>}
  */
-async function initReplicationOfSubscriberDBs(ourDID) {
-    // console.log("replicateSubsriberDBs")
+async function initReplicationBackup(ourDID) {
+
     const addressRecords = await _dbMyAddressBook.all();
-    _subscriberList = addressRecords.filter((addr)=> {
+    _followList = addressRecords.filter((addr)=> {
         return addr.value.owner !== ourDID && addr.value.sharedAddress!==undefined //sharedAddress undefined for all not decentralized addresses
     })
-    // console.log("_subscriberList",_subscriberList)
-    subscriberList.set(_subscriberList)
-    for (const s in _subscriberList) {
-        const dbAddress = _subscriberList[s].value.sharedAddress
-        // console.log("loading subscribers db s",dbAddress)
-        try{
-            _subscriberList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
-            _subscriberList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
-                console.log(`dbAddress: ${dbAddress} records`,records)
-            })
-        }catch(e){console.log(`error while loading ${dbAddress} `)}
 
+    followList.set(_followList)
+    for (const s in _followList) {
+        const dbAddress = _followList[s].value.sharedAddress
+        try {
+            _followList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
+            _followList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
+                console.log(`we follow and backup dbAddress: ${dbAddress} records`,records)
+            })
+        } catch(e){console.log(`error while loading ${dbAddress} `)}
     }
 }
 async function handleMessage (dContactMessage) {
@@ -164,35 +165,25 @@ async function handleMessage (dContactMessage) {
         switch (messageObj.command) {
             case REQUEST_ADDRESS:            
                 data = JSON.parse(messageObj.data)
-                requesterDB = await _orbitdb.open(data.sharedAddress, {
-                    type: 'documents',sync: true})  
-
-                // const isRes = await isRequesterInSenderDB(requesterDB, messageObj) //TODO this seems contradicting we need to think twice again
-                // if (isRes === true)
-                // break;
-
-                result = await confirm({
-                    data:messageObj,
-                    db:requesterDB,
-                    sender: messageObj.sender })
-
-                if(result){
+                requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents',sync: true})
+                result = await confirm({ data:messageObj, db:requesterDB})
+                if(result) {
                     if(result==='ONLY_HANDOUT'){
-                        await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
-                        //add a subscriber to our address book (should not be displayed in datatable
-                        const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                        //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
+                        //1) update his contact data in her addressbook
+                        //2) keep a backup of her data
+                        const subscriber  = { sharedAddress: data.sharedAddress, owner:messageObj.sender, subscriber:true }
                         subscriber._id = await sha256(JSON.stringify(subscriber));
                         await _dbMyAddressBook.put(subscriber)
+                        await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
                     }
                     else {
                         await writeMyAddressIntoRequesterDB(requesterDB);
-                        await requestAddress(messageObj.sender)
-                        //await addRequestersContactDataToMyDB(requesterDB,messageObj.sender) //we want to write Alice contact data into our address book same time
-                        //TODO in case Bob want's to exchange the data he should just send another request to Alice (just as Alice did)
+                        await requestAddress(messageObj.sender,true)
                     }
-                    initReplicationOfSubscriberDBs(_orbitdb.identity.id) //init replication of all subscriber ids
+                    initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
 
-                }else{
+                } else {
                     //TODO send "rejected sending address"
                 }
                 break;
@@ -201,7 +192,6 @@ async function handleMessage (dContactMessage) {
         }
     }
 }
-
 
 /**
  * When ever we want to send something out to a pear we create a message here
@@ -224,28 +214,39 @@ async function createMessage(command, recipient, data = null) {
 }
 
 /**
- * 1. Bob requests an address from Alice via Pub Sub
- * 2. Bob adds write permission to Alice identity to his own address book //TODO please make sure Alice can only write up to 3 addresses into Bobs db and can only update and delte her own.
- * 3. Bob is so kind and backups Alice (encrypted) address db on his device by opening it.
- * @param scannedAddress
+ * 1. Alice requests an address from Bob via pub sub
+ * 2. Alice adds write permission to Bobs identity //TODO please make sure Alice can only write one address into Bobs db and can only update and delete his own.
+ * 3. Bob keeps a backup of Alice (encrypted)
+ * 4. If Bob changes his address he is iterating through all of his subscribers, opens their address book and updates writes his data in.
+ *
+ * @param scannedAddress a DID or any other handle supported by the system (e.g. ethereum addresses=
+ * @param nopingpong set to true if Bob should not ask again to exchange the contacts if just happened (prevent the ping pong)
  * @returns {Promise<void>}
  */
-export const requestAddress = async (_scannedAddress) => {
+export const requestAddress = async (_scannedAddress,nopingpong) => {
     const scannedAddress = _scannedAddress.trim()
+
     try {
-        console.log("request requestAddress from", _orbitdb?.identity?.id); //TODO remove white spaces from scannedAddress string
+        console.log("request requestAddress from", _scannedAddress);
         const data = { sharedAddress:_dbMyAddressBook.address }
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
+        if(nopingpong===true) msg.nopingpong = true
         await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
+        //look if a dummy is inside
+        const all = await _dbMyAddressBook.all()
+        const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress})
 
-        const dummyContact  = {owner:scannedAddress, firstName:'requested', lastName:scannedAddress}
-        dummyContact._id = await sha256(JSON.stringify(dummyContact));
-        await _dbMyAddressBook.put(dummyContact)
-
-        const capabilities = await _dbMyAddressBook.access.capabilities()
-        console.log(`granted write permission to ${scannedAddress}`,capabilities)
+        if(foundDummy.length===0){
+            const dummyContact  = {
+                owner: scannedAddress,
+                firstName: 'invited',
+                lastName: scannedAddress
+            }
+            dummyContact._id = await sha256(JSON.stringify(dummyContact));
+            await _dbMyAddressBook.put(dummyContact)
+        }
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg))) //TODO when publishing a message sign content and enrypt content
-
+        startInvitationCheckWorker()
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
         console.error('Error in requestAddress:', error);
@@ -253,7 +254,35 @@ export const requestAddress = async (_scannedAddress) => {
 }
 
 /**
+ * Periodically checks for 'invited' contacts and attempts to resend the address request.
+ */
+function startInvitationCheckWorker() {
+    const checkInterval = 10000 //1000 * 60 * 5; // Check every 5 minutes
+    let intervalId = null; // Variable to hold the interval ID
+    intervalId = setInterval(async () => {
+        console.log("Checking for 'invited' contacts to resend requests...");
+
+        const allContacts = await _dbMyAddressBook.all();
+        const invitedContacts = allContacts.filter(contact => contact.value.firstName === 'invited');
+
+        if (invitedContacts.length === 0) {
+            console.log("No 'invited' contacts found, stopping the worker...");
+            clearInterval(intervalId); // Stop the interval
+            return; // Exit the function
+        }
+
+        for (const contact of invitedContacts) {
+            const data = { sharedAddress: _dbMyAddressBook.address };
+            const msg = await createMessage(REQUEST_ADDRESS, contact.value.owner, data);
+            await _libp2p.services.pubsub.publish(CONTENT_TOPIC + "/" + contact.value.owner, fromString(JSON.stringify(msg)));
+            console.log(`Resent address request to ${contact.value.owner}`);
+        }
+    }, checkInterval);
+}
+
+/**
  * Now we are writing our address directly into Alice address book (we got write permission)
+ *
  * @param recipient
  * @param data
  * @returns {Promise<void>}
@@ -262,19 +291,19 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     try {
         const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
         delete writeFirstOfOurAddresses.own;
+        //delete the dummy which alice added for us!
         const all = await requesterDB.all()
-        console.log("all before deleting",all)
-
-        //find id of dummy record and delte
         const foundDummy = all.filter((it) => {
-            console.log("it.value.owner",it.value.owner)
-            console.log("_orbitdb?.identity?.id",_orbitdb?.identity?.id)
             return it.value.owner === _orbitdb?.identity?.id
         })
-        console.log("foundDummy and deleting it",foundDummy)
-        await requesterDB.del(foundDummy[0].value._id)
+
+        for (const foundDummyKey in foundDummy) {
+            await requesterDB.del(foundDummy[foundDummyKey].key)
+        }
+
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
         notify(`wrote my address into requesters db with hash ${hash}`);
+
     } catch (error) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
     }
@@ -319,10 +348,6 @@ subscription.subscribe((val) => {
     _subscription = val
 });
 
-let _handle
-handle.subscribe((val) => {
-    _handle = val
-});
 let _connectedPeers
 connectedPeers.subscribe((val) => {
     _connectedPeers = val
@@ -332,9 +357,9 @@ myAddressBook.subscribe((val) => {
     _myAddressBook = val
 });
 
-let _subscriberList
-subscriberList.subscribe((val) => {
-    _subscriberList = val
+let _followList
+followList.subscribe((val) => {
+    _followList = val
 });
 
 let _selectedTab

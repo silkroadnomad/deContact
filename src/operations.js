@@ -1,5 +1,4 @@
 import {notify, sha256} from "./utils/utils.js";
-
 import {
     myAddressBook,
     selectedAddr,
@@ -8,10 +7,8 @@ import {
     qrCodeOpen,
     orbitdb,
     myDal,
-    dbMyAddressBook, subscriberList
+    dbMyAddressBook, followList
 } from "./stores.js";
-
-
 
 /**
  * Loading a contact from memory into the contactForm
@@ -28,18 +25,27 @@ export async function loadContact(id) {
 }
 
 /**
- * Adds a new contact into orbitdb dbMyAddressBook.
+ * Adds a new contact to the orbitdb dbMyAddressBook.
  * The result is a hash
  * At the end we switch back to ContactList Tab
  * @returns {Promise<void>}
  */
-export async function addContact() {
+export async function addContact(isOnBoarding) {
+
     _selectedAddr.owner = _orbitdb?.identity?.id
     _selectedAddr.sharedAddress = _dbMyAddressBook?.address
     _selectedAddr._id = await sha256(JSON.stringify(_selectedAddr)) //TODO this hash is staying so far until the end of life
     const hash = await _dbMyAddressBook.put(_selectedAddr)
-    selectedAddr.set({})
-    selectedTab.set(0)
+    if(!isOnBoarding){
+        selectedAddr.set({})
+        selectedTab.set(0)
+    }
+    else{
+        console.log("going to root now")
+        window.location.pathname = "/"
+        selectedAddr.set({})
+        selectedTab.set(0)
+    }
     notify(`Contact added successfully to ipfs/orbitdb! ${hash}`);
 }
 
@@ -54,12 +60,12 @@ export async function updateContact() {
     await _dbMyAddressBook.put(_selectedAddr)
     newAddrBook.push(_selectedAddr)
     myAddressBook.set(newAddrBook)
-    notify(`Contact updated successfully - informing our subscribers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
+    notify(`Contact updated successfully - informing our followers! ${_myAddressBook.firstName} ${_myAddressBook.lastName}`)
     if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
-        for (const s in  _subscriberList) {
-            console.log("updating address in ",_subscriberList[s].db.address)
-            _subscriberList[s].db.put(_selectedAddr)
-            notify(`Updated db ${_subscriberList[s].db.address} `)
+        for (const s in  _followList) {
+            console.log("updating address in ",_followList[s].db.address)
+            _followList[s].db.put(_selectedAddr)
+            notify(`Updated db ${_followList[s].db.address} `)
         }
     }
     selectedAddr.set({})
@@ -98,9 +104,9 @@ myAddressBook.subscribe((value) => {
     _myAddressBook = value
 })
 
-let _subscriberList
-subscriberList.subscribe((val) => {
-    _subscriberList = val
+let _followList
+followList.subscribe((val) => {
+    _followList = val
 });
 
 let _myDal;

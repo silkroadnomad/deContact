@@ -11,19 +11,12 @@
     export let qrCodeOpen
 
     let multiaddrs
-
-    $:{
-        if($connectedPeers>0){
-            multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString())
-        }
-    }
+    $:($connectedPeers>1)?multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString()):''
 
     let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an animation)
-    let linkUrl = `${page_url}/onboarding/${qrCodeData || '' }`
+    let linkUrl = qrCodeData //`${page_url}/onboarding/${qrCodeData || '' }`
     let fullDeContactUrl = true
-    $: linkUrl = fullDeContactUrl?`${page_url}/onboarding/${qrCodeData+'?multiaddr='+encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
-    console.log("linkUrl",linkUrl)
-    $:console.log(multiaddrs)
+    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData+'?multiaddr='+encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
 </script>
 
     <Modal bind:open={ qrCodeOpen }
@@ -49,7 +42,6 @@
             <Column>
                 {#if qrCodeData && qrCodeOpen}
                     <div class="container" on:click={async () => {
-                            console.log("linkurl",linkUrl)
                             await navigator.clipboard.writeText(linkUrl);
                             dispatch('close')
                             notify(`copied invitation`);

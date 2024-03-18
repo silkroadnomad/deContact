@@ -36,8 +36,13 @@
     }
 
     onMount(async ()=>{
-        await confirmExperimentalUse();
-        await handleSeedphrase();
+        if($hash!=='/onboarding'){
+            await confirmExperimentalUse();
+            await handleSeedphrase();
+        }else
+            await handleSeedphrase(true);
+
+
         await startNetwork();
     })
 
@@ -74,13 +79,6 @@
                      <ConnectionSignal title="Swarm connected" class="statusGreen" />&nbsp;{$connectedPeers}
                  {/if}
             </div>
-<!--            <div class="flags">
-                {#if $synced===true}
-                    <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
-                {:else}
-                    <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}
-                {/if}
-            </div>-->
         </HeaderNav>
 
         <HeaderUtilities>
