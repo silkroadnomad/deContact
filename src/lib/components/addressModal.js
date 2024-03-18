@@ -16,7 +16,6 @@ export async function confirm(options) {
       props: options
     });
     modal.$on('result', (e) => {
-      console.log("e",e)
       resolve(e.detail);
       modal.$destroy();
     });
