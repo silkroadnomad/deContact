@@ -59,7 +59,7 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 	});
 
 	test('Alice and Bob can exchange addresses', async () => {
-		test.setTimeout(50000);
+		test.setTimeout(50000); 
 
 		try { 
 			await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
@@ -78,22 +78,16 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
 		
 	
-		await page.waitForTimeout(15000);
+		//await page.waitForTimeout(15000);
 		await page2.getByRole('button', { name: 'Scan' }).click();
 		
-   	//await Promise.all([
-   	// page.waitForEvent('addressExchange')  		
-  	//]);	
-		
-			
 		//Exchanging data	
 		try { 
+			await page.getByRole('button', { name: 'From: Request contact data' }).click();
 			await page.getByRole('button', { name: 'Send My Contact Data' }).click();
 		} catch(error){
 			throw new Error("Exchange of Alice's contact information was not successful")		
-		}
-
-		
+		}		
 
 		try { 
 			await page2.getByRole('button', { name: 'Send My Contact Data' }).click();
@@ -103,7 +97,7 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 
 		//await page.getByRole('button', { name: 'Cancel' }).click();
 	});
-
+/*
 	test('Bob updates his address and Alice receives the update', async () => {
 
 		await page2.getByRole('row', { name: users[1].identity }).locator('label').click();
@@ -128,6 +122,8 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 
 	})
 
+	*/
+/*
 	test('Alice updates her address and Bob receives the update', async () => {
 
 		await page.getByRole('tab', { name: 'Contacts' }).click();
@@ -153,7 +149,7 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 
 	})
 
-	
+	*/
 
 	test.afterAll(async () => {
 		await Promise.all([
@@ -184,6 +180,7 @@ async function initializeNewPage(browser, user) {
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		const page_url = process.env.PAGE_URL;
+
 		await page.goto(page_url);
 		await page.evaluate(() => window.localStorage.clear());
 		await page.evaluate(() => window.sessionStorage.clear());

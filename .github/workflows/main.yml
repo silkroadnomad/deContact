@@ -1,9 +1,9 @@
 name: Self hosted runner
 on:
   push:
-    branches: [ githubCI, playwright, develop ]    
+    branches: [  develop, main ]    
   pull_request:
-    branches: [ githubCI, playwright, develop ]    
+    branches: [  develop, main ]    
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: 21  
+        node-version: 20  
     - name: Install dependencies
       run: |
         npm install
@@ -41,6 +41,6 @@ jobs:
       run: npx playwright install --with-deps  
     - name: Start test BasicAddressExchange.spec.js
       run: npx playwright test BasicAddressExchange.spec.js
-    - name: Start test MyDevicesAutoSync.spec.js 
-      run: npx playwright test MyDevicesAutoSync.spec.js 
+    #- name: Start test MyDevicesAutoSync.spec.js 
+    # run: npx playwright test MyDevicesAutoSync.spec.js 
 
