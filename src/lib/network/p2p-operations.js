@@ -140,7 +140,7 @@ async function processMessageQueue() {
                     // Mark this sender as having an active confirmation
                     activeConfirmations[sender] = true;
 
-                    if(data.onBoardingToken===undefined)
+                    if(data.onBoardingToken!==undefined)
                         result = 'ONLY_HANDOUT'
                     else
                         result = await confirm({ data: messageObj, db: requesterDB });
