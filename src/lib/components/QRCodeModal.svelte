@@ -31,9 +31,9 @@
             <Column>
                 {#if multiaddrs && multiaddrs.length>0}
                     <Toggle
-                        labelText="Generate invitation?"
-                        labelA="No"
-                        labelB="Yes"
+                        labelText="Scan DID or URL?"
+                        labelA="DID only"
+                        labelB="URL"
                         bind:toggled={fullDeContactUrl}/>
                 {/if}
             </Column>
