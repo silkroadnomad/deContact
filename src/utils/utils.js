@@ -1,23 +1,7 @@
-import { notificationMessage, showNotification } from "../stores.js";
+import { notificationMessage, showNotification, libp2p } from "../stores.js";
 import { mnemonicToSeedSync } from "bip39";
 import HDKey from "hdkey";
 import { createHash } from 'crypto';
-
-/**
- * {string} _notificationMessage
- */
-let _notificationMessage
-/**
- * {string} _showNotification
- */
-let _showNotification
-
-notificationMessage.subscribe((value) => {
-    _notificationMessage = value
-});
-showNotification.subscribe((value) => {
-    _showNotification = value
-})
 
 /**
  * Make an sha256 hash
@@ -64,35 +48,24 @@ export function notify(message) {
     }, 2000);
 }
 
-export function clickToCopy(node, target) {
-    async function copyText() {
-        let text = target
-            ? document.querySelector(target).innerText
-            : node.innerText;
+let _libp2p
 
-        try {
-            await navigator.clipboard.writeText(text);
+/**
+ * {string} _notificationMessage
+ */
+let _notificationMessage
+/**
+ * {string} _showNotification
+ */
+let _showNotification
 
-            node.dispatchEvent(
-                new CustomEvent('copysuccess', {
-                    bubbles: true
-                })
-            );
-        } catch(error) {
-            node.dispatchEvent(
-                new CustomEvent('copyerror', {
-                    bubbles: true,
-                    detail: error
-                })
-            );
-        }
-    }
+libp2p.subscribe((value) => {
+    _libp2p = value
+});
 
-    node.addEventListener('click', copyText);
-
-    return {
-        destroy() {
-            node.removeEventListener('click', copyText);
-        }
-    }
-}
+notificationMessage.subscribe((value) => {
+    _notificationMessage = value
+});
+showNotification.subscribe((value) => {
+    _showNotification = value
+})

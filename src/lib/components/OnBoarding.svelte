@@ -10,11 +10,10 @@
     } from "../../stores.js";
     import { requestAddress } from "../../lib/network/p2p-operations.js"
     import ContactForm from "$lib/components/ContactForm.svelte";
-    console.log("query",$query.split("&"))
 
     const onBoardingToken = decodeURI($query.split("&")[0]).split("=")[1]
     const aliceMultiAddress = JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])
-    console.log("aliceMultiAddress",aliceMultiAddress[0])
+
 
     let scannedContact
     let requested

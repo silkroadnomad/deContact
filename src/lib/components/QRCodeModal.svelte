@@ -1,22 +1,28 @@
 <script>
-    import {Column, Modal, Toggle, Grid, Row} from "carbon-components-svelte";
+    import {createEventDispatcher, onMount} from "svelte";
+    import { Column, Modal, Toggle, Grid, Row } from "carbon-components-svelte";
     import QrCode from "svelte-qrcode"
-    import { createEventDispatcher } from "svelte";
     const dispatch = createEventDispatcher();
-    import {connectedPeers, libp2p} from "../../stores.js";
-    import {notify} from "../../utils/utils.js";
+    import { connectedPeers, libp2p, orbitdb } from "../../stores.js";
+    import { notify } from "../../utils/utils.js";
 
     const page_url = import.meta.env.VITE_PAGE_URL?import.meta.env.VITE_PAGE_URL+'/#':'https://deContact.xyz/#';
+
     export let qrCodeData
     export let qrCodeOpen
 
     let multiaddrs
     $:($connectedPeers>1)?multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString()):''
 
-    let text = ''; //TODO when clicking use timeout to reset text to '' (maybe an animation)
+    let onBoardingToken
     let linkUrl = qrCodeData //`${page_url}/onboarding/${qrCodeData || '' }`
     let fullDeContactUrl = true
-    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData+'?onBoardingToken=mytoken&multiaddr='+encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
+    $: $orbitdb!==undefined?$orbitdb.identity.sign($orbitdb.identity,"mytoken").then( (sig) => {
+        onBoardingToken = sig
+        console.log("signature created on onboardingToken",onBoardingToken)
+    }):null;
+    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData}?onBoardingToken=${onBoardingToken}&multiaddr=${encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
+
 </script>
 
     <Modal bind:open={ qrCodeOpen }
