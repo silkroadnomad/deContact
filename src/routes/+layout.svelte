@@ -36,6 +36,16 @@
     }
 
     onMount(async ()=>{
+
+        if (window.Worker) {
+            const myWorker = new Worker('worker.js');
+            myWorker.postMessage([10, 2]); // Sending message as an array to our worker
+            myWorker.onmessage = function(e) {
+                console.log('Message received from worker: ' + e.data);
+            };
+        }
+        console.log("bla")
+
         if($hash!=='/onboarding'){
             await confirmExperimentalUse();
             await handleSeedphrase();
@@ -44,6 +54,8 @@
 
 
         await startNetwork();
+
+
     })
 
     let isSideNavOpen
