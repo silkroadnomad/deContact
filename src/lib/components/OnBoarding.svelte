@@ -9,7 +9,6 @@
         connectedPeers
     } from "../../stores.js";
     import { requestAddress } from "../../lib/network/p2p-operations.js"
-    import ContactForm from "$lib/components/ContactForm.svelte";
 
     const onBoardingToken = decodeURI($query.split("&")[0]).split("=")[1]
     const aliceMultiAddress = JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])

@@ -138,12 +138,18 @@ async function processMessageQueue() {
                     // Mark this sender as having an active confirmation
                     activeConfirmations[sender] = true;
 
-
                     if(messageObj.onBoardingToken!==undefined){
+                        //TODO "mytoken" should be a unique sessionId
+                        //TODO "onBoardingToken
                         const onBoardingSignatureValid = await _orbitdb.identity.verify(messageObj.onBoardingToken,_orbitdb.identity.publicKey,"mytoken")
                         console.log("onBoardingToken signature valid",onBoardingSignatureValid)
                         if(onBoardingSignatureValid)
                             result = 'ONLY_HANDOUT'
+                        else {
+                            notify(`onboarding signature was not valid - somebody wanted to steal your contact data`);
+                            return //don't do anything
+                        }
+
                     }
                     else
                         result = await confirm({ data: messageObj, db: requesterDB });
@@ -170,7 +176,6 @@ async function processMessageQueue() {
                     } else{
                         //TODO send "rejected sending address"
                     }
-
                     break;
                 default:
                     console.error(`Unknown command: ${messageObj.command}`);
@@ -278,6 +283,7 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
         if(onBoardingToken!==undefined) msg.onBoardingToken = onBoardingToken
         if(nopingpong===true) msg.nopingpong = true
         await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
+
         //look if a dummy is inside
         const all = await _dbMyAddressBook.all()
         const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress})
@@ -293,7 +299,9 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
             dummyContact._id = await sha256(JSON.stringify(dummyContact));
             await _dbMyAddressBook.put(dummyContact)
         }
-        await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg))) //TODO when publishing a message sign content and enrypt content
+
+        //TODO when publishing, sign and encrypt message
+        await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg)))
         startInvitationCheckWorker()
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
