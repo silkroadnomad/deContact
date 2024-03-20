@@ -1,5 +1,6 @@
 <script>
     import { onDestroy, onMount } from "svelte";
+    import DeContactWorker from "../worker.js?worker"
     import "carbon-components-svelte/css/all.css";
     import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
@@ -38,24 +39,50 @@
     onMount(async ()=>{
 
         if (window.Worker) {
-            const myWorker = new Worker('worker.js');
-            myWorker.postMessage([10, 2]); // Sending message as an array to our worker
-            myWorker.onmessage = function(e) {
+            const worker = new DeContactWorker();
+            worker.postMessage("standby");
+            // worker.postMessage([10, 2]); // Sending message as an array to our worker
+            worker.onmessage = function(e) {
                 console.log('Message received from worker: ' + e.data);
-            };
+                try {
+                    const msg = JSON.parse(e.data)
+                    msg?.connectedPeers?$connectedPeers=msg?.connectedPeers:null
+
+                }catch(e){
+                    console.log("error while parsing webworker message")
+                }
+
+            }
         }
-        console.log("bla")
+        else {
+            if($hash!=='/onboarding'){
+                await confirmExperimentalUse();
+                await handleSeedphrase();
+            }else
+                await handleSeedphrase(true);
 
-        if($hash!=='/onboarding'){
-            await confirmExperimentalUse();
-            await handleSeedphrase();
-        }else
-            await handleSeedphrase(true);
+            await startNetwork();
+        }
 
+    })
 
-        await startNetwork();
-
-
+    onDestroy(async ()=>{
+        if (window.Worker) {
+            const worker = new DeContactWorker();
+            worker.postMessage("wakeup");
+            // worker.postMessage([10, 2]); // Sending message as an array to our worker
+            // worker.onmessage = function(e) {
+            //     console.log('Message received from worker: ' + e.data);
+            //     try {
+            //         const msg = JSON.parse(e.data)
+            //         msg?.connectedPeers?$connectedPeers=msg?.connectedPeers:null
+            //
+            //     }catch(e){
+            //         console.log("error while parsing webworker message")
+            //     }
+            //
+            // }
+        }
     })
 
     let isSideNavOpen

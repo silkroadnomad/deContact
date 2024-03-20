@@ -27,7 +27,7 @@ const pubSubPeerDiscoveryTopics =
         : import.meta.env.VITE_P2P_PUPSUB.replace('\n','').split(',')
 
 export const bootstrapConfig = {list: multiaddrs};
-
+console.log("multiaddrs",multiaddrs)
 export const config = {
     addresses: {
         // swarm: [address],

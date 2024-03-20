@@ -63,10 +63,11 @@ export async function startNetwork() {
         connectedPeers.update(n => n - 1);
     });
 
+    _libp2p.services.pubsub.subscribe(CONTENT_TOPIC)
     _libp2p.services.pubsub.addEventListener('message', event => {
         const topic = event.detail.topic
         const message = toString(event.detail.data)
-        if(!topic.startsWith(CONTENT_TOPIC)) return
+        // if(!topic.startsWith(CONTENT_TOPIC)) return
         console.log(`Message received on topic '${topic}': ${message}`)
         handleMessage(message)
     })

@@ -12,7 +12,7 @@
     export let qrCodeOpen
 
     let multiaddrs
-    $:($connectedPeers>1)?multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString()):''
+    $:($libp2p && $connectedPeers>1)?multiaddrs = $libp2p.getMultiaddrs().map((ma) => ma.toString()):''
 
     let onBoardingToken
     let linkUrl = qrCodeData //`${page_url}/onboarding/${qrCodeData || '' }`
