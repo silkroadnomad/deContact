@@ -61,17 +61,11 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 	test('Alice and Bob can exchange addresses', async () => {
 		test.setTimeout(50000); 
 
-		try { 
-			await page.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
-		} catch(error){
-			console.log("no connection Alice")
-		}
+		const connect =  page.getByRole('img', { name: 'Swarm connected' })
+		await expect(connect, 'connection Alice').toBeEnabled({ timeout: 15000 });
 
-		try { 
-			await page2.getByRole('img', { name: 'Swarm connected' }).click({ timeout: 50000 });
-		} catch(error){
-			console.log("no connection Bob")
-		}
+		const connect2 =  page2.getByRole('img', { name: 'Swarm connected' })
+		await expect(connect2, 'connection Bob').toBeEnabled();
 
 		await page2.getByRole('tab', { name: 'Contacts' }).click();
 		await page2.getByRole('textbox', { role: 'scanContact' }).click();
@@ -81,23 +75,22 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		//await page.waitForTimeout(15000);
 		await page2.getByRole('button', { name: 'Scan' }).click();
 		
+   			
 		//Exchanging data	
-		try { 
-			await page.getByRole('button', { name: 'From: Request contact data' }).click();
-			await page.getByRole('button', { name: 'Send My Contact Data' }).click();
-		} catch(error){
-			throw new Error("Exchange of Alice's contact information was not successful")		
-		}		
+		await page.getByRole('button', { name: 'From: Request contact data' }).click();
 
-		try { 
-			await page2.getByRole('button', { name: 'Send My Contact Data' }).click();
-		} catch(error){
-			throw new Error("Exchange of Bob's contact information was not successful")	
-		}
+		const button = page.getByRole('button', { name: 'Send My Contact Data' })
+		await expect(button, "Exchange of Alice's contact information was successful").toBeEnabled();
+		await button.click();
+
+		const button2 = page2.getByRole('button', { name: 'Send My Contact Data' })
+		await expect(button2, "Exchange of Bobs's contact information was successful").toBeEnabled();
+		await button2.click();
+
 
 		//await page.getByRole('button', { name: 'Cancel' }).click();
 	});
-/*
+
 	test('Bob updates his address and Alice receives the update', async () => {
 
 		await page2.getByRole('row', { name: users[1].identity }).locator('label').click();
@@ -111,18 +104,13 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		await page2.getByPlaceholder('Enter city...').fill(users[2].city);
 		await page2.getByPlaceholder('Enter country...').fill(users[2].country);
 		await page2.getByRole('button', { name: 'Update' }).click();
-		//await page2.getByRole('row', { name: users[1].identity }).locator('span').click();		
-
-		try { 
-			await page.getByRole('row', { name: users[2].lastname }).locator('span').click();
-			console.log("Bob update was successful")
-		} catch(error){
-			throw new Error("Update was not successful")	
-		}
-
-	})
-
-	*/
+		//await page2.getByRole('row', { name: users[1].identity }).locator('span').click();	
+		
+		
+		const lastname = page.getByRole('row', { name: users[2].lastname }).locator('span')
+		await expect(lastname, "Bob update").toBeEnabled();
+		console.log("Bob update was successful")
+	})	
 /*
 	test('Alice updates her address and Bob receives the update', async () => {
 
@@ -138,18 +126,16 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		await page.getByPlaceholder('Enter city...').fill(users[3].city);
 		await page.getByPlaceholder('Enter country...').fill(users[3].country);
 		await page.getByRole('button', { name: 'Update' }).click();
-		await page.getByRole('row', { name: users[0].identity }).locator('span').click();		
-
-		try { 
-			await page2.getByRole('row', { name: users[3].lastname }).locator('span').click();
-			console.log("Alice update was successful")
-		} catch(error){
-			throw new Error("Update was not successful")	
-		}
+		await page.getByRole('row', { name: users[0].identity }).locator('span').click();	
+		
+		const lastname2 = page2.getByRole('row', { name: users[3].lastname }).locator('span')
+		
+		await expect(lastname2, "Alice update").toBeEnabled();
+		console.log("Alice update was successful")
 
 	})
-
-	*/
+*/
+	
 
 	test.afterAll(async () => {
 		await Promise.all([
@@ -176,10 +162,11 @@ async function fillForm(page, user) {
 }
 
 async function initializeNewPage(browser, user) {
-	try {
+	
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		const page_url = process.env.PAGE_URL;
+
 
 		await page.goto(page_url);
 		await page.evaluate(() => window.localStorage.clear());
@@ -193,7 +180,5 @@ async function initializeNewPage(browser, user) {
 		await fillForm(page, user);
 		await page.getByRole('button', { name: 'Add' }).click({ timeout: 50000 });
 		return page;
-	} catch (error) {
-		console.error('Error opening new page:', error);
-	}
+	
 }
