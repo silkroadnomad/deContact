@@ -1,15 +1,42 @@
 import { writable } from 'svelte/store'
-export const handle = writable(window.localStorage.getItem('handle') || 'unknown')
+
+/**
+ * The libp2p node instance
+ * @type {Writable<import('libp2p').Libp2p>}
+ */
 export const libp2p = writable()
+
+/**
+ * The OrbitDB instance
+ * @type {Writable<import('@orbitdb/core').OrbitDB>}
+ */
 export const orbitdb = writable()
+
+/**
+ * The Helia instance
+ * @type {Writable<import('helia').Helia>}
+ */
 export const helia = writable()
+
+/**
+ * The masterSeed based on the seedPhrase. Can be used to create HDKeys for crypto wallets
+ * @type {Writable<string>}
+ */
+export const masterSeed = writable()
+
+/**
+ * Seed phrase
+ * @type {Writable<string|undefined>}
+ */
+export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
+
+
 export const dbMessages = writable()
 export const subscription = writable()
 export const connectedPeers = writable(0)
 
-//0d3c4655d0fa1f9bcaa6c824eaae27fbb494e3a763d1bdd8b764d66e73ce8c4a
-export const masterSeed = writable()
-export const seedPhrase = writable(window.localStorage.getItem('seedPhrase') || undefined)
+
+
 
 export const myAddressBook = writable([])
 /** an orbitdb which will replace the myAddressBook store based on localstorage //TODO */

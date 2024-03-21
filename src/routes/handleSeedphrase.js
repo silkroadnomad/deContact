@@ -3,24 +3,30 @@ import {generateMasterSeed, notify} from "../utils/utils.js";
 import {masterSeed, seedPhrase, selectedTab} from "../stores.js";
 import {generateMnemonic} from "bip39";
 
-let _masterSeed;
+let _masterSeed; /** @type {string} the masterSeed based on the seedPhrase */
 masterSeed.subscribe((val) => {
     _masterSeed = val
 });
 
-let _seedPhrase;
+let _seedPhrase; /** @type {string} the seed phrase */
 seedPhrase.subscribe((val) => {
     _seedPhrase = val
 });
 
 /**
  * If there's no seed inside the browser storage, we ask the generate a new seed or to enter an existing
- * //TODO 1) encrypt the seed 2) keep seed only on mobile device and sign transactions there or 3) have a hardware wallet
+ * - stores the generated seedPhrase inside the browser storage and holds it inside Svelte store
+ * - creates a masterSeed from seedPhrase. Can be used to create hd-keys for crypto wallets.
+ *
+ * //TODO 1) encrypt the seed
+ * //TODO 2) keep seed only on mobile device and sign transactions there or
+ * //TODO 3) have a hardware wallet
  * //TODO 4) if browser ask for Metamask connect (EthereumIdentityProvider)
  *
+ * @param {boolean?} skip if true, we just create a new seed and don't ask the user, e.g. during onboarding procedure
  * @returns {Promise<void>}
  */
-export const handleSeedphrase = async (skip) => {
+export const handleSeedphrase = async (skip=false) => {
 
     if(!localStorage.getItem("seedPhrase") && !skip) {
 

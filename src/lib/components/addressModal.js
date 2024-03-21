@@ -1,12 +1,8 @@
-/**
- * performs confirmation dialogs
- * @module lib/components/common/confirmationModal/modal
- */
 import Modal from './AddressModal.svelte';
 
 /**
- * Creates a modal Confirmation Dialog and waits for the answer
- * @param {import('$lib/interfaces.js').ConfirmDialogOptions? } options
+ * Creates a Confirmation Dialog and waits for the user to click a button
+ * @param {import('$lib/interfaces.js').AddressModalOptions? } options
  * @returns {Promise<boolean>}
  */
 export async function confirm(options) {

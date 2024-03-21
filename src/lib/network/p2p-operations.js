@@ -19,7 +19,7 @@ import {
 } from "../../stores.js";
 import { config } from "../../config.js";
 import { confirm } from "../components/addressModal.js"
-import {notify, sha256} from "../../utils/utils.js";
+import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
 
 let blockstore = new LevelBlockstore("./helia-blocks")
@@ -28,6 +28,11 @@ let datastore = new LevelDatastore("./helia-data")
 let messageQueue = {};
 let activeConfirmations = {};
 
+/**
+ * The PubSub topic where deContact is publishing and subscribing
+ * REQUEST_ADDRESS requests
+ * @type {string}
+ */
 export const CONTENT_TOPIC = "/dContact/3/message/proto";
 
 const REQUEST_ADDRESS = 'REQUEST_ADDRESS';
@@ -41,11 +46,12 @@ export async function startNetwork() {
 
     _libp2p =  await createLibp2p(config)
     libp2p.set(_libp2p)
+
     _helia = await createHelia({
         libp2p: _libp2p,
         blockstore,
         datastore,
-        blockBrokers: [bitswap()]
+        blockBrokers: [bitswap()] //TODO what is this bockBrokers (bitswap) good for?
     });
     helia.set(_helia)
     window.helia = _helia
@@ -368,19 +374,34 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);
     }
 }
-let _libp2p;
+
+let _libp2p; /** @type {import('libp2p').Libp2p} Value of to the libp2p store variable containing the libp2p instance*/
 libp2p.subscribe((val) => {
     _libp2p = val
 });
 
+/**
+ * Subscription to the helia store variable containing the Helia instance
+ */
 let _helia;
 helia.subscribe((val) => {
     _helia = val
 });
 
+/**
+ * Subscription to the orbitdb store variable containing the OrbitDB instance
+ */
 let _orbitdb;
 orbitdb.subscribe((val) => {
     _orbitdb = val
+});
+
+/**
+ *
+ */
+let _masterSeed;
+masterSeed.subscribe((val) => {
+    _masterSeed = val
 });
 
 let _dbMessages;
@@ -391,11 +412,6 @@ dbMessages.subscribe((val) => {
 let _dbMyAddressBook;
 dbMyAddressBook.subscribe((val) => {
     _dbMyAddressBook = val
-});
-
-let _masterSeed;
-masterSeed.subscribe((val) => {
-    _masterSeed = val
 });
 
 let _seedPhrase;

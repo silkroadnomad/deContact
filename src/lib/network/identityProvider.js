@@ -5,7 +5,20 @@ import OrbitDBIdentityProviderDID from "@orbitdb/identity-provider-did";
 import {Identities, useIdentityProvider} from "@orbitdb/core";
 import {notify} from "../../utils/utils.js";
 
-export async function createIdentityProvider(type, seedArray, ipfs) {
+/**
+ *
+ * Create an IdentityProvider either an
+ * - OrbitDBIdentityProviderDID or
+ * - EthereumIdentityProvider
+ *
+ * //TODO open the seed decryption dialog if seed is encrypted
+ *
+ * @param type {string} 'ed25519' (for DID) or 'ethereum' (for Web3 or Metamask-wallet) support
+ * @param seed a 32bit seed
+ * @param ipfs the Helia instance
+ * @returns {Promise<{identities: module:Identities~Identities, identity: {id: string, publicKey: Object, signatures: Object, type: string, sign: Function, verify: Function}, identityProvider}>}
+ */
+export async function createIdentityProvider(type='ed25519', seed, ipfs) {
     let identity
     let identityProvider;
     const identities = await Identities({ ipfs })
@@ -16,8 +29,7 @@ export async function createIdentityProvider(type, seedArray, ipfs) {
             useIdentityProvider(OrbitDBIdentityProviderDID)
 
             try { //TODO if masterSeed array is encrypted open decryption dialog
-             //   const seedArray = new Uint8Array(seed.match(/.{1,2}/g).map(byte => parseInt(byte, 16)));
-                identityProvider = new Ed25519Provider(seedArray)
+                identityProvider = new Ed25519Provider(seed)
             } catch(e){
                 console.log(e)
                 notify(`DID error ${e}`)
@@ -26,7 +38,7 @@ export async function createIdentityProvider(type, seedArray, ipfs) {
             identity = await identities.createIdentity({ provider: OrbitDBIdentityProviderDID({ didProvider:identityProvider }) })
             break;
         case 'ethereum':
-            //TODO Assuming you have an Ethereum wallet instance
+            //TODO Implementing an Ethereum Provider
             const wallet = undefined
             identityProvider = new EthereumIdentityProvider({ wallet });
             break;

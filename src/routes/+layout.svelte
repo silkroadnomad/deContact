@@ -1,5 +1,5 @@
 <script>
-    import { onDestroy, onMount } from "svelte";
+    import { onMount } from "svelte";
     import "carbon-components-svelte/css/all.css";
     import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
@@ -22,7 +22,7 @@
     let theme = "g90";
 
     $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
-        console.log("generating seed phrase")
+        //TODO if we use EthereumProvider Seedphrase doesn't need to be handled at all instead - Metamask must be connected
         handleSeedphrase().then(() => {
             console.log("generated seed phrase - creating identity and starting orbitdb")
             getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
