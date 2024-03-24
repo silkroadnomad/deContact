@@ -110,7 +110,7 @@ export async function startNetwork() {
     })
 }
 
-async function close() {
+export async function close() {
     await _helia?.stop();
     await _orbitdb?.stop()
 }

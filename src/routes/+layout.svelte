@@ -1,5 +1,5 @@
 <script>
-    import { onMount } from "svelte";
+    import {onDestroy, onMount} from "svelte";
     import "carbon-components-svelte/css/all.css";
     import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
@@ -10,7 +10,7 @@
     import QRCodeModal from "$lib/components/QRCodeModal.svelte";
     import { myDal, qrCodeOpen, qrCodeData, seedPhrase, helia, orbitdb, masterSeed } from "../stores.js";
 
-    import { startNetwork } from "../lib/network/p2p-operations.js"
+    import { startNetwork, close } from "../lib/network/p2p-operations.js"
     import { getIdentityAndCreateOrbitDB} from "$lib/network/getIdendityAndCreateOrbitDB.js"
 
     import { connectedPeers } from "../stores.js";
@@ -45,6 +45,8 @@
 
         await startNetwork();
     })
+
+    onDestroy(close)
 
     let isSideNavOpen
     let title = "   - the cloud we are!"
