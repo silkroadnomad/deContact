@@ -4,7 +4,6 @@
         libp2p,
         connectedPeers,
         masterSeed,
-        handle,
         orbitdb, seedPhrase,
         dbMyAddressBook, selectedAddr, selectedTab
     } from "../../stores.js"
