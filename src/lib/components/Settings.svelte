@@ -7,7 +7,6 @@
         orbitdb, seedPhrase,
         dbMyAddressBook, selectedAddr, selectedTab
     } from "../../stores.js"
-    $:window.localStorage.setItem('handle', $handle);
     $:window.localStorage.setItem('seed', $masterSeed);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
 </script>
