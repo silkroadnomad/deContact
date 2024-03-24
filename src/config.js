@@ -69,7 +69,7 @@ export const config = {
     peerDiscovery: [
         bootstrap(bootstrapConfig),
         pubsubPeerDiscovery({
-            interval: 1000,
+            interval: 10000,
             topics: pubSubPeerDiscoveryTopics, // defaults to ['_peer-discovery._p2p._pubsub']
             listenOnly: false
         })
