@@ -111,7 +111,7 @@ export async function startNetwork() {
 }
 
 async function close() {
-    await _ipfs?.stop();
+    await _helia?.stop();
     await _orbitdb?.stop()
 }
 
