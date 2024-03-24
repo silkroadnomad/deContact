@@ -110,6 +110,11 @@ export async function startNetwork() {
     })
 }
 
+async function close() {
+    await _ipfs?.stop();
+    await _orbitdb?.stop()
+}
+
 async function handleMessage(dContactMessage) {
     console.log("dContactMessage", dContactMessage);
     if (!dContactMessage) return;
@@ -209,6 +214,7 @@ async function getAddressRecords() {
         myAddressBook.set(transformedRecords);
         console.log("records in dbMyAddressBook ",addressRecords)
     } catch (e) {
+        await close()
         console.log("something isn't yet correctly setup inside dbMyAddressBook")
     }
 }
@@ -244,7 +250,9 @@ async function initReplicationBackup(ourDID) {
             _followList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
                 console.log(`we follow and backup dbAddress: ${dbAddress} records`,records)
             })
-        } catch(e){console.log(`error while loading ${dbAddress} `)}
+        } catch(e){
+            await close()
+            console.log(`error while loading ${dbAddress} `)}
     }
 }
 
