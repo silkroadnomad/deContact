@@ -64,9 +64,9 @@ Opens a confirmation modal on Bob's device when Alice is requesting his contact 
         <ExpandableTile>
             <div slot="above">
                 <div>From:
-                    {#if filteredElements.length>0}
-                        {contactData?.firstName} {contactData?.lastName} {contactData?.city} <br/>
-                        owner: {contactData?.owner}<br/>
+                    {#if aliceOwnContactData?.length>0}
+                        {aliceOwnContactData[0]?.firstName} {aliceOwnContactData[0]?.lastName} {aliceOwnContactData[0]?.city} <br/>
+                        owner: {aliceOwnContactData[0]?.owner}<br/>
                     {/if}
                 </div>
                 <p>&nbsp;</p>
