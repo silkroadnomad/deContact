@@ -70,6 +70,9 @@ export async function startNetwork() {
         connectedPeers.update(n => n - 1);
     });
 
+    _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
+    orbitdb.set(_orbitdb)
+
     await _libp2p.services.pubsub.subscribe(CONTENT_TOPIC+"/"+_orbitdb.identity.id)
 
     _libp2p.services.pubsub.addEventListener('message', event => {
@@ -79,9 +82,6 @@ export async function startNetwork() {
         console.log(`Message received on topic '${topic}': ${message}`)
         handleMessage(message)
     })
-
-    _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
-    orbitdb.set(_orbitdb)
 
     /**
      * My Address Book (with own contact data and contact data of others
@@ -146,6 +146,9 @@ async function processMessageQueue() {
         let result, data, requesterDB;
         if (messageObj.recipient === _orbitdb.identity.id) {
             switch (messageObj.command) {
+                case CANCEL_REQUEST:
+                    data = JSON.parse(messageObj.data);
+                break;
                 case REQUEST_ADDRESS:
                     data = JSON.parse(messageObj.data);
                     requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents', sync: true });
@@ -163,7 +166,6 @@ async function processMessageQueue() {
                             notify(`onboarding signature was not valid - somebody wanted to steal your contact data`);
                             return //don't do anything
                         }
-
                     }
                     else
                         result = await confirm({ data: messageObj, db: requesterDB });
@@ -184,8 +186,26 @@ async function processMessageQueue() {
                         initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
 
                     } else{
-                        const msg = await createMessage(REQUEST_ADDRESS, messageObj.sender);
-                        await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+messageObj.sender,fromString(JSON.stringify(msg)))
+                        try {
+
+                            const all = await requesterDB.all()
+                            const foundDummy = all.filter((it) => {
+                                return it.value.owner === _orbitdb?.identity?.id
+                            })
+
+                            for (const foundDummyKey in foundDummy) {
+                                await requesterDB.del(foundDummy[foundDummyKey].key)
+                            }
+                            foundDummy[0].value.firstName="request canceled";
+                            const cancelDummy = foundDummy[0].value;
+                            const hash = await requesterDB.put(cancelDummy);
+                            notify(`wrote canceled request with hash ${hash}`);
+
+                        } catch (error) {
+                            console.error('Error in writeMyAddressIntoRequesterDB:', error);
+                        }
+                        // const msg = await createMessage(CANCEL_REQUEST, messageObj.sender);
+                        // await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+messageObj.sender,fromString(JSON.stringify(msg)))
                     }
                     // Confirmation is complete; allow future confirmations for this sender
                     delete activeConfirmations[sender];
