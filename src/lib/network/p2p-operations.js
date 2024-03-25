@@ -17,9 +17,8 @@ import {
     connectedPeers,
     followList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
-
 import { confirm } from "../components/addressModal.js"
-import { notify, sha256 } from "../../utils/utils.js";
+import {notify, sha256} from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
 
 let blockstore = new LevelBlockstore("./helia-blocks")
@@ -27,6 +26,7 @@ let datastore = new LevelDatastore("./helia-data")
 
 let messageQueue = {};
 let activeConfirmations = {};
+
 
 /**
  * The PubSub topic where deContact is publishing and subscribing
@@ -83,6 +83,9 @@ export async function startNetwork() {
         handleMessage(message)
     })
 
+    _orbitdb = await getIdentityAndCreateOrbitDB('ed25519',_masterSeed,_helia)
+    orbitdb.set(_orbitdb)
+
     /**
      * My Address Book (with own contact data and contact data of others
      */
@@ -93,7 +96,7 @@ export async function startNetwork() {
         sync: true,
         AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
     })
-    // console.log("dbMyAddressBook",_dbMyAddressBook)
+
     dbMyAddressBook.set(_dbMyAddressBook)
     window.mydb = _dbMyAddressBook
     await getAddressRecords()
@@ -149,6 +152,7 @@ async function processMessageQueue() {
                 case CANCEL_REQUEST:
                     data = JSON.parse(messageObj.data);
                 break;
+
                 case REQUEST_ADDRESS:
                     data = JSON.parse(messageObj.data);
                     requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents', sync: true });
@@ -187,7 +191,6 @@ async function processMessageQueue() {
 
                     } else{
                         try {
-
                             const all = await requesterDB.all()
                             const foundDummy = all.filter((it) => {
                                 return it.value.owner === _orbitdb?.identity?.id
@@ -340,6 +343,7 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
 
         //TODO when publishing, sign and encrypt message
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress, new TextEncoder().encode(JSON.stringify(msg)))
+
         startInvitationCheckWorker()
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
@@ -352,8 +356,8 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
  * The interval increases exponentially: first 10 seconds, then 100 seconds, then 10000 seconds, and so on.
  */
 function startInvitationCheckWorker() {
-    let iteration = 0; // Track the current iteration
 
+    let iteration = 0; // Track the current iteration
     const executeWorker = async () => {
         console.log("Checking for 'invited' contacts to resend requests...");
 
@@ -368,6 +372,7 @@ function startInvitationCheckWorker() {
         for (const contact of invitedContacts) {
             const data = { sharedAddress: _dbMyAddressBook.address };
             const msg = await createMessage(REQUEST_ADDRESS, contact.value.owner, data);
+
             if(contact?.value?.onBoardingToken) msg.onBoardingToken = contact.value.onBoardingToken;
             
             // Use TextEncoder to encode the message
@@ -380,7 +385,7 @@ function startInvitationCheckWorker() {
         const nextInterval = Math.pow(10, iteration) * 1000; // Calculate the next interval
         console.log(`Scheduling next check in ${nextInterval / 1000} seconds.`);
         setTimeout(executeWorker, nextInterval);
-    };
+    }
 
     // Start the first execution
     executeWorker();

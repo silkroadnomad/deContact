@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 import { chromium } from 'playwright';
 
-const browser = await chromium.launch({
-	headless: process.env.HEADLESS?process.env.HEADLESS:true
+const browser = await chromium.launch({	
+	headless: process.env.HEADLESS==="true"?process.env.HEADLES==="true":true
 });
 
 const users = [ //TODO can we put this into assets?
@@ -19,6 +19,44 @@ const users = [ //TODO can we put this into assets?
 	}
 ];
 
+
+test.describe('Devices auto synchronization', () => {
+	let page, page2;
+
+	test.beforeEach(async ({ browser }) => {
+		test.setTimeout(50000);
+		page = await initializeNewPage(browser, users[0]);		
+	});
+
+	test('checkDeviceSync', async () => {
+		test.setTimeout(150000);
+
+		const context = await browser.newContext();
+		page2 = await context.newPage();
+		const page_url = process.env.PAGE_URL;
+		await page2.goto(page_url);
+
+		await page2.getByRole('button', { name: 'Continue' }).click();
+		await page2.getByRole('button', { name: 'Enter Existing Seed Phrase' }).click();
+		await page2.getByRole('button', { name: 'Enter Existing Seed Phrase' }).click();
+		await page2.getByRole('tab', { name: 'Contacts' }).click();
+
+		//const connect =  page2.getByRole('img', { name: 'Swarm connected' })
+		//await expect(connect, 'connection Alice synchronization').toBeEnabled({ timeout: 30000 }); 
+
+		await page2.getByLabel('Contacts').locator('span').first().click();
+	});
+
+	test.afterEach(async () => {
+		await Promise.all([
+			page.close(),
+			page2.close()
+		]);
+	});
+});
+
+
+
 async function fillInput(page, placeholder, value) {
 	await page.click(`[placeholder="${placeholder}"]`);
 	await page.fill(`[placeholder="${placeholder}"]`, value);
@@ -34,7 +72,7 @@ async function fillForm(page, user) {
 }
 
 async function initializeNewPage(browser, user) {
-	try {
+	
 		const context = await browser.newContext();
 		const page = await context.newPage();
 		const page_url = process.env.PAGE_URL;
@@ -52,39 +90,5 @@ async function initializeNewPage(browser, user) {
 		await fillForm(page, user);
 		await page.getByRole('button', { name: 'Add' }).click({ timeout: 50000 });
 		return page;
-	} catch (error) {
-		console.error('Error opening new page:', error);
-	}
+	
 }
-
-
-test.describe('Devices auto synchronization', () => {
-	let page, page2;
-
-	test.beforeEach(async ({ browser }) => {
-		test.setTimeout(50000);
-		page = await initializeNewPage(browser, users[0]);
-		//page2 = await initializeNewPage(browser, users[0]);
-	});
-
-	test('checkDeviceSync', async () => {
-		test.setTimeout(150000);
-
-		const context = await browser.newContext();
-		page2 = await context.newPage();
-		const page_url = process.env.PAGE_URL;
-		await page2.goto(page_url);
-		await page2.getByRole('button', { name: 'Continue' }).click();
-		await page2.getByRole('button', { name: 'Enter Existing Seed Phrase' }).click();
-		await page2.getByRole('button', { name: 'Enter Existing Seed Phrase' }).click();
-		await page2.getByRole('tab', { name: 'Contacts' }).click();
-		await page2.getByLabel('Contacts').locator('span').first().click();
-	});
-
-	test.afterEach(async () => {
-		await Promise.all([
-			page.close(),
-			page2.close()
-		]);
-	});
-});

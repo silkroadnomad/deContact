@@ -2,11 +2,13 @@
     import { ComposedModal, ModalHeader, ModalBody, ModalFooter, ExpandableTile, Column, Grid, Row, Checkbox } from "carbon-components-svelte";
     import { onMount, createEventDispatcher } from "svelte";
 
+
     /** dispatches the events when a button was clicked*/
     const dispatch = createEventDispatcher();
 
     /** the header of the modal @type {string} [heading='deContact Protocol Action'] */
     export let heading = 'deContact Protocol Action';
+
     /** the button label when sending the contact data  @type {string} [heading='Send My Contact Data'] */
     export let SendMyContactData = 'Send My Contact Data';
     /** the button label when canceling the operation  @type {string} [heading='Send My Contact Data']*/
@@ -17,6 +19,7 @@
 
     /** the orbitdb of Alice (which requests contact data from Bob */
     export let db;
+
 
     /** contains the contact data of Alice (the requester) @type {Array<object>} */
     let aliceOwnContactData
@@ -50,9 +53,7 @@
     onMount(() => {
         readRequestersContactData();
     });
-
 </script>
-
 <!--
 @component
 Opens a confirmation modal on Bob's device when Alice is requesting his contact data.

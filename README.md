@@ -1,4 +1,4 @@
-[![Basic Tests](https://github.com/silkroadnomad/deContact/actions/workflows/main.yml/badge.svg)](https://github.com/silkroadnomad/deContact/actions/workflows/main.yml)
+![github workflow](https://github.com/davidreband/deContact/actions/workflows/self-hosted-runner.yml/badge.svg)
 
 # deContact
 A peer-to-peer address book in Svelte with local first protocol built on libp2p, Helia and OrbitDB

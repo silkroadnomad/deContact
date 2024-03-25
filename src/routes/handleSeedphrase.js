@@ -26,7 +26,7 @@ seedPhrase.subscribe((val) => {
  * @param {boolean?} skip if true, we just create a new seed and don't ask the user, e.g. during onboarding procedure
  * @returns {Promise<void>}
  */
-export const handleSeedphrase = async (skip=false) => {
+export const handleSeedphrase = async (skip= false) => {
 
     if(!localStorage.getItem("seedPhrase") && !skip) {
 
