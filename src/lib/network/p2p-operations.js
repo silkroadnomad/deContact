@@ -111,8 +111,8 @@ export async function startNetwork() {
 }
 
 export async function close() {
-    await _helia?.stop();
     await _orbitdb?.stop()
+    await _helia?.stop();
 }
 
 async function handleMessage(dContactMessage) {
@@ -215,7 +215,7 @@ async function getAddressRecords() {
         console.log("records in dbMyAddressBook ",addressRecords)
     } catch (e) {
         await close()
-        console.log("something isn't yet correctly setup inside dbMyAddressBook")
+        console.log("exception while opening (reading) dbMyAddressBook")
     }
 }
 
