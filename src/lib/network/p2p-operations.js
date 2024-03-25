@@ -4,7 +4,7 @@ import { OrbitDBAccessController, useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
-import { fromString, toString } from 'uint8arrays';
+import { config } from "../../config.js";
 import {
     libp2p,
     helia,
@@ -17,7 +17,7 @@ import {
     connectedPeers,
     followList, dbMessages, selectedTab, syncedDevices,
 } from "../../stores.js";
-import { config } from "../../config.js";
+
 import { confirm } from "../components/addressModal.js"
 import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
@@ -77,7 +77,7 @@ export async function startNetwork() {
 
     _libp2p.services.pubsub.addEventListener('message', event => {
         const topic = event.detail.topic
-        const message = toString(event.detail.data)
+        const message = new TextDecoder().decode(event.detail.data)
         if(!topic.startsWith(CONTENT_TOPIC)) return
         console.log(`Message received on topic '${topic}': ${message}`)
         handleMessage(message)
@@ -172,7 +172,7 @@ async function processMessageQueue() {
                     if(result){
                         if(result==='ONLY_HANDOUT'){
                             //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
-                            //1) update his contact data in her addressbook
+                            //1) update his contact data in her address book
                             //2) keep a backup of her data
                             const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
                             subscriber._id = await sha256(JSON.stringify(subscriber));
@@ -339,7 +339,7 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
         }
 
         //TODO when publishing, sign and encrypt message
-        await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress,fromString(JSON.stringify(msg)))
+        await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress, new TextEncoder().encode(JSON.stringify(msg)))
         startInvitationCheckWorker()
         notify(`sent SEND_ADDRESS_REQUEST to ${scannedAddress}`);
     } catch (error) {
@@ -349,33 +349,41 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
 
 /**
  * Periodically checks for 'invited' contacts and attempts to resend the address request.
+ * The interval increases exponentially: first 10 seconds, then 100 seconds, then 10000 seconds, and so on.
  */
 function startInvitationCheckWorker() {
+    let iteration = 0; // Track the current iteration
 
-    const checkInterval = 10000 //1000 * 60 * 5; // Check every 5 minutes
-    let intervalId = null; // Variable to hold the interval ID
-
-    intervalId = setInterval(async () => {
+    const executeWorker = async () => {
         console.log("Checking for 'invited' contacts to resend requests...");
 
         const allContacts = await _dbMyAddressBook.all();
         const invitedContacts = allContacts.filter(contact => contact.value.firstName === 'invited');
 
         if (invitedContacts.length === 0) {
-            console.log("No 'invited' contacts found, stopping the worker...");
-            clearInterval(intervalId);
-            return;
+            console.log("No 'invited' contacts found. Worker will not schedule further checks.");
+            return; // Stop scheduling further executions
         }
 
         for (const contact of invitedContacts) {
             const data = { sharedAddress: _dbMyAddressBook.address };
             const msg = await createMessage(REQUEST_ADDRESS, contact.value.owner, data);
-            if(contact?.value?.onBoardingToken) msg.onBoardingToken = contact.value.onBoardingToken
+            if(contact?.value?.onBoardingToken) msg.onBoardingToken = contact.value.onBoardingToken;
             
-            await _libp2p.services.pubsub.publish(CONTENT_TOPIC + "/" + contact.value.owner, fromString(JSON.stringify(msg)));
+            // Use TextEncoder to encode the message
+            await _libp2p.services.pubsub.publish(CONTENT_TOPIC + "/" + contact.value.owner, new TextEncoder().encode(JSON.stringify(msg)));
             console.log(`Resent address request to ${contact.value.owner}`);
         }
-    }, checkInterval);
+
+        // Schedule the next execution
+        iteration++;
+        const nextInterval = Math.pow(10, iteration) * 1000; // Calculate the next interval
+        console.log(`Scheduling next check in ${nextInterval / 1000} seconds.`);
+        setTimeout(executeWorker, nextInterval);
+    };
+
+    // Start the first execution
+    executeWorker();
 }
 
 /**
