@@ -238,8 +238,8 @@ async function getAddressRecords() {
         myAddressBook.set(transformedRecords);
         console.log("records in dbMyAddressBook ",addressRecords)
     } catch (e) {
+        console.log("exception while opening (reading) dbMyAddressBook",e)
         await close()
-        console.log("exception while opening (reading) dbMyAddressBook")
     }
 }
 
