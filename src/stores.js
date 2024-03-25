@@ -6,8 +6,6 @@ export const helia = writable()
 export const dbMessages = writable()
 export const subscription = writable()
 export const connectedPeers = writable(0)
-export const progressText = writable("initializing...")
-export const progressState = writable(0)
 
 //0d3c4655d0fa1f9bcaa6c824eaae27fbb494e3a763d1bdd8b764d66e73ce8c4a
 export const masterSeed = writable()
@@ -43,7 +41,7 @@ export const recordsSynced = writable(0)
 export const showNotification =  writable()
 export const notificationMessage = writable()
 
-export const subscriberList = writable(JSON.parse(window.localStorage.getItem('subscriberList')) || [] )
+export const followList = writable([] )
 export const qrCodeOpen = writable(false)
 export const qrCodeData = writable()
 
@@ -58,9 +56,10 @@ const contact = {
     city: "",
     stateProvince: "",
     countryRegion:"",
+    email:"",
     ipns: "",
     owner:"",
-    own:false,
+    own:true,
     category: 'business',
     sharedAddress:""
 }

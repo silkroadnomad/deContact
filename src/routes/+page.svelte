@@ -22,8 +22,6 @@
         orbitdb,
         qrCodeOpen,
         qrCodeData,
-        progressState,
-        progressText,
         showNotification,
         notificationMessage,
         selectedTab,
@@ -37,9 +35,9 @@
 </script>
 
 <div class="content">
-    {#if $progressState!==6}
+<!--    {#if $progressState!==6}
     <ProgressBar helperText={"("+$progressState+"/6) "+$progressText} status={$progressState===6?"finished":"active"} />
-    {/if}
+    {/if}-->
     <Tabs class="tabs" bind:selected={$selectedTab}>
         <Tab label="Contacts" data-cy="contacts"/>
         <Tab label="My Address" data-cy="address"/>
@@ -53,14 +51,14 @@
                             <TextInput role="scanContact" size="sm" bind:value={scannedAddress} on:keydown={(e) => e.code==='Enter'?requestAddress(scannedAddress):null} />
                         </Column>
                             <Column>
-                                <Button size="sm"
-                                        on:click={async () => await requestAddress(scannedAddress)}>
-                                    <Scan size="16"/> &nbsp; Scan
-                                </Button>
-                                <Button size="sm" on:click={() => {
-                                    $qrCodeData = $orbitdb?.identity?.id;
-                                    $qrCodeOpen = !$qrCodeOpen;
-                                }}>
+                                    <Button size="sm"
+                                            on:click={async () => await requestAddress(scannedAddress)}>
+                                        <Scan size="16"/> &nbsp; Scan
+                                    </Button>
+                                    <Button size="sm" on:click={() => {
+                                        $qrCodeData = $orbitdb?.identity?.id;
+                                        $qrCodeOpen = !$qrCodeOpen;
+                                    }}>
                                     <QrCode size="16" /> &nbsp; QR Code
                                 </Button>
                         </Column>

@@ -13,22 +13,29 @@
     export let EnterExistingSeedButtonText = 'Enter Existing Seed Phrase';
     export let data
 
+    let open = true
 </script>
 
-<Modal open
+<Modal bind:open
        shouldSubmitOnEnter={false}
        primaryButtonText={GenerateNewButtonText}
        secondaryButtonText={EnterExistingSeedButtonText}
        selectorPrimaryFocus=".bx--btn--primary"
        modalHeading={heading}
 
-       on:close={() => dispatch('result', ENTER_EXISTING)}
+       on:close={() => {
+                 dispatch('result', ENTER_EXISTING)
+                 open = false
+       }}
        on:click:button--secondary={() => {
             /** when a button is clicked 'result' event with a result object is dispatched @return {boolean} true or false according to the clicked button */
             dispatch('result', ENTER_EXISTING);
+            open = false
         }}
-        on:submit={() => dispatch('result', GENERATE_NEW)}
-        >
+        on:submit={() => {
+            dispatch('result', GENERATE_NEW)
+            open = false
+        }}>
         <Grid>
             {#if data.text} <Row><Column>{data.text}</Column></Row> {/if}
         </Grid>

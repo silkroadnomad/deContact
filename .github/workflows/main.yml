@@ -1,7 +1,7 @@
 name: Basic Tests
 on:
   push:
-    branches: [ develop, main ]
+    branches: [ develop, main, githubCI ]
   pull_request:
     branches: [ develop, main ]
 jobs:
@@ -25,7 +25,7 @@ jobs:
     - uses: actions/checkout@v4
     - uses: actions/setup-node@v4
       with:
-        node-version: 21  
+        node-version: 20  
     - name: Install dependencies
       run: |
         npm install
@@ -43,3 +43,4 @@ jobs:
       run: npx playwright test BasicAddressExchange.spec.js
     - name: Start test MyDevicesAutoSync.spec.js 
       run: npx playwright test MyDevicesAutoSync.spec.js 
+

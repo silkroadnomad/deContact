@@ -22,7 +22,9 @@
     let theme = "g90";
 
     $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
+        console.log("generating seed phrase")
         handleSeedphrase().then(() => {
+            console.log("generated seed phrase - creating identity and starting orbitdb")
             getIdentityAndCreateOrbitDB('ed25519', $masterSeed, $helia)
                 .then(dbInstance => {
                     orbitdb.set(dbInstance);
@@ -34,8 +36,13 @@
     }
 
     onMount(async ()=>{
-        await confirmExperimentalUse();
-        await handleSeedphrase();
+        if($hash!=='/onboarding'){
+            await confirmExperimentalUse();
+            await handleSeedphrase();
+        }else
+            await handleSeedphrase(true);
+
+
         await startNetwork();
     })
 
@@ -47,7 +54,7 @@
         '': Home,
         '/onboarding': OnBoarding
     }
-
+    // $: console.log("$hash",$hash)
     $: view = routes[$hash]
 
         //    const urlParams = new URLSearchParams(window.location.search); //TODO url params we need when we "onboard" a new user via scanning a URL
@@ -72,13 +79,6 @@
                      <ConnectionSignal title="Swarm connected" class="statusGreen" />&nbsp;{$connectedPeers}
                  {/if}
             </div>
-<!--            <div class="flags">
-                {#if $synced===true}
-                    <WatsonHealthAiStatusComplete  title="Storage Protocol synced messages" class="statusGreen"/>&nbsp;{$recordsSynced.length | 0}
-                {:else}
-                    <WatsonHealthAiStatus title="Storage Protocol syncing..." class="statusYellow" />&nbsp;{$recordsSynced.length | 0}
-                {/if}
-            </div>-->
         </HeaderNav>
 
         <HeaderUtilities>

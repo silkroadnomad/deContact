@@ -53,15 +53,17 @@
     </Row>
     <Row class="custom-row">
         <Column sm={1}><Button data-cy="DropFollowerDBs" size="sm" on:click={async () => {
-            console.log("dropping DropFollowerDBs db!")
-
-
             const addressRecords = await $dbMyAddressBook.all();
+            console.log("dropping DropFollowerDBs db!",addressRecords)
             for (const addressRecord of addressRecords) {
-                if(addressRecord.own) continue
-                console.log("dropping follower db",addressRecord.sharedAddress)
-                 const followerDB2DDrop = await $orbitdb.open(addressRecord.sharedAddress)
+                if(addressRecord.value.own) continue
+                console.log("dropping follower db",addressRecord.value.sharedAddress)
+                 const followerDB2DDrop = await $orbitdb.open(addressRecord.value.sharedAddress)
                  await followerDB2DDrop.drop()
+                 if(addressRecord.value.subscriber){
+                    const deleteHash = await $dbMyAddressBook.del(addressRecord.key)
+                    console.log("deleteHash",deleteHash)
+                 }
             }
             console.log("addressRecords",addressRecords)
             selectedAddr.set({})

@@ -20,9 +20,9 @@ seedPhrase.subscribe((val) => {
  *
  * @returns {Promise<void>}
  */
-export const handleSeedphrase = async () => {
+export const handleSeedphrase = async (skip) => {
 
-    if(!localStorage.getItem("seedPhrase")) {
+    if(!localStorage.getItem("seedPhrase") && !skip) {
 
         const result = await generateSeed({ data: {
                 text: "We couldn't find a master seed phrase inside your browser storage. " +
@@ -36,10 +36,17 @@ export const handleSeedphrase = async () => {
             case GENERATE_NEW:
                 _seedPhrase = generateMnemonic();
                 seedPhrase.set(_seedPhrase)
+                localStorage.setItem("seedPhrase",_seedPhrase)
                 selectedTab.set(3)
                 notify(`generated a new seed phrase ${_seedPhrase}`)
                 break;
         }
+    }
+
+    if(skip){ //we are in onboarding mode
+        _seedPhrase = generateMnemonic();
+        seedPhrase.set(_seedPhrase)
+        localStorage.setItem("seedPhrase",_seedPhrase)
     }
     _masterSeed = generateMasterSeed(_seedPhrase,"password")
     masterSeed.set(_masterSeed)
