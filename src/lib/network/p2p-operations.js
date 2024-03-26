@@ -263,6 +263,7 @@ async function processMessageQueue() {
                             // for (const foundDummyKey in foundDummy) {
                             //     await requesterDB.del(foundDummy[foundDummyKey].key)
                             // }
+                            cancelDummy.value._id = foundDummy[foundDummyKey]
                             foundDummy[0].value.firstName="request canceled";
                             const cancelDummy = foundDummy[0].value;
                             const hash = await requesterDB.put(cancelDummy);
@@ -466,14 +467,14 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     try {
         const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
         delete writeFirstOfOurAddresses.own;
-        
+
         //delete the dummy which alice added for us!
         const all = await requesterDB.all()
         const foundDummy = all.filter((it) => {
             return it.value.owner === _orbitdb?.identity?.id
         })
 
-        writeFirstOfOurAddresses._id = foundDummy[foundDummyKey].value._id
+        writeFirstOfOurAddresses._id = foundDummy[0].value._id
         // for (const foundDummyKey in foundDummy) {
         //     await requesterDB.del(foundDummy[foundDummyKey].key)
         // }
