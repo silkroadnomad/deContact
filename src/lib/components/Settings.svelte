@@ -1,20 +1,26 @@
 <script>
-    import { TextInput, Button, Column, Grid, Row, PasswordInput } from "carbon-components-svelte";
+    import { writable } from 'svelte/store';
+    import { TextInput, PasswordInput, Button, Column, Grid, Row, Toggle } from "carbon-components-svelte";
     import {
         libp2p,
         connectedPeers,
         masterSeed,
         orbitdb, seedPhrase,
-        dbMyAddressBook, selectedAddr, selectedTab
+        dbMyAddressBook, selectedAddr, selectedTab,
+        useWebRTC,
+        useWebSocket 
     } from "../../stores.js"
     $:window.localStorage.setItem('seed', $masterSeed);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
-</script>
+    $:window.localStorage.setItem('useWebRTC', $useWebRTC.toString());
+    $:window.localStorage.setItem('useWebSocket', $useWebSocket.toString());
+
+  console.log("useWebRTC",$useWebRTC)
+  </script>
 
 <!--
  @component Settings component displays current address of db and my handle
  The handle is used in order to set write permissions for the databases
-*/
 -->
 <Grid>
     <Row>
@@ -27,12 +33,6 @@
 
     <Row class="custom-row">
         <Column sm={3}><PasswordInput labelText="Seed Phrase" helperText="If you change the seed phrase a new DID is generated" size="sm" bind:value={$seedPhrase} /></Column>
-<!--        <Column size="small"><Button kind="tertiary" on:click={ async () => {-->
-<!--            const result = await confirm({ data: {-->
-<!--                text:   "the contact data of this user are (will be) stored in an own orbit-db document table, " +-->
-<!--                        "all data inside are encrypted so from outside nobody could ever decrypt it even when connecting to our peer this database." +-->
-<!--                        "when this button is clicked the OrbitDBs will be re-connected according to our new seed." } })-->
-<!--        }}>Sync My Devices</Button></Column>-->
     </Row>
 
     <Row>
@@ -48,6 +48,14 @@
                                   readonly
                                   size="sm"
                                   value={$connectedPeers} /></Column>
+    </Row>
+    <Row>
+        <Column sm={3}>
+            <Toggle id="webrtc-toggle" labelText="WebRTC" bind:toggled={$useWebRTC} /></Column>
+    </Row>
+    <Row>
+        <Column sm={3}>
+            <Toggle id="websocket-toggle" labelText="WebSocket" bind:toggled={$useWebSocket} /></Column>
     </Row>
     <Row class="custom-row">
         <Column sm={1}><Button data-cy="DropFollowerDBs" size="sm" on:click={async () => {
@@ -76,8 +84,6 @@
             selectedAddr.set({})
             selectedTab.set(0)
         }}>Drop AddressDB</Button></Column>
-
-
     </Row>
 
 </Grid>

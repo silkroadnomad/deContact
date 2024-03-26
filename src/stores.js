@@ -68,6 +68,9 @@ export const recordsSynced = writable(0)
 export const showNotification =  writable()
 export const notificationMessage = writable()
 
+export const useWebRTC = writable(window.localStorage.getItem('useWebRTC') !== null ? window.localStorage.getItem('useWebRTC') === 'true' : true);
+export const useWebSocket = writable(window.localStorage.getItem('useWebSocket') === 'true' ? true : false); // Default off
+
 export const followList = writable([] )
 export const qrCodeOpen = writable(false)
 export const qrCodeData = writable()

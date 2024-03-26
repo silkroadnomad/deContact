@@ -5,6 +5,10 @@ import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
 import { config } from "../../config.js";
+import { webSockets } from "@libp2p/websockets";
+import * as filters from "@libp2p/websockets/filters";
+import { webRTC, webRTCDirect } from "@libp2p/webrtc";
+import { webTransport } from "@libp2p/webtransport";
 import {
     libp2p,
     helia,
@@ -15,8 +19,10 @@ import {
     dbMyAddressBook,
     subscription,
     connectedPeers,
-    followList, dbMessages, selectedTab, syncedDevices,
+    followList, dbMessages, selectedTab, syncedDevices,useWebRTC, useWebSocket
 } from "../../stores.js";
+
+import { get } from 'svelte/store';
 import { confirm } from "../components/addressModal.js"
 import {notify, sha256} from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
@@ -27,6 +33,10 @@ let datastore = new LevelDatastore("./helia-data")
 let messageQueue = {};
 let activeConfirmations = {};
 
+let _libp2p; /** @type {import('libp2p').Libp2p} Value of to the libp2p store variable containing the libp2p instance*/
+libp2p.subscribe((val) => {
+    _libp2p = val
+});
 
 /**
  * The PubSub topic where deContact is publishing and subscribing
@@ -133,6 +143,60 @@ async function handleMessage(dContactMessage) {
     await processMessageQueue();
 }
 
+
+// Function to restart libp2p with selected transports
+async function restartLibp2p() {
+    const webRTCEnabled = get(useWebRTC);
+    const webSocketEnabled = get(useWebSocket);
+
+    // Assuming you have a function to stop the current libp2p instance
+    if (_libp2p) {
+        await _libp2p.stop();
+    }
+
+
+    // Clear existing transports before adding new ones
+    config.transports = [];
+
+    if (webRTCEnabled) {
+        const webRTCConfig = webRTC({
+            rtcConfiguration: {
+                iceServers: [{
+                    urls: [
+                        'stun:stun.l.google.com:19302',
+                        'stun:global.stun.twilio.com:3478'
+                    ]
+                }]
+            }
+        });
+        config.transports.push(webRTCConfig, webRTCDirect());
+    }
+
+    if (webSocketEnabled) {
+        const webSocketConfig = webSockets({filter: filters.all});
+        config.transports.push(webSocketConfig);
+    }
+    console.log("restarting libp2p with config",config)
+    _libp2p =  await createLibp2p(config)
+  
+}
+
+// React to changes in the toggle states with initial call prevention
+let isInitialCall = true;
+
+useWebRTC.subscribe(() => {
+    if (!isInitialCall) {
+        restartLibp2p();
+    }
+});
+
+useWebSocket.subscribe(() => {
+    if (!isInitialCall) {
+        restartLibp2p();
+    }
+});
+
+isInitialCall = false;
 /**
  * We want to open a confirmation dialog for each sender sending a pub sub message. (in case it's coming in same time)
  * @returns {Promise<void>}
@@ -420,10 +484,6 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
     }
 }
 
-let _libp2p; /** @type {import('libp2p').Libp2p} Value of to the libp2p store variable containing the libp2p instance*/
-libp2p.subscribe((val) => {
-    _libp2p = val
-});
 
 /**
  * Subscription to the helia store variable containing the Helia instance
