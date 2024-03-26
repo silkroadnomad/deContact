@@ -260,9 +260,9 @@ async function processMessageQueue() {
                                 return it.value.owner === _orbitdb?.identity?.id
                             })
 
-                            for (const foundDummyKey in foundDummy) {
-                                await requesterDB.del(foundDummy[foundDummyKey].key)
-                            }
+                            // for (const foundDummyKey in foundDummy) {
+                            //     await requesterDB.del(foundDummy[foundDummyKey].key)
+                            // }
                             foundDummy[0].value.firstName="request canceled";
                             const cancelDummy = foundDummy[0].value;
                             const hash = await requesterDB.put(cancelDummy);
@@ -472,9 +472,9 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
             return it.value.owner === _orbitdb?.identity?.id
         })
 
-        for (const foundDummyKey in foundDummy) {
-            await requesterDB.del(foundDummy[foundDummyKey].key)
-        }
+        // for (const foundDummyKey in foundDummy) {
+        //     await requesterDB.del(foundDummy[foundDummyKey].key)
+        // }
 
         const hash = await requesterDB.put(writeFirstOfOurAddresses);
         notify(`wrote my address into requesters db with hash ${hash}`);
