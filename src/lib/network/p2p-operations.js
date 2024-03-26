@@ -144,18 +144,14 @@ async function handleMessage(dContactMessage) {
 }
 
 
-// Function to restart libp2p with selected transports
 async function restartLibp2p() {
     const webRTCEnabled = get(useWebRTC);
     const webSocketEnabled = get(useWebSocket);
 
-    // Assuming you have a function to stop the current libp2p instance
     if (_libp2p) {
         await _libp2p.stop();
     }
 
-
-    // Clear existing transports before adding new ones
     config.transports = [];
 
     if (webRTCEnabled) {
@@ -181,7 +177,6 @@ async function restartLibp2p() {
   
 }
 
-// React to changes in the toggle states with initial call prevention
 let isInitialCall = true;
 
 useWebRTC.subscribe(() => {
@@ -245,7 +240,7 @@ async function processMessageQueue() {
                             const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
                             subscriber._id = await sha256(JSON.stringify(subscriber));
                             await _dbMyAddressBook.put(subscriber)
-                            await writeMyAddressIntoRequesterDB(requesterDB, messageObj.timestamp); //Bob writes his address into Alice address book
+                            await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
                         }
                         else {
                             await writeMyAddressIntoRequesterDB(requesterDB);
@@ -259,14 +254,13 @@ async function processMessageQueue() {
                             const foundDummy = all.filter((it) => {
                                 return it.value.owner === _orbitdb?.identity?.id
                             })
-
+                            const cancelDummy = foundDummy[0].value;
                             for (const foundDummyKey in foundDummy) {
                             //    await requesterDB.del(foundDummy[foundDummyKey].key)
                                 cancelDummy.value._id = foundDummy[foundDummyKey].value._id
+                                cancelDummy.value.firstName="request canceled";
                             }
 
-                            foundDummy[0].value.firstName="request canceled";
-                            const cancelDummy = foundDummy[0].value;
                             const hash = await requesterDB.put(cancelDummy);
                             notify(`wrote canceled request with hash ${hash}`);
 
@@ -308,7 +302,7 @@ async function getAddressRecords() {
         console.log("records in dbMyAddressBook ",addressRecords)
     } catch (e) {
         console.log("exception while opening (reading) dbMyAddressBook",e)
-        await close()
+        //await close()
     }
 }
 
@@ -466,7 +460,9 @@ function startInvitationCheckWorker() {
  */
 export async function writeMyAddressIntoRequesterDB(requesterDB) {
     try {
-        const writeFirstOfOurAddresses = _myAddressBook[0] //TODO use boolean flag "own" and a "tag" e.g. business or private to indicate which address should be written
+        const writeFirstOfOurAddresses = _myAddressBook.filter((it) => {
+            return it.owner === _orbitdb?.identity?.id
+        })[0]
         delete writeFirstOfOurAddresses.own;
 
         //delete the dummy which alice added for us!
@@ -479,8 +475,8 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
              // await requesterDB.del(foundDummy[foundDummyKey].key)|
             writeFirstOfOurAddresses._id = foundDummy[foundDummyKey].value._id
             const hash = await requesterDB.put(writeFirstOfOurAddresses);
+            notify(`wrote my address into requesters db with hash ${hash}`);
         }
-        notify(`wrote my address into requesters db with hash ${hash}`);
 
     } catch (error) {
         console.error('Error in writeMyAddressIntoRequesterDB:', error);

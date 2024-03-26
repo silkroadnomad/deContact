@@ -19,7 +19,7 @@ const multiaddrs =
     import.meta.env.MODE === 'development'
         ? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',')
         : import.meta.env.VITE_SEED_NODES.replace('\n','').split(',')
-
+console.log("multiaddrs",multiaddrs)
 
 const pubSubPeerDiscoveryTopics =
 	import.meta.env.MODE === 'development'
@@ -69,7 +69,7 @@ export const config = {
     peerDiscovery: [
         bootstrap(bootstrapConfig),
         pubsubPeerDiscovery({
-            interval: 70000,
+            interval: 10000,
             topics: pubSubPeerDiscoveryTopics, // defaults to ['_peer-discovery._p2p._pubsub']
             listenOnly: false
         })
