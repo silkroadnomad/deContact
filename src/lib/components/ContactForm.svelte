@@ -63,7 +63,10 @@
                 {:else}
                     <Button data-cy="addContact" size="sm" on:click={async () => {
                         await addContact(isOnBoarding)
-                        if(isOnBoarding)  window.location.hash="/"
+                        if(isOnBoarding) {
+                             //await requestAddress(messageObj.sender,true) //TODO
+                             window.location.hash="/"
+                        }
                     }}>{!isOnBoarding?"Add":"Add & View Contact Data "}</Button>
                 {/if}
             </Column>
