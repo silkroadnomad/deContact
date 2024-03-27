@@ -86,11 +86,11 @@ export const config = {
             protocol: '/ipfs/kad/1.0.0',
             peerInfoMapper: removePrivateAddressesMapper
         })*/
-        dht: kadDHT({
-            protocolPrefix: "/svelte-pubsub",
-            maxInboundStreams: 5000,
-            maxOutboundStreams: 5000,
-            clientMode: true,
-        })
+        // dht: kadDHT({
+        //     protocolPrefix: "/svelte-pubsub",
+        //     maxInboundStreams: 5000,
+        //     maxOutboundStreams: 5000,
+        //     clientMode: true,
+        // })
     }
 }

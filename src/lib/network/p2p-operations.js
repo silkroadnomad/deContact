@@ -1,6 +1,6 @@
 import { createLibp2p } from 'libp2p'
 import { createHelia } from "helia";
-import { OrbitDBAccessController, useAccessController} from '@orbitdb/core';
+import { IPFSAccessController, useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
@@ -89,12 +89,13 @@ export async function startNetwork() {
     /**
      * My Address Book (with own contact data and contact data of others
      */
-    useAccessController(OrbitDBAccessController)
+    useAccessController(IPFSAccessController)
     const myDBName = await sha256(_orbitdb.identity.id)
     _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
         type: 'documents',
         sync: true,
-        AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
+        AccessController: IPFSAccessController({ write: ['*'] })
+        // AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
     })
 
     dbMyAddressBook.set(_dbMyAddressBook)
@@ -324,7 +325,7 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
         if(onBoardingToken!==undefined) msg.onBoardingToken = onBoardingToken
         if(nopingpong===true) msg.nopingpong = true
-        await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
+        // await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
 
         //look if a dummy is inside
         const all = await _dbMyAddressBook.all()
