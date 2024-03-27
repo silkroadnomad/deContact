@@ -40,7 +40,6 @@
                 requested = true
             }
     }
-
     $:{
         if($myAddressBook.length>0){ //if a record arrives in my address book show it on the page //TODO go to ContactList (would be better)
             scannedContact = $myAddressBook?.filter((it) => { return it.owner === $did })
@@ -48,9 +47,7 @@
          //   window.location.hash="/"
         }
     }
-    $: console.log("$selectedAddr.email",$selectedAddr.email)
-    $: console.log("$selectedAddr.firstName",$selectedAddr.firstName)
-    $: console.log("$selectedAddr.lastName",$selectedAddr.lastName)
+
     $:{
         if($selectedAddr.email){
             $selectedAddr.firstName=$selectedAddr.email
