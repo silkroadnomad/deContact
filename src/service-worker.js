@@ -28,7 +28,7 @@ self.addEventListener('activate', (event) => {
 
     event.waitUntil(deleteOldCaches());
 });
-
+self.addEventListener('put', (event) => { console.log("put was called",event)})
 self.addEventListener('fetch', (event) => {
     // ignore POST requests etc
     if (event.request.method !== 'GET') return;
@@ -58,7 +58,7 @@ self.addEventListener('fetch', (event) => {
             }
 
             if (response.status === 200) {
-                cache.put(event.request, response.clone());
+                //cache.put(event.request, response.clone());
             }
 
             return response;

@@ -12,14 +12,14 @@
     import { requestAddress } from "../../lib/network/p2p-operations.js"
     import ContactForm from "./ContactForm.svelte"
     const onBoardingToken = decodeURI($query.split("&")[0]).split("=")[1]
-    const aliceMultiAddress = JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])
-
+    // const aliceMultiAddress = JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])
+    const aliceMultiAddress = undefined
     let scannedContact
     let requested
     let aliceConnected
 
-    $:{
-        if(!aliceConnected && $libp2p && $connectedPeers>0){
+    $:{ //connect to a multiAddress if one was given!
+        if(aliceMultiAddress && !aliceConnected && $libp2p && $connectedPeers>0){
             $libp2p.dial(multiaddr(aliceMultiAddress[0])).then((info) => {
                 aliceConnected=true
                 console.log("connected peer",info)}).catch(
