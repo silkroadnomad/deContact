@@ -21,8 +21,8 @@
         onBoardingToken = sig
         console.log("signature created on onboardingToken",onBoardingToken)
     }):null;
-    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData}?onBoardingToken=${onBoardingToken}&multiaddr=${encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
-
+   // $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData}?onBoardingToken=${onBoardingToken}&multiaddr=${encodeURI(JSON.stringify(multiaddrs)) || '' }`:qrCodeData
+    $: linkUrl = (fullDeContactUrl && $connectedPeers>1)?`${page_url}/onboarding/${qrCodeData}?onBoardingToken=${onBoardingToken} || '' }`:qrCodeData
 </script>
 
     <Modal bind:open={ qrCodeOpen }

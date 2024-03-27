@@ -7,7 +7,7 @@
     const dispatch = createEventDispatcher();
 
     /** the header of the modal @type {string} [heading='deContact Protocol Action'] */
-    export let heading = 'deContact Protocol Action';
+    export let heading = 'deContact address request ';
 
     /** the button label when sending the contact data  @type {string} [heading='Send My Contact Data'] */
     export let SendMyContactData = 'Send My Contact Data';
