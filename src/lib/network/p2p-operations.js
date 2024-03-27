@@ -76,7 +76,7 @@ export async function startNetwork() {
     });
 
     _libp2p.addEventListener('connection:close', (c) => {
-        console.log("connection:close",c.detail)
+        console.log("connection:close",c);
         connectedPeers.update(n => n - 1);
     });
 
@@ -443,7 +443,7 @@ function startInvitationCheckWorker() {
 
         // Schedule the next execution
         iteration++;
-        const nextInterval = 10 iteration * 1000; // Calculate the next interval
+        const nextInterval = 10 * iteration * 1000; // Calculate the next interval
         console.log(`Scheduling next check in ${nextInterval / 1000} seconds.`);
         setTimeout(executeWorker, nextInterval);
     }
