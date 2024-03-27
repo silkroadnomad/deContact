@@ -49,7 +49,7 @@ export const handleSeedphrase = async (skip= false) => {
         }
     }
 
-    if(skip){ //we are in onboarding mode
+    if(skip && !localStorage.getItem("seedPhrase")){ //we are in onboarding mode
         _seedPhrase = generateMnemonic();
         seedPhrase.set(_seedPhrase)
         localStorage.setItem("seedPhrase",_seedPhrase)
