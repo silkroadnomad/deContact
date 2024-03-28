@@ -4,7 +4,7 @@ import { browser } from '$app/environment';
 function getHash () {
     if(browser){
         const hashWithDID = location.hash.replace(/^#/, '')
-        // console.log("hash",hashWithDID.indexOf('/',1)!==-1?hashWithDID.substring(0,hashWithDID.indexOf('/',1)):hashWithDID)
+        if(hashWithDID.length===1) return ""
         return hashWithDID.indexOf('/',1)!==-1?hashWithDID.substring(0,hashWithDID.indexOf('/',1)):hashWithDID
     }
 }
@@ -12,8 +12,7 @@ function getHash () {
 function getDID () {
     if(browser){
         const hashWithDID = location.hash.replace(/^#/, '')
-        if(!hashWithDID) return
-        // console.log("did",hashWithDID.split("/")[2].substring(0,hashWithDID.split("/")[2].indexOf("?")));
+        if(hashWithDID.length===1) return ""
         return hashWithDID.split("/")[2].substring(0,hashWithDID.split("/")[2].indexOf("?"))
     }
 }
