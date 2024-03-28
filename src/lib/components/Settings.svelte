@@ -1,5 +1,4 @@
 <script>
-    import { writable } from 'svelte/store';
     import { TextInput, PasswordInput, Button, Column, Grid, Row, Toggle } from "carbon-components-svelte";
     import {
         libp2p,
@@ -10,6 +9,7 @@
         useWebRTC,
         useWebSocket 
     } from "../../stores.js"
+
     $:window.localStorage.setItem('seed', $masterSeed);
     $:window.localStorage.setItem('seedPhrase', $seedPhrase);
     $:window.localStorage.setItem('useWebRTC', $useWebRTC.toString());
@@ -74,7 +74,7 @@
             console.log("addressRecords",addressRecords)
             selectedAddr.set({})
             selectedTab.set(0)
-        }}>Drop Follower DBs</Button></Column>
+        }}>Drop Followed & Follower DBs</Button></Column>
         <Column>&nbsp;</Column>
         <Column sm={1}><Button data-cy="DropAddressDB" size="sm" on:click={async () => {
             console.log("dropping address db!")

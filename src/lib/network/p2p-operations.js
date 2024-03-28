@@ -1,6 +1,6 @@
 import { createLibp2p } from 'libp2p'
 import { createHelia } from "helia";
-import { IPFSAccessController, useAccessController} from '@orbitdb/core';
+import { useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
 import { bitswap } from '@helia/block-brokers'
@@ -8,7 +8,7 @@ import { config } from "../../config.js";
 import { webSockets } from "@libp2p/websockets";
 import * as filters from "@libp2p/websockets/filters";
 import { webRTC, webRTCDirect } from "@libp2p/webrtc";
-import { webTransport } from "@libp2p/webtransport";
+
 import {
     libp2p,
     helia,
@@ -22,10 +22,11 @@ import {
     followList, dbMessages, selectedTab, syncedDevices,useWebRTC, useWebSocket
 } from "../../stores.js";
 
-import { get } from 'svelte/store';
+// import { get } from 'svelte/store';
 import { confirm } from "../components/addressModal.js"
-import {notify, sha256} from "../../utils/utils.js";
+import { notify, sha256 } from "../../utils/utils.js";
 import { getIdentityAndCreateOrbitDB } from "$lib/network/getIdendityAndCreateOrbitDB.js";
+import AddressBookAccessController from '$lib/network/AddressBookAccessController.js';
 
 let blockstore = new LevelBlockstore("./helia-blocks")
 let datastore = new LevelDatastore("./helia-data")
@@ -99,13 +100,14 @@ export async function startNetwork() {
     /**
      * My Address Book (with own contact data and contact data of others
      */
-    useAccessController(IPFSAccessController)
-    const myDBName = await sha256(_orbitdb.identity.id)
-    _dbMyAddressBook = await _orbitdb.open("/myAddressBook/"+myDBName, {
+    useAccessController(AddressBookAccessController)
+    const myIdentityHash = await sha256(_orbitdb.identity.id)
+    let myDBName = "/myAddressBook/"+myIdentityHash
+
+    _dbMyAddressBook = await _orbitdb.open(myDBName, {
         type: 'documents',
         sync: true,
-        AccessController: IPFSAccessController({ write: ['*'] })
-        // AccessController: OrbitDBAccessController({ write: [_orbitdb.identity.id]})
+        AccessController: AddressBookAccessController({identity:_orbitdb.identity.id} )
     })
 
     dbMyAddressBook.set(_dbMyAddressBook)
@@ -116,7 +118,7 @@ export async function startNetwork() {
 
     startInvitationCheckWorker()
     _dbMyAddressBook.events.on('join', async (peerId, heads) => {
-        console.log("db replicated (join event received)",peerId)
+        console.log(`db replicated (join event received) peerId: ${peerId}`,heads)
         syncedDevices.set(true)
         getAddressRecords()
     })
@@ -146,8 +148,8 @@ async function handleMessage(dContactMessage) {
 
 
 async function restartLibp2p() {
-    const webRTCEnabled = get(useWebRTC);
-    const webSocketEnabled = get(useWebSocket);
+    // const webRTCEnabled = get(useWebRTC);
+    // const webSocketEnabled = get(useWebSocket);
 
     if (_libp2p) {
         await _libp2p.stop();
@@ -178,21 +180,7 @@ async function restartLibp2p() {
   
 }
 
-let isInitialCall = true;
 
-useWebRTC.subscribe(() => {
-    if (!isInitialCall) {
-        restartLibp2p();
-    }
-});
-
-useWebSocket.subscribe(() => {
-    if (!isInitialCall) {
-        restartLibp2p();
-    }
-});
-
-isInitialCall = false;
 /**
  * We want to open a confirmation dialog for each sender sending a pub sub message. (in case it's coming in same time)
  * @returns {Promise<void>}
@@ -201,10 +189,7 @@ async function processMessageQueue() {
     for (const sender in messageQueue) {
         const messageObj = messageQueue[sender];
 
-        // Check if a confirmation dialog is already active for this sender
-        if (activeConfirmations[sender]) {
-            continue;
-        }
+        if (activeConfirmations[sender]) continue;  // Check if a confirmation dialog is already active for this sender
 
         let result, data, requesterDB;
         if (messageObj.recipient === _orbitdb.identity.id) {
@@ -215,39 +200,49 @@ async function processMessageQueue() {
 
                 case REQUEST_ADDRESS:
                     data = JSON.parse(messageObj.data);
-                    requesterDB = await _orbitdb.open(data.sharedAddress, { type: 'documents', sync: true });
-                    // Mark this sender as having an active confirmation
-                    activeConfirmations[sender] = true;
+
+                    requesterDB = await _orbitdb.open(data.sharedAddress, {
+                        type: 'documents',
+                        sync: true,
+                        AccessController: AddressBookAccessController({ identity:_orbitdb.identity.id } )
+                    })
 
                     if(messageObj.onBoardingToken!==undefined){
                         //TODO "mytoken" should be a unique sessionId
-                        //TODO "onBoardingToken
-                        const onBoardingSignatureValid = await _orbitdb.identity.verify(messageObj.onBoardingToken,_orbitdb.identity.publicKey,"mytoken")
-                        console.log("onBoardingToken signature valid",onBoardingSignatureValid)
-                        if(onBoardingSignatureValid)
-                            result = 'ONLY_HANDOUT'
+                        const onBoardingSignatureValid = await _orbitdb.identity.verify(messageObj.onBoardingToken, _orbitdb.identity.publicKey, "mytoken")
+                        console.log("onBoardingSignatureValid",onBoardingSignatureValid)
+                        if(onBoardingSignatureValid){
+                            await writeMyAddressIntoRequesterDB(requesterDB);
+                            await requestAddress( messageObj.sender,true ) //we request the address //TODO we should do that only when the checkbox is enabled in the onboardingtoken
+                            // Remove the message from the queue after processing
+                            delete messageQueue[sender];
+                        }
                         else {
                             notify(`onboarding signature was not valid - somebody wanted to steal your contact data`);
                             return //don't do anything
                         }
                     }
-                    else
+                    else{
+                        activeConfirmations[sender] = true; // Mark this sender as having an active confirmation
                         result = await confirm({ data: messageObj, db: requesterDB });
+                    }
+
+
                     if(result){
                         if(result==='ONLY_HANDOUT'){
                             //As Bob updates his contact data (without requesting contact data of Alice), Bob needs to remember Alice db address so he can
                             //1) update his contact data in her address book
                             //2) keep a backup of her data
-                            const subscriber  = {sharedAddress: data.sharedAddress, subscriber:true}
+                            const subscriber  = { sharedAddress: data.sharedAddress, owner:messageObj.sender, subscriber:true }
                             subscriber._id = await sha256(JSON.stringify(subscriber));
                             await _dbMyAddressBook.put(subscriber)
                             await writeMyAddressIntoRequesterDB(requesterDB); //Bob writes his address into Alice address book
                         }
                         else {
                             await writeMyAddressIntoRequesterDB(requesterDB);
-                            await requestAddress(messageObj.sender,true)
+                            await requestAddress( messageObj.sender,true )
                         }
-                        initReplicationBackup(_orbitdb.identity.id) //init replication of all subscriber ids
+                        initReplicationBackup( _orbitdb.identity.id ) //init replication of all subscriber ids
 
                     } else{
                         try {
@@ -255,21 +250,16 @@ async function processMessageQueue() {
                             const foundDummy = all.filter((it) => {
                                 return it.value.owner === _orbitdb?.identity?.id
                             })
-                            const cancelDummy = foundDummy[0].value;
-                            for (const foundDummyKey in foundDummy) {
-                            //    await requesterDB.del(foundDummy[foundDummyKey].key)
-                                cancelDummy.value._id = foundDummy[foundDummyKey].value._id
-                                cancelDummy.value.firstName="request canceled";
-                            }
 
-                            const hash = await requesterDB.put(cancelDummy);
-                            notify(`wrote canceled request with hash ${hash}`);
+                            for (const foundDummyKey in foundDummy) {
+                                foundDummy[foundDummyKey].value.firstName="request canceled";
+                                const hash = await requesterDB.put(foundDummy[foundDummyKey]);
+                                notify(`wrote canceled request with hash ${hash}`);
+                            }
 
                         } catch (error) {
                             console.error('Error in writeMyAddressIntoRequesterDB:', error);
                         }
-                        // const msg = await createMessage(CANCEL_REQUEST, messageObj.sender);
-                        // await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+messageObj.sender,fromString(JSON.stringify(msg)))
                     }
                     // Confirmation is complete; allow future confirmations for this sender
                     delete activeConfirmations[sender];
@@ -301,10 +291,12 @@ async function getAddressRecords() {
         })
         myAddressBook.set(transformedRecords);
         console.log("records in dbMyAddressBook ",addressRecords)
+        return addressRecords
     } catch (e) {
         console.log("exception while opening (reading) dbMyAddressBook",e)
         //await close()
     }
+    return []
 }
 
 /**
@@ -334,7 +326,8 @@ async function initReplicationBackup(ourDID) {
     for (const s in _followList) {
         const dbAddress = _followList[s].value.sharedAddress
         try {
-            _followList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true})
+            _followList[s].db = await _orbitdb.open(dbAddress, {type: 'documents',sync: true,
+                AccessController: AddressBookAccessController({ identity:_orbitdb.identity.id } )})
             _followList[s].db.all().then((records)=> { //replicate the addresses of Bob, Peter etc.
                 console.log(`we follow and backup dbAddress: ${dbAddress} records`,records)
             })
@@ -384,7 +377,6 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
         const msg = await createMessage(REQUEST_ADDRESS, scannedAddress,data);
         if(onBoardingToken!==undefined) msg.onBoardingToken = onBoardingToken
         if(nopingpong===true) msg.nopingpong = true
-        // await _dbMyAddressBook.access.grant("write",scannedAddress) //the requested did (to write into my address book)
 
         //look if a dummy is inside
         const all = await _dbMyAddressBook.all()

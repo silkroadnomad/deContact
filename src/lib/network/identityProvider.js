@@ -35,7 +35,7 @@ export async function createIdentityProvider(type='ed25519', seed, ipfs) {
                 notify(`DID error ${e}`)
                 return
             }
-            identity = await identities.createIdentity({ provider: OrbitDBIdentityProviderDID({ didProvider:identityProvider }) })
+            identity = await identities.createIdentity({ provider: OrbitDBIdentityProviderDID({ didProvider: identityProvider }) })
             break;
         case 'ethereum':
             //TODO Implementing an Ethereum Provider

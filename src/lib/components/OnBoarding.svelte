@@ -5,14 +5,18 @@
         selectedAddr,
         orbitdb,
         libp2p,
-        dbMyAddressBook,
+        // dbMyAddressBook,
         myAddressBook,
         connectedPeers
     } from "../../stores.js";
     import { requestAddress } from "../../lib/network/p2p-operations.js"
     import ContactForm from "./ContactForm.svelte"
-    const onBoardingToken = decodeURI($query.split("&")[0]).split("=")[1]
+    // import { page } from '$app/stores'
 
+
+   const onBoardingToken = decodeURI($query.split("&")[0]).split("=")[1]
+    // const onBoardingToken = $page.url.searchParams.get('onBoardingToken')
+   // const aliceMultiAddress = $page.url.searchParams.get('onBoardingToken') ((JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])
     // const aliceMultiAddress = JSON.parse(decodeURI($query.split("&")[1]).split("=")[1])
     const aliceMultiAddress = undefined
     let scannedContact
@@ -34,8 +38,7 @@
             if(!requested &&
                 $connectedPeers>1 && //if connected
                 $did!==undefined &&
-                $orbitdb!==undefined &&
-                $dbMyAddressBook.access!==undefined){
+                $orbitdb!==undefined ){
                 requestAddress($did,false,onBoardingToken)
                 requested = true
             }
@@ -44,7 +47,7 @@
     $:scannedContact = $myAddressBook?.filter((it) => { return it.owner === $did })
 
     $:{
-        if($selectedAddr.email){
+        if($selectedAddr.email && ! $selectedAddr.firstName && ! $selectedAddr.lastName){
             $selectedAddr.firstName=$selectedAddr.email
             $selectedAddr.lastName=$orbitdb.identity.id
         }

@@ -7,13 +7,14 @@
 
 <section>
     <Grid>
-        {#if !isOnBoarding}
+
         <Row>
             <Column><TextInput data-cy="txtFirstname" size="sm" labelText="firstname" placeholder="Enter firstname..."
                                bind:value={$selectedAddr.firstName} /></Column>
             <Column><TextInput data-cy="txtLastname" size="sm" labelText="lastname" placeholder="Enter lastname..."
                                bind:value={$selectedAddr.lastName} /></Column>
         </Row>
+        {#if !isOnBoarding}
         <Row>
             <Column><TextInput  data-cy="txtStreet" size="sm" labelText="street" placeholder="Enter street..."
                                 bind:value={$selectedAddr.street}  /></Column>
