@@ -4,7 +4,7 @@ import { browser } from '$app/environment';
 function getHash () {
     if(browser){
         const hashWithDID = location.hash.replace(/^#/, '')
-        if(hashWithDID.length===1) return ""
+        if(hashWithDID.length<2) return ""
         return hashWithDID.indexOf('/',1)!==-1?hashWithDID.substring(0,hashWithDID.indexOf('/',1)):hashWithDID
     }
 }
@@ -12,7 +12,7 @@ function getHash () {
 function getDID () {
     if(browser){
         const hashWithDID = location.hash.replace(/^#/, '')
-        if(hashWithDID.length===1) return ""
+        if(hashWithDID.length<2) return ""
         return hashWithDID.split("/")[2].substring(0,hashWithDID.split("/")[2].indexOf("?"))
     }
 }
