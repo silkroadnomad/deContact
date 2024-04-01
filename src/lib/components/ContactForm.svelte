@@ -55,7 +55,7 @@
         <Row>
             <Column>
                 {#if $selectedAddr._id}
-                    {#if $selectedAddr.owner === $orbitdb.identity.id}
+                    {#if $selectedAddr.owner === $orbitdb?.identity?.id}
                         <Button data-cy="updateContact" size="sm" on:click={() => updateContact()}>Update</Button>
                         <Button data-cy="newContact" size="sm" on:click={() => $selectedAddr = {}}>New</Button>
                     {/if}
@@ -63,10 +63,12 @@
 
                 {:else}
                     <Button data-cy="addContact" size="sm" on:click={async () => {
-                        await addContact(isOnBoarding)
+
                         if(isOnBoarding) {
-                             //await requestAddress(messageObj.sender,true) //TODO
-                             window.location.hash="/"
+                            await updateContact(true)
+                            window.location.hash="/"
+                        }else{
+                            addContact()
                         }
                     }}>{!isOnBoarding?"Add":"Add & View Contact Data "}</Button>
                 {/if}

@@ -454,19 +454,23 @@ function startInvitationCheckWorker() {
  */
 export async function writeMyAddressIntoRequesterDB(requesterDB) {
     try {
+
+        //1. Take out our address (the one where is the owner like our identity)
         const writeFirstOfOurAddresses = _myAddressBook.filter((it) => {
             return it.owner === _orbitdb?.identity?.id
         })[0]
         delete writeFirstOfOurAddresses.own;
 
-        //delete the dummy which alice added for us!
+        //find our dummy which Alice added for it (the one with our id again)
         const all = await requesterDB.all()
         const foundDummy = all.filter((it) => {
             return it.value.owner === _orbitdb?.identity?.id
         })
 
+        //now overwrite the dummy with new data (but take our id)
         for (const foundDummyKey in foundDummy) {
              // await requesterDB.del(foundDummy[foundDummyKey].key)|
+            delete writeFirstOfOurAddresses.id //delete an id if it should contain one
             writeFirstOfOurAddresses._id = foundDummy[foundDummyKey].value._id
             const hash = await requesterDB.put(writeFirstOfOurAddresses);
             notify(`wrote my address into requesters db with hash ${hash}`);

@@ -38,7 +38,8 @@ export const connectedPeers = writable(0)
 
 
 
-export const myAddressBook = writable([])
+/** this is the orbitdb which holds the contact data */
+export const myAddressBook = writable()
 /** an orbitdb which will replace the myAddressBook store based on localstorage //TODO */
 export const dbMyAddressBook = writable([])
 
