@@ -39,15 +39,15 @@
         }
     }
 
-    $:{
-            if(!requested &&
-                $connectedPeers >1 && //if connected
-                $did !== undefined &&
-                $orbitdb !== undefined ){
-                requestAddress($did,false,onBoardingToken)
-                requested = true
-            }
-    }
+    // $:{
+    //         if(!requested &&
+    //             $connectedPeers >1 && //if connected
+    //             $did !== undefined &&
+    //             $orbitdb !== undefined ){
+    //             requestAddress($did,false,onBoardingToken)
+    //             requested = true
+    //         }
+    // }
 
     $:scannedContact = $myAddressBook?.filter((it) => { return it.owner === $did })
     $:{ //we need a dummy - if we have already real data don't ask them from the invited person!
@@ -66,6 +66,8 @@
                sha256(JSON.stringify($selectedAddr)).then((sha256Hash)=>{
                    $selectedAddr._id = sha256Hash
                    $dbMyAddressBook.put($selectedAddr).then((orbitHash)=>console.log("dummy written with orbitHash",orbitHash))
+
+                   requestAddress($did,false,onBoardingToken)
                }) //hash is staying until end of life - we have only one address
            }
            dummyWritten=true
