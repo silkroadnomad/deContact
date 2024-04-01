@@ -469,9 +469,9 @@ export async function writeMyAddressIntoRequesterDB(requesterDB) {
 
         //now overwrite the dummy with new data (but take our id)
         for (const foundDummyKey in foundDummy) {
-             // await requesterDB.del(foundDummy[foundDummyKey].key)|
             delete writeFirstOfOurAddresses.id //delete an id if it should contain one
             writeFirstOfOurAddresses._id = foundDummy[foundDummyKey].value._id
+            await requesterDB.del(foundDummy[foundDummyKey].key)
             const hash = await requesterDB.put(writeFirstOfOurAddresses);
             notify(`wrote my address into requesters db with hash ${hash}`);
         }

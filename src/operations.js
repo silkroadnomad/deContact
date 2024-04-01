@@ -67,8 +67,13 @@ export async function updateContact(isOnBoarding) {
     if(_selectedAddr.owner === _orbitdb?.identity?.id){ //only send update requests if my own address was changed
         for (const s in  _followList) {
             console.log("updating address in ",_followList[s].db.address)
-            _followList[s].db.put(_selectedAddr)
-            notify(`Updated db ${_followList[s].db.address} `)
+            _followList[s].db.all().then(()=> { //first sync then update
+
+                _followList[s].db.put(_selectedAddr)
+                notify(`Updated db ${_followList[s].db.address} `)
+            })
+
+
         }
     }
     selectedAddr.set({})
