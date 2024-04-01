@@ -384,7 +384,7 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
         const all = await _dbMyAddressBook.all()
 
         const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress })
-        await _dbMyAddressBook.del(foundDummy[0].key)
+        if(foundDummy.length>0) await _dbMyAddressBook.del(foundDummy[0].key)
         // if(foundDummy.length===0){
         const dummyContact  = {
             owner: scannedAddress,
