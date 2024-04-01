@@ -2,7 +2,7 @@
     import { DataTable, Toolbar, ToolbarContent, ToolbarSearch, Pagination } from "carbon-components-svelte";
     import { myAddressBook, selectedRowIds } from "../../stores.js";
     import { generateQRForAddress } from "../../operations.js"
-    let pageSize = 5;
+    let pageSize = 50;
     let page = 1;
     let filteredRowIds = [];
 </script>
