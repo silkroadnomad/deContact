@@ -107,7 +107,7 @@ export async function startNetwork() {
     _dbMyAddressBook = await _orbitdb.open(myDBName, {
         type: 'documents',
         sync: true,
-        AccessController: AddressBookAccessController({identity:_orbitdb.identity.id} )
+        AccessController: AddressBookAccessController({identity:_orbitdb.identity.id, myDBName: myDBName} )
     })
 
     dbMyAddressBook.set(_dbMyAddressBook)
@@ -204,7 +204,8 @@ async function processMessageQueue() {
                     requesterDB = await _orbitdb.open(data.sharedAddress, {
                         type: 'documents',
                         sync: true,
-                        AccessController: AddressBookAccessController({ identity:_orbitdb.identity.id } )
+                        AccessController: AddressBookAccessController({identity:_orbitdb.identity.id})
+                        // AccessController: AddressBookAccessController({ identity:_orbitdb.identity.id } )
                     })
 
                     if(messageObj.onBoardingToken!==undefined){
