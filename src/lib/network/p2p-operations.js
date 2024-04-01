@@ -211,17 +211,18 @@ async function processMessageQueue() {
                     if(messageObj.onBoardingToken!==undefined){
                         //TODO "mytoken" should be a unique sessionId
                         const onBoardingSignatureValid = await _orbitdb.identity.verify(messageObj.onBoardingToken, _orbitdb.identity.publicKey, "mytoken")
+
                         console.log("onBoardingSignatureValid",onBoardingSignatureValid)
                         if(onBoardingSignatureValid){
                             await writeMyAddressIntoRequesterDB(requesterDB);
                             await requestAddress( messageObj.sender,true ) //we request the address //TODO we should do that only when the checkbox is enabled in the onboardingtoken
-                            // Remove the message from the queue after processing
+                            initReplicationBackup( _orbitdb.identity.id ) //init replication of all subscriber ids
                             delete messageQueue[sender];
                         }
                         else {
                             notify(`onboarding signature was not valid - somebody wanted to steal your contact data`);
-                            return //don't do anything
                         }
+                        continue; //if this was an invitation that was all we have todo
                     }
                     else{
                         activeConfirmations[sender] = true; // Mark this sender as having an active confirmation
