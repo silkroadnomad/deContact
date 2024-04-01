@@ -382,19 +382,20 @@ export const requestAddress = async (_scannedAddress,nopingpong, onBoardingToken
 
         //look if a dummy is inside
         const all = await _dbMyAddressBook.all()
-        const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress})
 
-        if(foundDummy.length===0){
-            const dummyContact  = {
-                owner: scannedAddress,
-                firstName: 'invited',
-                lastName: scannedAddress
-            }
-            if(onBoardingToken!==undefined) dummyContact.onBoardingToken = onBoardingToken
-
-            dummyContact._id = await sha256(JSON.stringify(dummyContact));
-            await _dbMyAddressBook.put(dummyContact)
+        const foundDummy = all.filter((it) => { return it.value.owner === scannedAddress })
+        await _dbMyAddressBook.del(foundDummy[0].key)
+        // if(foundDummy.length===0){
+        const dummyContact  = {
+            owner: scannedAddress,
+            firstName: 'invited',
+            lastName: scannedAddress
         }
+        if(onBoardingToken!==undefined) dummyContact.onBoardingToken = onBoardingToken
+
+        dummyContact._id = await sha256(JSON.stringify(dummyContact));
+        await _dbMyAddressBook.put(dummyContact)
+        // }
 
         //TODO when publishing, sign and encrypt message
         await _libp2p.services.pubsub.publish(CONTENT_TOPIC+"/"+scannedAddress, new TextEncoder().encode(JSON.stringify(msg)))
