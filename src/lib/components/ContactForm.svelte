@@ -54,8 +54,8 @@
         {/if}
         <Row>
             <Column>
-                {#if $selectedAddr._id}
-                    {#if $selectedAddr.owner === $orbitdb?.identity?.id && !isOnBoarding}
+                {#if $selectedAddr._id && !isOnBoarding}
+                    {#if $selectedAddr.owner === $orbitdb?.identity?.id}
                         <Button data-cy="updateContact" size="sm" on:click={() => updateContact()}>Update</Button>
                         <Button data-cy="newContact" size="sm" on:click={() => $selectedAddr = {}}>New</Button>
                     {/if}
