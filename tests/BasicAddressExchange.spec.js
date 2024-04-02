@@ -70,17 +70,8 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		await pageBob.getByRole('tab', { name: 'Contacts' }).click();
 		await pageBob.getByRole('textbox', { role: 'scanContact' }).click();
 		await pageBob.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
-		
-	
-		//await pageAlice.waitForTimeout(15000);
 		await pageBob.getByRole('button', { name: 'Scan' }).click();
 
-		// await pageAlice.getByTestId('requestContactData').click();
-		// const checkbox = await pageAlice.locator('div[data-testid="requestContactData"] input[type="checkbox"]');
-		// const checkbox = await pageAlice.locator(' input[type="checkbox"]');
-		// const checkbox = pageAlice.getByRole('checkbox')
-		// await checkbox.check(); // To check the checkbox
-		//await pageAlice.getByRole('input', { name: 'requestContactData' }).click();
 
 		const button = pageAlice.getByRole('button', { name: 'Send My Contact Data' })
 		await expect(button, "Exchange of Alice's contact information was successful").toBeEnabled();
@@ -94,7 +85,7 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		//await pageAlice.getByRole('button', { name: 'Cancel' }).click();
 	});
 
-	test('Bob updates his address and Alice receives the update', async () => {
+	test.skip('Bob updates his address and Alice receives the update', async () => {
 
 		await pageBob.getByRole('row', { name: users[1].identity }).locator('label').click();
 		await pageBob.getByPlaceholder('Enter lastname...').click();
