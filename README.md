@@ -6,20 +6,20 @@ A peer-to-peer address book in Svelte with local first protocol built on libp2p,
 ![dcontact-v0.2 (istanbul)](doc/dcontact-v0.2.jpg "dcontact-v0.2")
 
 ## Main Use Case
-1. My address book on my phone is outdated. I need a way to automatically update contact data as somebody is moving into a new city or country.
+1. Address books on computers and phones are always outdated. We need a way to automatically update contact data as somebody is moving to a new place.
 2. I don't like to host my data on Google, Amazon or Facebook any longer. 
 
 ## Features
-1. Onboarding of a new user and account creation
-2. Backup seed on new device (Auto Device Sync)
-3. Add my own contact data (private, business, other)
-4. Contact List (see my own contact data and others (decentralized and traditional))
-5. Search in contact list
-6. Request contact data by (scanning a) DID
-7. Answer contact data request and write contact data in requesters db
-8. Update own contact data and write updates into follower dbs
-9. Backup of follower dbs
-10. Backup of followed dbs
+[x] Onboarding of a new user and account creation 
+[x] Backup seed on new device (Auto Device Sync)
+[x] Add my own contact data (private, business, other)
+[x] Contact List (see my own contact data and others (decentralized and traditional))
+    [x] Search in contact list
+[x] Request contact data by (scanning a) DID
+[x] Answer contact data request and write contact data in requesters db
+[x] Update own contact data and write updates into follower dbs
+[x] Backup of follower dbs (people who requested our contact data)
+10. Backup of followed dbs (people which's contact data we requested)
 
 ## Developing
 1. Clone this repository
@@ -33,7 +33,6 @@ To create a production version of your app:
 ```bash
 npm run build
 ```
-
 You can preview the production build with `npm run preview`.
 
 
