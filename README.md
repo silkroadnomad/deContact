@@ -19,7 +19,7 @@ A peer-to-peer address book in Svelte with local first protocol built on libp2p,
 [x] Answer contact data request and write contact data in requesters db
 [x] Update own contact data and write updates into follower dbs
 [x] Backup of follower dbs (people who requested our contact data)
-10. Backup of followed dbs (people which's contact data we requested)
+[x] Backup of followed dbs (people which's contact data we requested)
 
 ## Developing
 1. Clone this repository
