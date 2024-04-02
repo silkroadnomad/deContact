@@ -4,52 +4,7 @@ import { chromium } from 'playwright';
 const browser = await chromium.launch({
 	headless: process.env.HEADLESS==="true"?process.env.HEADLES==="true":true
 });
-
-//TODO can we put this into fixtures?
-const users = [
-	{
-		identity: 'Alice',
-		firstname: 'Alice',
-		lastname: 'Maier',
-		street: 'Schulgasse 5',
-		zipcode: '84444',
-		did: '',
-		city: 'Berlin',
-		country: 'Germany'
-	},
-	{
-		identity: 'Bob',
-		firstname: 'Bob',
-		lastname: 'Dylan',
-		street: 'Schulgasse 55',
-		zipcode: '565544',
-		did: '',
-		city: 'Berlin',
-		country: 'Germany'
-	},
-	{
-		identity: 'Bob',
-		firstname: 'Bob',
-		lastname: 'Fox',
-		street: 'Schulgasse 150',
-		zipcode: '1111111',
-		did: '',
-		city: 'Rom',
-		country: 'Italy'
-	},
-	{
-		identity: 'Alice',
-		firstname: 'Alice',
-		lastname: 'May',
-		street: 'Moosecker str 789',
-		zipcode: '84444',
-		did: '',
-		city: 'Rom',
-		country: 'Italy'
-	},
-];
-
-test.describe('Simple exchange of address between Alice and Bob', () => {
+test.describe('Simple exchange of address between Alice and Bob', async () => {
 	let pageAlice, pageBob;
 
 	test.beforeAll(async ({ browser }) => {
@@ -85,7 +40,7 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		//await pageAlice.getByRole('button', { name: 'Cancel' }).click();
 	});
 
-	test.skip('Bob updates his address and Alice receives the update', async () => {
+	test('Bob updates his address and Alice receives the update', async () => {
 
 		await pageBob.getByRole('row', { name: users[1].identity }).locator('label').click();
 		await pageBob.getByPlaceholder('Enter lastname...').click();
@@ -98,12 +53,10 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 		await pageBob.getByPlaceholder('Enter city...').fill(users[2].city);
 		await pageBob.getByPlaceholder('Enter country...').fill(users[2].country);
 		await pageBob.getByRole('button', { name: 'Update' }).click();
-		//await page2.getByRole('row', { name: users[1].identity }).locator('span').click();	
-		
-		
+		//await page2.getByRole('row', { name: users[1].identity }).locator('span').click();
 		// const lastname = pageAlice.getByRole('row', { name: users[2].lastname }).locator('span')
 		//await expect(lastname).toHaveText('Bob update');
-	})	
+})
 /*
 	test('Alice updates her address and Bob receives the update', async () => {
 
@@ -175,3 +128,46 @@ async function initializeNewPage(browser, user) {
 		return page;
 	
 }
+//TODO can we put this into fixtures?
+const users = [
+	{
+		identity: 'Alice',
+		firstname: 'Alice',
+		lastname: 'Maier',
+		street: 'Schulgasse 5',
+		zipcode: '84444',
+		did: '',
+		city: 'Berlin',
+		country: 'Germany'
+	},
+	{
+		identity: 'Bob',
+		firstname: 'Bob',
+		lastname: 'Dylan',
+		street: 'Schulgasse 55',
+		zipcode: '565544',
+		did: '',
+		city: 'Berlin',
+		country: 'Germany'
+	},
+	{
+		identity: 'Bob',
+		firstname: 'Bob',
+		lastname: 'Fox',
+		street: 'Schulgasse 150',
+		zipcode: '1111111',
+		did: '',
+		city: 'Rom',
+		country: 'Italy'
+	},
+	{
+		identity: 'Alice',
+		firstname: 'Alice',
+		lastname: 'May',
+		street: 'Moosecker str 789',
+		zipcode: '84444',
+		did: '',
+		city: 'Rom',
+		country: 'Italy'
+	},
+];
