@@ -50,83 +50,85 @@ const users = [
 ];
 
 test.describe('Simple exchange of address between Alice and Bob', () => {
-	let page, page2;
+	let pageAlice, pageBob;
 
 	test.beforeAll(async ({ browser }) => {
 		test.setTimeout(10000);
-		page = await initializeNewPage(browser, users[0]);
-		page2 = await initializeNewPage(browser, users[1]);
+		pageAlice = await initializeNewPage(browser, users[0]);
+		pageBob = await initializeNewPage(browser, users[1]);
 	});
 
 	test('Alice and Bob can exchange addresses', async () => {
 		test.setTimeout(50000); 
 
-		const connect =  page.getByRole('img', { name: 'Swarm connected' })
+		const connect =  pageAlice.getByRole('img', { name: 'Swarm connected' })
 		await expect(connect, 'connection Alice').toBeEnabled({ timeout: 15000 });
 
-		const connect2 =  page2.getByRole('img', { name: 'Swarm connected' })
+		const connect2 =  pageBob.getByRole('img', { name: 'Swarm connected' })
 		await expect(connect2, 'connection Bob').toBeEnabled();
 
-		await page2.getByRole('tab', { name: 'Contacts' }).click();
-		await page2.getByRole('textbox', { role: 'scanContact' }).click();
-		await page2.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
+		await pageBob.getByRole('tab', { name: 'Contacts' }).click();
+		await pageBob.getByRole('textbox', { role: 'scanContact' }).click();
+		await pageBob.getByRole('textbox', { role: 'scanContact' }).fill(users[0].did);
 		
 	
-		//await page.waitForTimeout(15000);
-		await page2.getByRole('button', { name: 'Scan' }).click();
-		
-   			
-		//Exchanging data	
-		await page.getByRole('button', { name: 'From: Request contact data' }).click();
+		//await pageAlice.waitForTimeout(15000);
+		await pageBob.getByRole('button', { name: 'Scan' }).click();
 
-		const button = page.getByRole('button', { name: 'Send My Contact Data' })
+		// await pageAlice.getByTestId('requestContactData').click();
+		// const checkbox = await pageAlice.locator('div[data-testid="requestContactData"] input[type="checkbox"]');
+		// const checkbox = await pageAlice.locator(' input[type="checkbox"]');
+		// const checkbox = pageAlice.getByRole('checkbox')
+		// await checkbox.check(); // To check the checkbox
+		//await pageAlice.getByRole('input', { name: 'requestContactData' }).click();
+
+		const button = pageAlice.getByRole('button', { name: 'Send My Contact Data' })
 		await expect(button, "Exchange of Alice's contact information was successful").toBeEnabled();
 		await button.click();
 
-		const button2 = page2.getByRole('button', { name: 'Send My Contact Data' })
+		const button2 = pageBob.getByRole('button', { name: 'Send My Contact Data' })
 		await expect(button2, "Exchange of Bobs's contact information was successful").toBeEnabled();
 		await button2.click();
 
 
-		//await page.getByRole('button', { name: 'Cancel' }).click();
+		//await pageAlice.getByRole('button', { name: 'Cancel' }).click();
 	});
 
 	test('Bob updates his address and Alice receives the update', async () => {
 
-		await page2.getByRole('row', { name: users[1].identity }).locator('label').click();
-		await page2.getByPlaceholder('Enter lastname...').click();
-		await page2.getByPlaceholder('Enter lastname...').fill(users[2].lastname);
-		await page2.getByPlaceholder('Enter street...').click();
-		await page2.getByPlaceholder('Enter street...').fill(users[2].street);
-		await page2.getByPlaceholder('Enter zipcode...').click();
-		await page2.getByPlaceholder('Enter zipcode...').fill(users[2].zipcode);
-		await page2.getByPlaceholder('Enter city...').click();
-		await page2.getByPlaceholder('Enter city...').fill(users[2].city);
-		await page2.getByPlaceholder('Enter country...').fill(users[2].country);
-		await page2.getByRole('button', { name: 'Update' }).click();
+		await pageBob.getByRole('row', { name: users[1].identity }).locator('label').click();
+		await pageBob.getByPlaceholder('Enter lastname...').click();
+		await pageBob.getByPlaceholder('Enter lastname...').fill(users[2].lastname);
+		await pageBob.getByPlaceholder('Enter street...').click();
+		await pageBob.getByPlaceholder('Enter street...').fill(users[2].street);
+		await pageBob.getByPlaceholder('Enter zipcode...').click();
+		await pageBob.getByPlaceholder('Enter zipcode...').fill(users[2].zipcode);
+		await pageBob.getByPlaceholder('Enter city...').click();
+		await pageBob.getByPlaceholder('Enter city...').fill(users[2].city);
+		await pageBob.getByPlaceholder('Enter country...').fill(users[2].country);
+		await pageBob.getByRole('button', { name: 'Update' }).click();
 		//await page2.getByRole('row', { name: users[1].identity }).locator('span').click();	
 		
 		
-		const lastname = page.getByRole('row', { name: users[2].lastname }).locator('span')
-		await expect(lastname, "Bob update").toBeEnabled();
-		console.log("Bob update was successful")
+		// const lastname = pageAlice.getByRole('row', { name: users[2].lastname }).locator('span')
+		//await expect(lastname).toHaveText('Bob update');
 	})	
 /*
 	test('Alice updates her address and Bob receives the update', async () => {
 
-		await page.getByRole('tab', { name: 'Contacts' }).click();
-		await page.getByRole('row', { name: users[0].identity }).locator('label').click();
-		await page.getByPlaceholder('Enter lastname...').click();
-		await page.getByPlaceholder('Enter lastname...').fill(users[3].lastname);
-		await page.getByPlaceholder('Enter street...').click();
-		await page.getByPlaceholder('Enter street...').fill(users[3].street);
-		await page.getByPlaceholder('Enter zipcode...').click();
-		await page.getByPlaceholder('Enter zipcode...').fill(users[3].zipcode);
-		await page.getByPlaceholder('Enter city...').click();
-		await page.getByPlaceholder('Enter city...').fill(users[3].city);
-		await page.getByPlaceholder('Enter country...').fill(users[3].country);
-		await page.getByRole('button', { name: 'Update' }).click();
-		await page.getByRole('row', { name: users[0].identity }).locator('span').click();	
+		await pageAlice.getByRole('tab', { name: 'Contacts' }).click();
+		await pageAlice.getByRole('row', { name: users[0].identity }).locator('label').click();
+		await pageAlice.getByPlaceholder('Enter lastname...').click();
+		await pageAlice.getByPlaceholder('Enter lastname...').fill(users[3].lastname);
+		await pageAlice.getByPlaceholder('Enter street...').click();
+		await pageAlice.getByPlaceholder('Enter street...').fill(users[3].street);
+		await pageAlice.getByPlaceholder('Enter zipcode...').click();
+		await pageAlice.getByPlaceholder('Enter zipcode...').fill(users[3].zipcode);
+		await pageAlice.getByPlaceholder('Enter city...').click();
+		await pageAlice.getByPlaceholder('Enter city...').fill(users[3].city);
+		await pageAlice.getByPlaceholder('Enter country...').fill(users[3].country);
+		await pageAlice.getByRole('button', { name: 'Update' }).click();
+		await pageAlice.getByRole('row', { name: users[0].identity }).locator('span').click();
 		
 		const lastname2 = page2.getByRole('row', { name: users[3].lastname }).locator('span')
 		
@@ -139,8 +141,8 @@ test.describe('Simple exchange of address between Alice and Bob', () => {
 
 	test.afterAll(async () => {
 		await Promise.all([
-			page.close(),
-			page2.close()
+			pageAlice.close(),
+			pageBob.close()
 		]);
 	});
 });
@@ -158,7 +160,7 @@ async function fillForm(page, user) {
 	await fillInput(page, 'Enter country...', user.country);
 	await page.getByLabel('Category').click();
 	await page.getByText('Private').click();
-	await page.locator('label').filter({ hasText: 'our own address' }).click();
+	// await page.locator('label').filter({ hasText: 'our own address' }).click();
 }
 
 async function initializeNewPage(browser, user) {

@@ -28,7 +28,7 @@
     let checkboxLabel;
 
     /** if Alice receives a REQUEST_ADDRESS from Bob, he marks the pubsub message with nopingpong=true so Alice isn't requesting Bobs contact data again*/
-    let exchangeData = data.nopingpong?true:false
+    let exchangeData = !data.nopingpong
     let dontRequestData = data.nopingpong
 
     /**
@@ -47,7 +47,7 @@
         aliceOwnContactData = businessCardElements.filter(element => element.value.owner === data.sender);
 
         if(aliceOwnContactData.length>0)
-            checkboxLabel =  `Contact data request from ${aliceOwnContactData[0].value.firstName} ${aliceOwnContactData[0].value?.lastName} ${aliceOwnContactData[0].value.city}`
+            checkboxLabel =  `Request contact data from ${aliceOwnContactData[0].value.firstName} ${aliceOwnContactData[0].value?.lastName} ${aliceOwnContactData[0].value.city}`
     }
 
     onMount(() => {
@@ -57,7 +57,6 @@
 <!--
 @component
 Opens a confirmation modal on Bob's device when Alice is requesting his contact data.
-
 -->
 <ComposedModal open on:close={() => dispatch('result', false)} on:submit={() => dispatch('result', true)}>
     <ModalHeader label="deContact Protocol Action" title={heading} />
@@ -71,7 +70,8 @@ Opens a confirmation modal on Bob's device when Alice is requesting his contact 
                     {/if}
                 </div>
                 <p>&nbsp;</p>
-                {#if !dontRequestData}<Checkbox labelText={checkboxLabel}  bind:checked={exchangeData} />{/if}
+                {#if !dontRequestData}
+                    <Checkbox labelText={checkboxLabel} data-testid="requestContactData"  bind:checked={exchangeData} />{/if}
                 <p>&nbsp;</p>
                 <div>View Transaction Details</div>
             </div>

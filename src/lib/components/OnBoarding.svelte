@@ -49,21 +49,20 @@
     //         }
     // }
 
-    $:scannedContact = $myAddressBook?.filter((it) => { return it.owner === $did })
+    $:scannedContact = $myAddressBook?.filter( it => { return it.owner === $did })
     $:{ //we need a dummy - if we have already real data don't ask them from the invited person!
        if(!dummyWritten &&
             $libp2p &&
             $connectedPeers>0 &&
             $dbMyAddressBook !==undefined && // !Array.isArray($dbMyAddressBook) && //TODO why is this an array at some point?
-           $orbitdb !== undefined ){
-           ourContact = $myAddressBook?.filter((it) => { return it.owner === $orbitdb?.identity?.id })
-           if(ourContact.length>0){
-               requestAddress($did,false,onBoardingToken).then(()=>{
-                   window.location.hash="/" //no need to ask for email, firstname anyore - go straight to contact list
-               })
-
-           }
-           else {
+            $orbitdb !== undefined ){
+            ourContact = $myAddressBook?.filter( it => { return it.owner === $orbitdb?.identity?.id })
+            if(ourContact.length>0){
+                   requestAddress($did,false,onBoardingToken).then(()=>{
+                       window.location.hash="/" //no need to ask for email, firstname anyore - go straight to contact list
+                   })
+            }
+            else {
                //create a dummy contact for us so we can write it into the requesters db as long the user didn't write the contact data
                $selectedAddr.owner = $orbitdb?.identity?.id
                $selectedAddr.lastName = $orbitdb?.identity?.id
