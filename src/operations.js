@@ -70,8 +70,6 @@ export async function updateContact(isOnBoarding) {
             if(_selectedAddr._id){
                 _followList[s].db.put(_selectedAddr)
             }
-            else
-                console.log("_selectedAddr doesn't have _id!",_selectedAddr)
         }
     }
     selectedAddr.set({})
