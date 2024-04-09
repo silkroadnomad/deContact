@@ -4,7 +4,7 @@
 	"private": true,
 	"scripts": {
 		"dev": "vite dev",
-		"build": "vite build",
+		"build": "vite build --output public",
 		"build:fixed": "npm run build && node ipfs_fixes/inject_base.cjs && node ipfs_fixes/inject_base_in_singletons_file.cjs && node ipfs_fixes/inject_base_in_paths_file.cjs && node ipfs_fixes/relativize_pages.cjs && node ipfs_fixes/relativize_js.cjs",
 		"preview": "vite preview",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./jsconfig.json",
