@@ -19,7 +19,7 @@ import {
     dbMyAddressBook,
     subscription,
     connectedPeers,
-    followList, dbMessages, selectedTab, syncedDevices,useWebRTC, useWebSocket
+    followList, dbMessages, selectedTab, syncedDevices
 } from "../../stores.js";
 
 // import { get } from 'svelte/store';

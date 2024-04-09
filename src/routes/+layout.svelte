@@ -1,10 +1,8 @@
 <script>
-    import {onDestroy, onMount} from "svelte";
+    import { onDestroy, onMount } from "svelte";
     import "carbon-components-svelte/css/all.css";
     import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
-    import WatsonHealthAiStatus from "carbon-icons-svelte/lib/WatsonHealthAiStatus.svelte";
-    import WatsonHealthAiStatusComplete from "carbon-icons-svelte/lib/WatsonHealthAiStatusComplete.svelte";
     import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";
     import { hash } from './router.js'
     import QRCodeModal from "$lib/components/QRCodeModal.svelte";
@@ -21,7 +19,7 @@
 
     let theme = "g90";
 
-    $: if ($helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined) {
+    $: if ( $helia!==undefined && $masterSeed!==undefined && $seedPhrase!==undefined ) {
         //TODO if we use EthereumProvider Seedphrase doesn't need to be handled at all instead - Metamask must be connected
         handleSeedphrase().then(() => {
             console.log("generated seed phrase - creating identity and starting orbitdb")
@@ -35,7 +33,7 @@
         })
     }
 
-    onMount(async ()=>{
+    onMount( async () => {
         if($hash!=='/onboarding'){
             await confirmExperimentalUse();
             await handleSeedphrase();
@@ -44,7 +42,7 @@
 
 
         await startNetwork();
-    })
+    } )
 
     onDestroy(close)
 

@@ -29,7 +29,7 @@ test.describe('Simple exchange of address between Alice and Bob', async () => {
 
 
 		const button = pageAlice.getByRole('button', { name: 'Send My Contact Data' })
-		await expect(button, "Exchange of Alice's contact information was successful").toBeEnabled();
+		await expect(button, "Exchange of Alice's contact information was successful").toBeEnabled(); //TODO what is that?
 		await button.click();
 
 		const button2 = pageBob.getByRole('button', { name: 'Send My Contact Data' })

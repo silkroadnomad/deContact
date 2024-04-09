@@ -12,14 +12,14 @@ import { autoNAT } from '@libp2p/autonat'
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
-import { kadDHT } from '@libp2p/kad-dht'
+// import { kadDHT } from '@libp2p/kad-dht'
 import { FaultTolerance } from '@libp2p/interface-transport'
 
 const multiaddrs =
     import.meta.env.MODE === 'development'
         ? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',')
         : import.meta.env.VITE_SEED_NODES.replace('\n','').split(',')
-console.log("multiaddrs",multiaddrs)
+
 
 const pubSubPeerDiscoveryTopics =
 	import.meta.env.MODE === 'development'
@@ -81,7 +81,7 @@ export const config = {
         identify: identify(),
         autoNAT: autoNAT(),
         dcutr: dcutr(),
-        pubsub: gossipsub({allowPublishToZeroTopicPeers: true, canRelayMessage: true}),
+        pubsub: gossipsub({ allowPublishToZeroTopicPeers: true, canRelayMessage: true }),
 /*        aminoDHT: kadDHT({
             protocol: '/ipfs/kad/1.0.0',
             peerInfoMapper: removePrivateAddressesMapper
