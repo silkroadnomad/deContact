@@ -36,7 +36,8 @@
 	},
 	"type": "module",
 	"dependencies": {
-		"@waku/sdk": "^0.0.21",
+		"@waku/sdk": "^0.0.24",
+		"protobufjs": "^7.2.6",
 		"qrcode-generator": "^1.4.4"
 	}
 }
