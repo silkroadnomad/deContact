@@ -33,8 +33,8 @@ export async function startNetwork() {
 
     progressText.set("waku started - waiting for remote peers")
     progressState.set(3)
-    // await waitForRemotePeer(_wakuNode, [Protocols.LightPush]);
-    await waitForRemotePeer(_wakuNode, [Protocols.Store]);
+    await waitForRemotePeer(_wakuNode, [Protocols.LightPush]);
+    // await waitForRemotePeer(_wakuNode, [Protocols.Store]);
 
     // Create the callback function
 //     const callback = (wakuMessage) => {
