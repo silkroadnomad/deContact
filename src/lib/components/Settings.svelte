@@ -1,7 +1,7 @@
 <script>
     import { TextInput, PasswordInput, Button, Column, Grid, Row, Toggle } from "carbon-components-svelte";
     import {
-        libp2p,
+        helia,
         connectedPeers,
         masterSeed,
         orbitdb, seedPhrase,
@@ -39,7 +39,7 @@
         <Column sm={3}><TextInput labelText="PeerId (LibP2P)"
                                   helperText="Every device has a unique peer id independent from your seed phrase"
                                   readonly size="sm"
-                                  value={$libp2p?.peerId?.string} /></Column>
+                                  value={$helia?.libp2p?.peerId?.string} /></Column>
     </Row>
 
     <Row class="custom-row">

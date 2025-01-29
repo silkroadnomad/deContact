@@ -10,16 +10,16 @@ A peer-to-peer address book in Svelte with local first protocol built on libp2p,
 2. I don't like to host my data on Google, Amazon or Facebook any longer. 
 
 ## Features
-[x] Onboarding of a new user and account creation 
-[x] Backup seed on new device (Auto Device Sync)
-[x] Add my own contact data (private, business, other)
-[x] Contact List (see my own contact data and others (decentralized and traditional))
+- [x] Onboarding of a new user and account creation 
+- [x] Backup seed on new device (Auto Device Sync)
+- [x] Add my own contact data (private, business, other)
+- [x] Contact List (see my own contact data and others (decentralized and traditional))
     [x] Search in contact list
-[x] Request contact data by (scanning a) DID
-[x] Answer contact data request and write contact data in requesters db
-[x] Update own contact data and write updates into follower dbs
-[x] Backup of follower dbs (people who requested our contact data)
-[x] Backup of followed dbs (people which's contact data we requested)
+- [x] Request contact data by (scanning a) DID
+- [x] Answer contact data request and write contact data in requesters db
+- [x] Update own contact data and write updates into follower dbs
+- [x] Backup of follower dbs (people who requested our contact data)
+- [x] Backup of followed dbs (people which's contact data we requested)
 
 ## Developing
 1. Clone this repository

@@ -4,37 +4,36 @@ import { webRTC, webRTCDirect } from "@libp2p/webrtc";
 import { webTransport } from "@libp2p/webtransport";
 import { bootstrap } from '@libp2p/bootstrap'
 import { circuitRelayTransport } from '@libp2p/circuit-relay-v2'
-import { noise } from "@chainsafe/libp2p-noise";
+import { noise } from '@chainsafe/libp2p-noise'
 import { yamux } from "@chainsafe/libp2p-yamux";
 import { pubsubPeerDiscovery} from "@libp2p/pubsub-peer-discovery";
-import { identify } from '@libp2p/identify'
+import { identify, identifyPush } from '@libp2p/identify';
 import { autoNAT } from '@libp2p/autonat'
 import { gossipsub } from "@chainsafe/libp2p-gossipsub";
 import { ping } from '@libp2p/ping'
 import { dcutr } from '@libp2p/dcutr'
-// import { kadDHT } from '@libp2p/kad-dht'
 import { FaultTolerance } from '@libp2p/interface-transport'
 
 const multiaddrs =
     import.meta.env.MODE === 'development'
-        ? import.meta.env.VITE_SEED_NODES_DEV.replace('\n','').split(',')
-        : import.meta.env.VITE_SEED_NODES.replace('\n','').split(',')
+        ? import.meta.env.VITE_SEED_NODES_DEV?.replace('\n','').split(',')
+        : import.meta.env.VITE_SEED_NODES?.replace('\n','').split(',')
 
 
 const pubSubPeerDiscoveryTopics =
 	import.meta.env.MODE === 'development'
-		? import.meta.env.VITE_P2P_PUPSUB_DEV.replace('\n','').split(',')
-        : import.meta.env.VITE_P2P_PUPSUB.replace('\n','').split(',')
-
+		? import.meta.env.VITE_P2P_PUPSUB_DEV?.replace('\n','').split(',')
+        : import.meta.env.VITE_P2P_PUPSUB?.replace('\n','').split(',')
+console.log("multiaddrs",multiaddrs)
 export const bootstrapConfig = {list: multiaddrs};
 
 export const config = {
     addresses: {
         // swarm: [address],
         listen: [
-            "/webrtc",
-            "/webtransport",
-            "/wss", "/ws",
+            "/p2p-circuit",
+            "/p2p-circuit",
+            '/webrtc'
         ]
     },
     transports: [
@@ -51,10 +50,14 @@ export const config = {
         }),
         webRTCDirect(),
         webTransport(),
-        circuitRelayTransport({ discoverRelays: 2 }),
+        circuitRelayTransport({ discoverRelays: 1}),
         // kadDHT({}),
     ],
-    connectionEncryption: [noise()],
+    connectionEncrypters: [noise()],
+    connectionManager: {
+        maxConnections: 100,
+        maxIncomingPendingConnections: 100,
+    },
     transportManager: {
         faultTolerance: FaultTolerance.NO_FATAL
     },
@@ -69,16 +72,15 @@ export const config = {
     peerDiscovery: [
         bootstrap(bootstrapConfig),
         pubsubPeerDiscovery({
-            interval: 10000,
+            interval: 8000,
             topics: pubSubPeerDiscoveryTopics, // defaults to ['_peer-discovery._p2p._pubsub']
             listenOnly: false
         })
     ],
     services: {
-        ping: ping({
-            protocolPrefix: 'dContact', // default
-        }),
+        ping: ping(),
         identify: identify(),
+        identifyPush: identifyPush(),
         autoNAT: autoNAT(),
         dcutr: dcutr(),
         pubsub: gossipsub({ allowPublishToZeroTopicPeers: true, canRelayMessage: true }),

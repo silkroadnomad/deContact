@@ -68,6 +68,26 @@ export async function startNetwork() {
     helia.set(_helia)
     window.helia = _helia
 
+    _libp2p.addEventListener('peer:discovery', async (evt) => {
+        const peer = evt.detail;
+        console.log('found peer: ', peer);
+        
+        // Check if we're already connected to this peer
+        const connections = _libp2p.getConnections(peer.id);
+        if (connections.length === 0) {
+            try {
+                // If not connected, attempt to dial using the peer's multiaddr
+                await _libp2p.dial(peer.multiaddrs[0]);
+                console.log('Successfully connected to peer:', peer.id.toString());
+            } catch (err) {
+                console.error('Failed to connect to peer:', err);
+            }
+        }
+    })
+    _libp2p.addEventListener('peer:connect', async event => {
+        console.log('peer:connect dialing', event.detail)
+    })
+
     _libp2p.addEventListener('connection:open',  async (c) => {
         console.log("connection:open",c.detail.remoteAddr.toString())
         connectedPeers.update(n => n + 1);
