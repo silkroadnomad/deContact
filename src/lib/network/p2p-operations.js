@@ -3,7 +3,6 @@ import { createHelia } from "helia";
 import { useAccessController} from '@orbitdb/core';
 import { LevelBlockstore } from "blockstore-level"
 import { LevelDatastore } from "datastore-level";
-/*import { bitswap } from '@helia/block-b/!**!/rokers'*/
 import { config } from "../../config.js";
 import { webSockets } from "@libp2p/websockets";
 import * as filters from "@libp2p/websockets/filters";
@@ -63,7 +62,6 @@ export async function startNetwork() {
         libp2p: _libp2p,
         blockstore,
         datastore,
-        //blockBrokers: [bitswap()] //TODO what is this bockBrokers (bitswap) good for?
     });
     helia.set(_helia)
     window.helia = _helia
