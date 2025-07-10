@@ -87,12 +87,3 @@
     </Row>
 
 </Grid>
-<style>
-    :global(.bx--label) {
-        color: white;
-    }
-
-    :global(.bx--row) {
-        margin-bottom: 40px; /* Adjust the bottom margin to increase space between rows */
-    }
-</style>

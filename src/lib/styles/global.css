@@ -1,0 +1,8 @@
+/* Global styles for Carbon Components */
+.bx--label {
+    color: white;
+}
+
+.bx--row {
+    margin-bottom: 40px; /* Adjust the bottom margin to increase space between rows */
+}

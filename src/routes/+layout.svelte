@@ -1,6 +1,7 @@
 <script>
     import { onDestroy, onMount } from "svelte";
     import "carbon-components-svelte/css/all.css";
+    import "../lib/styles/global.css";
     import ConnectionSignalOff from "carbon-icons-svelte/lib/ConnectionSignalOff.svelte";
     import ConnectionSignal from "carbon-icons-svelte/lib/ConnectionSignal.svelte";
     import { Header, HeaderGlobalAction, HeaderNav, HeaderUtilities, Theme } from "carbon-components-svelte";

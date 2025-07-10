@@ -51,10 +51,21 @@
         <Row>
             <Column>
                 {#if qrCodeData && qrCodeOpen}
-                    <div class="container" on:click={async () => {
+                    <div class="container" 
+                         role="button" 
+                         tabindex="0"
+                         on:click={async () => {
                             await navigator.clipboard.writeText(linkUrl);
                             dispatch('close')
                             notify(`copied invitation`);
+                        }}
+                         on:keydown={async (e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                                e.preventDefault();
+                                await navigator.clipboard.writeText(linkUrl);
+                                dispatch('close')
+                                notify(`copied invitation`);
+                            }
                         }}>
                         <QrCode  value={linkUrl} />
                     </div>
